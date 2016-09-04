@@ -15,7 +15,7 @@ typedef enum {
     tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM
 } tile_content;
 
-typedef struct tile {
+typedef struct tile_t {
     point_t* location;
     int rock_hardness;
     tile_content content;
@@ -28,6 +28,6 @@ typedef struct {
     int (*const update_hardness)(tile_t* tile, int value);
     int (*const update_content)(tile_t* tile, tile_content value);
 } tile_namespace;
-tile_namespace const tile;
+extern tile_namespace const tile;
 
 #endif /* tile_h */

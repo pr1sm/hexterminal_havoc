@@ -10,16 +10,16 @@
 
 #include "point.h"
 
-point_t* construct(int x, int y) {
+point_t* point_construct(int x, int y) {
     point_t* point = (point_t*)malloc(sizeof(point_t));
     point->x = x;
     point->y = y;
     return point;
 }
 
-int destruct(point_t* point) {
+int point_destruct(point_t* point) {
     free(point);
     return 0;
 }
 
-point_namespace const point = { construct, destruct };
+point_namespace const point = { point_construct, point_destruct };

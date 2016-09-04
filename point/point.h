@@ -9,7 +9,7 @@
 #ifndef point_h
 #define point_h
 
-typedef struct point {
+typedef struct point_t {
     int x;
     int y;
 } point_t;
