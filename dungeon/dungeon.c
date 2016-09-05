@@ -11,22 +11,39 @@
 #include <time.h>
 
 #include "dungeon.h"
+#include "../tile/tile.h"
+#include "../room/room.h"
 
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
-#define ROCK_HARD 254
-#define ROCK_MED  127
+#define ROCK_HARD 220
+#define ROCK_MED  110
 #define ROCK_SOFT 1
 
 // Array of tiles for the dungeon
 // size will be 21 rows x 80 cols
 tile_t*** _dungeon_array;
 
+// Temporary!
+room_t** _room_array;
+int _room_size;
+
+//static room_t** _room_array;
+//static int _room_size;
+
 static void write_dungeon_pgm(const char* file_name, int zone);
 static void accent_dungeon();
 static void diffuse_dungeon();
 static void smooth_dungeon();
+static void border_dungeon();
+
+static int is_open_space();
+static void add_rooms();
+
+static void d_print_room(room_t* r) {
+    printf("Room: x: %2d, y: %2d, w: %2d, h: %2d\n", r->location->x, r->location->y, r->width, r->height);
+}
 
 void dungeon_construct() {
     int i, j;
@@ -57,10 +74,97 @@ void dungeon_generate_terrain() {
     accent_dungeon();
     diffuse_dungeon();
     smooth_dungeon();
+    border_dungeon();
 }
 
 void dungeon_place_rooms() {
+    int i, j;
+    int x, y, width, height, room_valid = 1;
+    int overlap_valid = 1;
+    int place_attempts_fail = 0;
+    _room_size = 6;
+    _room_array = calloc(_room_size, sizeof(*_room_array));
     
+    // initally create the 6 rooms and check if overlap is valid.
+    do {
+        for(i = 0; i < _room_size; i++) {
+            do {
+                room_valid = 1;
+                x = (rand() % (DUNGEON_WIDTH - 2)) + 1;
+                y = (rand() % (DUNGEON_HEIGHT - 2)) + 1;
+                width = (rand() % 8) + 4;
+                height = (rand() % 8) + 3;
+                if(((x + width) > DUNGEON_WIDTH - 2) ||
+                   ((y + height) > DUNGEON_HEIGHT - 2)) {
+                    room_valid = 0;
+                }
+            } while(!room_valid);
+            _room_array[i] = roomAPI.construct(x, y, width, height);
+        }
+        
+        // check overlap
+        overlap_valid = 1;
+        for(i = 0; i < _room_size; i++) {
+            for(j = 0; j < i; j++) {
+                if(roomAPI.is_overlap(_room_array[i], _room_array[j])) {
+                    overlap_valid = 0;
+                    break;
+                }
+            }
+            if(!overlap_valid) {
+                break;
+            }
+        }
+    } while(!overlap_valid);
+    
+    add_rooms();
+    
+    // Check if we have open space and add rooms one at a time
+    while(is_open_space() && place_attempts_fail < 2000) {
+        room_valid = 1;
+        do {
+            x = (rand() % (DUNGEON_WIDTH - 2)) + 1;
+            y = (rand() % (DUNGEON_HEIGHT - 2)) + 1;
+            width = (rand() % 8) + 4;
+            height = (rand() % 8) + 3;
+            if(((x + width) > DUNGEON_WIDTH - 2) ||
+               ((y + height) > DUNGEON_HEIGHT - 2)) {
+                room_valid = 0;
+                place_attempts_fail++;
+            }
+        } while(!room_valid && place_attempts_fail < 2000);
+        if(place_attempts_fail >= 2000) {
+            break;
+        }
+        
+        room_t* new_room = roomAPI.construct(x, y, width, height);
+        
+        overlap_valid = 1;
+        for(i = 0; i < _room_size; i++) {
+            if(roomAPI.is_overlap(new_room, _room_array[i])) {
+                overlap_valid = 0;
+                break;
+            }
+        }
+        if(!overlap_valid) {
+            place_attempts_fail++;
+            roomAPI.destruct(new_room);
+        } else {
+            room_t** new_room_array = (room_t**) realloc(_room_array, (_room_size + 1) * sizeof(*_room_array));
+            if(new_room_array == NULL) {
+                // TODO: log error
+                break;
+            }
+            _room_array = new_room_array;
+            _room_array[_room_size++] = new_room;
+        }
+    }
+    
+    add_rooms();
+    
+    for(i = 0; i < _room_size; i++) {
+        d_print_room(_room_array[i]);
+    }
 }
 
 void dungeon_pathfind() {
@@ -189,6 +293,57 @@ static void smooth_dungeon() {
         }
     }
     write_dungeon_pgm("rock_smooth_map.pgm", 0);
+}
+
+static void border_dungeon() {
+    int i, j;
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        if(i == 0 || i == DUNGEON_HEIGHT - 1) {
+            for(j = 0; j < DUNGEON_WIDTH; j++) {
+                tileAPI.update_content(_dungeon_array[i][j], tc_BORDER);
+                tileAPI.update_hardness(_dungeon_array[i][j], 255);
+            }
+        } else {
+            tileAPI.update_content(_dungeon_array[i][0], tc_BORDER);
+            tileAPI.update_hardness(_dungeon_array[i][0], 255);
+            tileAPI.update_content(_dungeon_array[i][DUNGEON_WIDTH - 1], tc_BORDER);
+            tileAPI.update_hardness(_dungeon_array[i][DUNGEON_WIDTH - 1], 255);
+        }
+    }
+    write_dungeon_pgm("rock_terrain_map.pgm", 0);
+}
+
+static int is_open_space() {
+    int i;
+    int total_size = 0;
+    for(i = 0; i < _room_size; i++) {
+        total_size += (_room_array[i]->height * _room_array[i]->width);
+    }
+    return total_size < (DUNGEON_HEIGHT * DUNGEON_WIDTH * 0.25f);
+}
+
+static void add_rooms() {
+    int i, j, k;
+    // Rooms are created, add them to _dungeon_array
+    for(i = 0; i < _room_size; i++) {
+        for(j = _room_array[i]->location->y; j < _room_array[i]->location->y + _room_array[i]->height; j++) {
+            for(k = _room_array[i]->location->x; k < _room_array[i]->location->x + _room_array[i]->width; k++) {
+                tileAPI.update_content(_dungeon_array[j][k], tc_ROOM);
+            }
+        }
+    }
+    
+    for(i = 0; i < 21; i++) {
+        for(j = 0; j < 80; j++) {
+            tile_t* t = _dungeon_array[i][j];
+            char out = t->content == tc_BORDER ? '%' :
+            t->content == tc_ROCK ? ' ' :
+            t->content == tc_ROOM ? '.' : '$';
+            printf("%c", out);
+        }
+        printf("\n");
+    }
+    printf("\n");
 }
 
 dungeon_namespace const dungeonAPI = {

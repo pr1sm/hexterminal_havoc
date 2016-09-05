@@ -13,6 +13,11 @@
 
 extern tile_t*** _dungeon_array;
 
+// Temporary for testing!
+#include "../room/room.h"
+extern room_t** _room_array;
+extern int _room_size;
+
 typedef struct dungeon_namespace {
     void (*const construct)();
     void (*const destruct)();

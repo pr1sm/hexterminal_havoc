@@ -20,6 +20,7 @@ typedef struct room_t {
 typedef struct room_namespace {
     room_t* (*const construct)(int x, int y, int width, int height);
     void (*const destruct)(room_t* room);
+    int (*const is_overlap)(room_t* r1, room_t* r2);
 } room_namespace;
 extern room_namespace const roomAPI;
 
