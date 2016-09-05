@@ -25,7 +25,6 @@ struct tile_t {
 
 typedef struct {
     tile_t* (*const construct)(int x, int y);
-    tile_t* (*const construct_loc)(point_t* location);
     void    (*const destruct)(tile_t* tile);
     void    (*const update_hardness)(tile_t* tile, int value);
     void    (*const update_content)(tile_t* tile, tile_content value);

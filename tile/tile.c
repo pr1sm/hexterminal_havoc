@@ -11,12 +11,8 @@
 #include "tile.h"
 
 tile_t* tile_construct(int x, int y) {
-    point_t* location = pointAPI.construct(x, y);
-    return tileAPI.construct_loc(location);
-}
-
-tile_t* tile_construct_loc(point_t* location) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
+    point_t* location = pointAPI.construct(x, y);
     t->location = location;
     t->content = tc_UNSET;
     t->rock_hardness = 0;
@@ -26,6 +22,7 @@ tile_t* tile_construct_loc(point_t* location) {
 
 void tile_destruct(tile_t* tile) {
     free(tile->changes);
+    free(tile->location);
     free(tile);
 }
 
@@ -59,7 +56,6 @@ int tile_are_changes_proposed(tile_t* tile) {
 
 tile_namespace const tileAPI = {
     tile_construct,
-    tile_construct_loc,
     tile_destruct,
     tile_update_hardness,
     tile_update_content,

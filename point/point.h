@@ -14,7 +14,7 @@ typedef struct point_t {
     int y;
 } point_t;
 
-typedef struct {
+typedef struct point_namespace {
     point_t* (*const construct)(int x, int y);
     int (*const destruct)(point_t* point);
 } point_namespace;
