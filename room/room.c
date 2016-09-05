@@ -63,13 +63,22 @@ int room_is_overlap(room_t* r1, room_t* r2) {
     x_diff = large_x - small_x;
     
     small_y = r1->location->y < r2->location->y ? r1->location->y : r2->location->y;
-    large_y = (r1->location->y + r1->width) > (r2->location->y + r2->width) ? (r1->location->y + r1->width) : (r2->location->y + r2->width);
+    large_y = (r1->location->y + r1->height) > (r2->location->y + r2->height) ? (r1->location->y + r1->height) : (r2->location->y + r2->height);
     y_diff = large_y - small_y;
     
+    logger.d("Comparing Rooms For Overlap");
+    logger.d("Room1: x: %2d y: %2d w: %2d h: %2d", r1->location->x, r1->location->y, r1->width, r1->height);
+    logger.d("Room2: x: %2d y: %2d w: %2d h: %2d", r2->location->x, r2->location->y, r2->width, r2->height);
+    logger.d("s_x: %2d l_x: %2d d_x: %2d", small_x, large_x, x_diff);
+    logger.d("s_y: %2d l_y: %2d d_y: %2d", small_y, large_y, y_diff);
+    logger.d("min_x: %2d min_y: %2d", min_x_dim, min_y_dim);
+    
     if(y_diff <= min_y_dim && x_diff <= min_x_dim) {
+        logger.d("Overlap Detected!");
         return 1;
     }
     
+    logger.d("No Overlap Detected!");
     return 0;
 }
 
