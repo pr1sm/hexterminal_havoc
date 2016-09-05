@@ -9,7 +9,16 @@
 #ifndef logger_h
 #define logger_h
 
-typedef struct {
+typedef enum logger_mode {
+    LOG_T = 1,
+    LOG_D = 2,
+    LOG_I = 4,
+    LOG_W = 8,
+    LOG_E = 16,
+    LOG_F = 32
+} logger_mode;
+
+typedef struct logger_namespace {
     void (*const t)(const char* str, ...);
     void (*const d)(const char* str, ...);
     void (*const i)(const char* str, ...);
@@ -17,6 +26,7 @@ typedef struct {
     void (*const e)(const char* str, ...);
     void (*const f)(const char* str, ...);
     void (*const create)(const char* name);
+    void (*const set_modes_enabled)(int modes);
 } logger_namespace;
 extern logger_namespace const logger;
 
