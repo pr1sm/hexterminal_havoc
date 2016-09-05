@@ -14,8 +14,11 @@
 
 #include "dungeon/dungeon.h"
 #include "room/room.h"
+#include "logger/logger.h"
 
 int main(int argc, const char * argv[]) {
+    
+    logger.set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
     
     dungeonAPI.construct();
     

@@ -20,15 +20,9 @@
 #define DEFAULT_LOG_NAME "default.log";
 #define LINE_SPACING 32
 
-#define LOG_T 0
-#define LOG_D 1
-#define LOG_I 2
-#define LOG_W 3
-#define LOG_E 4
-#define LOG_F 5
-
 static int initialized = 0;
 static char* log_name = DEFAULT_LOG_NAME;
+static int modes_enabled = LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F;
 
 static char* get_date_string();
 static int   file_exists(char* file_name);
@@ -36,7 +30,7 @@ static void  create_bak(char* prev, char* dir_path);
 static void  create_bak_r(char* prev, char* dir_path, int idx);
 static void  get_full_path(char* path);
 static void  wrap_lines(char* msg, int msg_size);
-static void  write_log(int log_lvl, const char* str, va_list args);
+static void  write_log(logger_mode mode, const char* str, va_list args);
 
 // Create function.  This function creates
 // a log file as well as moves an existing log
@@ -116,6 +110,17 @@ void f(const char* str, ...) {
     va_start(args, str);
     write_log(LOG_F, str, args);
     va_end(args);
+}
+
+void set_modes_enabled(int modes) {
+    modes_enabled = 0;
+    modes_enabled += (modes & LOG_T) ? LOG_T : 0;
+    modes_enabled += (modes & LOG_D) ? LOG_D : 0;
+    modes_enabled += LOG_I;                        // We always want one channel to be open, so use the INFO channel
+    modes_enabled += (modes & LOG_W) ? LOG_W : 0;
+    modes_enabled += (modes & LOG_E) ? LOG_E : 0;
+    modes_enabled += (modes & LOG_F) ? LOG_F : 0;
+    logger.i("Setting modes enabled to: %x", modes_enabled);
 }
 
 // Get the current date and
@@ -235,13 +240,18 @@ static void wrap_lines(char* msg, int msg_size) {
     free(indented_line_spacing);
 }
 
-static void write_log(int log_lvl, const char* str, va_list args) {
+static void write_log(logger_mode mode, const char* str, va_list args) {
+    // check if mode is enabled
+    if((modes_enabled & mode) == 0) {
+        return;
+    }
+    
     // Set the correct header based on the log level.
-    const char* header = log_lvl == LOG_T ? "TRACE : " :
-    log_lvl == LOG_D ? "DEBUG : " :
-    log_lvl == LOG_I ? "INFO  : " :
-    log_lvl == LOG_W ? "WARN  : " :
-    log_lvl == LOG_E ? "ERROR : " : "FATAL : ";
+    const char* header = mode == LOG_T ? "TRACE : " :
+    mode == LOG_D ? "DEBUG : " :
+    mode == LOG_I ? "INFO  : " :
+    mode == LOG_W ? "WARN  : " :
+    mode == LOG_E ? "ERROR : " : "FATAL : ";
     
     // Max size of [str] and a stack trace if there is one.
     int max_va_list_size = 4146;
@@ -270,7 +280,7 @@ static void write_log(int log_lvl, const char* str, va_list args) {
     
     // if the log level was error or fatal level and an errno was set,
     // print the error as well.
-    if(log_lvl >= LOG_E && errno) {
+    if(mode >= LOG_E && errno) {
         char date_length_spacing[strlen(date) + 1];
         memset(date_length_spacing, ' ', strlen(date) + 1);
         sprintf(msg + strlen(msg), "%s\terrno : %s\n", date_length_spacing, strerror(errno));
@@ -300,4 +310,4 @@ static void write_log(int log_lvl, const char* str, va_list args) {
     }
 }
 
-logger_namespace const logger = { t, d, i, w, e, f, create };
+logger_namespace const logger = { t, d, i, w, e, f, create, set_modes_enabled };
