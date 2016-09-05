@@ -18,6 +18,6 @@ typedef struct {
     point_t* (*const construct)(int x, int y);
     int (*const destruct)(point_t* point);
 } point_namespace;
-extern point_namespace const point;
+extern point_namespace const pointAPI;
 
 #endif /* point_h */

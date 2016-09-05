@@ -12,8 +12,6 @@
 #ifndef heap_h
 #define heap_h
 
-#include "node.h"
-
 typedef struct heap_node_t {
     void* data;
     int index;

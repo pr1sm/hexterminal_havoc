@@ -22,4 +22,4 @@ int point_destruct(point_t* point) {
     return 0;
 }
 
-point_namespace const point = { point_construct, point_destruct };
+point_namespace const pointAPI = { point_construct, point_destruct };
