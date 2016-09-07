@@ -18,6 +18,7 @@
 #include "../env_flags/env_flags.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
+#define ROCK_MAX 255
 #define ROCK_HARD 220
 #define ROCK_MED  110
 #define ROCK_SOFT 1
@@ -205,7 +206,7 @@ void dungeon_place_rooms() {
                 if(j < 1 || j >= DUNGEON_WIDTH - 1 || k < 1 || k >= DUNGEON_HEIGHT - 1) {
                     continue;
                 }
-                tileAPI.update_hardness(_dungeon_array[k][j], ROCK_HARD);
+                tileAPI.update_hardness(_dungeon_array[k][j], ROCK_MAX);
             }
         }
     }
@@ -217,10 +218,17 @@ void dungeon_pathfind() {
     logger.i("Generating Corridors...");
     
     graph_t* g = dijkstraAPI.construct();
+    point_t src;
+    point_t dest;
     int i;
     for(i = 0; i < _room_size - 1; i++) {
-        dijkstraAPI.dijkstra(g, _room_array[i]->location, _room_array[i+1]->location);
-        dijkstraAPI.place_path(g, _room_array[i+1]->location);
+        src.x = (rand() % _room_array[i]->width) + _room_array[i]->location->x;
+        src.y = (rand() % _room_array[i]->height) + _room_array[i]->location->y;
+        dest.x = (rand() % _room_array[i+1]->width) + _room_array[i+1]->location->x;
+        dest.y = (rand() % _room_array[i+1]->height) + _room_array[i+1]->location->y;
+        logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
+        dijkstraAPI.dijkstra(g, &src, &dest);
+        dijkstraAPI.place_path(g, &dest);
     }
     
     dijkstraAPI.destruct(g);
@@ -391,13 +399,13 @@ static void border_dungeon() {
         if(i == 0 || i == DUNGEON_HEIGHT - 1) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
                 tileAPI.update_content(_dungeon_array[i][j], tc_BORDER);
-                tileAPI.update_hardness(_dungeon_array[i][j], 255);
+                tileAPI.update_hardness(_dungeon_array[i][j], ROCK_MAX);
             }
         } else {
             tileAPI.update_content(_dungeon_array[i][0], tc_BORDER);
-            tileAPI.update_hardness(_dungeon_array[i][0], 255);
+            tileAPI.update_hardness(_dungeon_array[i][0], ROCK_MAX);
             tileAPI.update_content(_dungeon_array[i][DUNGEON_WIDTH - 1], tc_BORDER);
-            tileAPI.update_hardness(_dungeon_array[i][DUNGEON_WIDTH - 1], 255);
+            tileAPI.update_hardness(_dungeon_array[i][DUNGEON_WIDTH - 1], ROCK_MAX);
         }
     }
     
