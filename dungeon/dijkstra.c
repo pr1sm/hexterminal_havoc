@@ -57,7 +57,7 @@ static void add_edge(graph_t* g, tile_t* src, tile_t* dest) {
     }
     edge_t* e = calloc(1, sizeof(edge_t));
     e->dest = point_to_index(dest->location);
-    e->weight = abs(dest->rock_hardness - src->rock_hardness);
+    e->weight = dest->rock_hardness;
     v->edges[v->edges_len++] = e;
 }
 

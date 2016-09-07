@@ -239,8 +239,12 @@ void dungeon_pathfind() {
 void dungeon_print() {
     logger.i("Printing Dungeon...");
     int i, j;
-    for(i = 0; i < 21; i++) {
-        for(j = 0; j < 80; j++) {
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            char c = tileAPI.char_for_content(_dungeon_array[i][j]);
+            if(c == '?') {
+                logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
+            }
             printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
         }
         printf("\n");
