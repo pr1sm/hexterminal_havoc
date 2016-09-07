@@ -128,7 +128,6 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
         v->visited = 0;
     }
     vertex_t* start = g->vertices[ia];
-    vertex_t* end = NULL;
     start->dist = 0;
     heap_t* h = heapAPI.construct(compare_vertices, NULL);
     heapAPI.insert(h, start);
@@ -136,7 +135,6 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
         vertex_t* v = heapAPI.remove(h);
         
         if(v->index == ib) {
-            end = v;
             break;
         }
         v->visited = 1;
