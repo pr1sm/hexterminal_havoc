@@ -12,7 +12,7 @@
 #include "../point/point.h"
 
 typedef enum {
-    tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM
+    tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM, tc_PATH
 } tile_content;
 
 typedef struct tile_t tile_t;

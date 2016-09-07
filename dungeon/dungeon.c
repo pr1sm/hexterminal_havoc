@@ -126,8 +126,6 @@ void dungeon_place_rooms() {
     } while(!overlap_valid);
     logger.t("Initial Rooms Generated");
     
-    add_rooms();
-    
     // Check if we have open space and add rooms one at a time
     logger.t("Checking on adding more rooms");
     while(is_open_space() && place_attempts_fail < 2000) {
@@ -191,7 +189,11 @@ void dungeon_place_rooms() {
 }
 
 void dungeon_pathfind() {
+    logger.i("Generating Corridors...");
     
+    
+    
+    logger.i("Corridors Generated");
 }
 
 static void write_dungeon_pgm(const char* file_name, int zone) {
@@ -363,11 +365,13 @@ static void border_dungeon() {
 }
 
 static int is_open_space() {
+    logger.t("Checking Open Space...");
     int i;
     int total_size = 0;
     for(i = 0; i < _room_size; i++) {
         total_size += (_room_array[i]->height * _room_array[i]->width);
     }
+    logger.t("Room Space taken: %d out of total space %d", total_size, DUNGEON_WIDTH * DUNGEON_HEIGHT);
     return total_size < (DUNGEON_HEIGHT * DUNGEON_WIDTH * 0.25f);
 }
 
@@ -381,18 +385,6 @@ static void add_rooms() {
             }
         }
     }
-    
-    for(i = 0; i < 21; i++) {
-        for(j = 0; j < 80; j++) {
-            tile_t* t = _dungeon_array[i][j];
-            char out = t->content == tc_BORDER ? '%' :
-            t->content == tc_ROCK ? ' ' :
-            t->content == tc_ROOM ? '.' : '$';
-            printf("%c", out);
-        }
-        printf("\n");
-    }
-    printf("\n");
 }
 
 dungeon_namespace const dungeonAPI = {

@@ -26,15 +26,13 @@ typedef struct heap_t {
 } heap_t;
 
 typedef struct heap_namespace {
-    void  (*const construct)(heap_t* h,
-                             int (*compare)(const void* a, const void* b),
-                             void (*data_delete)(void*));
-    void  (*const construct_from_array)(heap_t* h,
-                                        void* array,
-                                        int size,
-                                        int num_members,
-                                        int (*compare)(const void* a, const void* b),
-                                        void (*data_delete)(void*));
+    heap_t*  (*const construct)(int (*compare)(const void* a, const void* b),
+                                void (*data_delete)(void*));
+    heap_t*  (*const construct_from_array)(void* array,
+                                           int size,
+                                           int num_members,
+                                           int (*compare)(const void* a, const void* b),
+                                           void (*data_delete)(void*));
     void  (*const destruct)(heap_t* h);
     heap_node_t* (*const insert)(heap_t* h, void* v);
     void* (*const peek)(heap_t* h);
