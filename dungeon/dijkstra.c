@@ -46,18 +46,18 @@ static void add_vertex(graph_t* g, point_t* p) {
     }
 }
 
-static void add_edge(graph_t* g, point_t* p1, point_t* p2, int weight) {
-    add_vertex(g, p1);
-    add_vertex(g, p2);
-    vertex_t* v = g->vertices[point_to_index(p1)];
+static void add_edge(graph_t* g, tile_t* src, tile_t* dest) {
+    add_vertex(g, src->location);
+    add_vertex(g, dest->location);
+    vertex_t* v = g->vertices[point_to_index(src->location)];
     if(v->edges_len >= v->edges_size) {
         v->edges_size = v->edges_size ? v->edges_size * 2 : 5;
         // TODO: Deal with this possible realloc error
         v->edges = realloc(v->edges, v->edges_size * sizeof (*v->edges));
     }
     edge_t* e = calloc(1, sizeof(edge_t));
-    e->dest = point_to_index(p2);
-    e->weight = weight;
+    e->dest = point_to_index(dest->location);
+    e->weight = abs(dest->rock_hardness - src->rock_hardness);
     v->edges[v->edges_len++] = e;
 }
 
@@ -97,7 +97,7 @@ graph_t* dijkstra_construct() {
                 }
                 tile_t* dest = _dungeon_array[y][x];
                 
-                add_edge(g, t->location, dest->location, dest->rock_hardness);
+                add_edge(g, t, dest);
             }
         }
     }
@@ -135,6 +135,7 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
         vertex_t* v = heapAPI.remove(h);
         
         if(v->index == ib) {
+            logger.i("Found Path with dist: %d", v->dist);
             break;
         }
         v->visited = 1;
