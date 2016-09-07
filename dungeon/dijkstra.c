@@ -92,7 +92,7 @@ graph_t* dijkstra_construct() {
                 // check if we are in range
                 y = i + coord_adj[k];
                 x = j + coord_adj[k + 1];
-                if(x < 1 || x >= 79 || y < 1 || y >= 20) {
+                if(x < 1 || x >= DUNGEON_WIDTH - 1 || y < 1 || y >= DUNGEON_HEIGHT - 1) {
                     continue;
                 }
                 tile_t* dest = _dungeon_array[y][x];

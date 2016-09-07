@@ -80,11 +80,21 @@ void dungeon_generate_terrain() {
     smooth_dungeon();
     border_dungeon();
     logger.i("Terrain Generated");
+    
+    int i, j;
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            if(_dungeon_array[i][j]->content == tc_UNSET) {
+                logger.f("Unset Tile @ (%2d, %2d) after terrain generation!", j, i);
+                exit(2);
+            }
+        }
+    }
 }
 
 void dungeon_place_rooms() {
     logger.i("Placing rooms in dungeon...");
-    int i, j;
+    int i, j, k;
     int x, y, width, height, room_valid = 1;
     int overlap_valid = 1;
     int place_attempts_fail = 0;
@@ -183,6 +193,22 @@ void dungeon_place_rooms() {
     
     for(i = 0; i < _room_size; i++) {
         d_log_room(_room_array[i]);
+    }
+    
+    // Change hardness of Rooms and borders to ROCK_HARD
+    // This should help pathfinding route around rooms instead
+    // of going through, leading to more winding paths and
+    // points of entry into rooms instead of entire walls.
+    for(i = 0; i < _room_size; i++) {
+        room_t* room = _room_array[i];
+        for(j = room->location->x - 1; j <= room->location->x + room->width; j++) {
+            for(k = room->location->y; k <= room->location->y + room->height; k++) {
+                if(j < 1 || j >= DUNGEON_WIDTH - 1 || k < 1 || k >= DUNGEON_HEIGHT - 1) {
+                    continue;
+                }
+                tileAPI.update_hardness(_dungeon_array[k][j], ROCK_HARD);
+            }
+        }
     }
     
     logger.i("Rooms Placed in Dungeon");
