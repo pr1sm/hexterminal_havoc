@@ -148,6 +148,8 @@ void dungeon_place_rooms() {
                ((y + height) > DUNGEON_HEIGHT - 2)) {
                 room_valid = 0;
                 place_attempts_fail++;
+            } else {
+                room_valid = 1;
             }
         } while(!room_valid && place_attempts_fail < 2000);
         if(place_attempts_fail >= 2000) {
@@ -441,7 +443,7 @@ static int is_open_space() {
         total_size += (_room_array[i]->height * _room_array[i]->width);
     }
     logger.t("Room Space taken: %d out of total space %d", total_size, DUNGEON_WIDTH * DUNGEON_HEIGHT);
-    return total_size < (DUNGEON_HEIGHT * DUNGEON_WIDTH * 0.25f);
+    return total_size < (DUNGEON_HEIGHT * DUNGEON_WIDTH * 0.20f);
 }
 
 static void add_rooms() {
