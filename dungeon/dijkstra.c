@@ -46,7 +46,7 @@ static void add_vertex(graph_t* g, point_t* p) {
     }
 }
 
-static void add_edge(graph_t* g, tile_t* src, tile_t* dest) {
+static void add_edge(graph_t* g, tile_t* src, tile_t* dest, int invert) {
     add_vertex(g, src->location);
     add_vertex(g, dest->location);
     vertex_t* v = g->vertices[point_to_index(src->location)];
@@ -57,7 +57,8 @@ static void add_edge(graph_t* g, tile_t* src, tile_t* dest) {
     }
     edge_t* e = calloc(1, sizeof(edge_t));
     e->dest = point_to_index(dest->location);
-    e->weight = dest->rock_hardness;
+    // Invert the rock hardness based on flag
+    e->weight = invert ? 255-dest->rock_hardness : dest->rock_hardness;
     v->edges[v->edges_len++] = e;
 }
 
@@ -76,7 +77,7 @@ static void teardown_vertex(vertex_t* v) {
     free(v);
 }
 
-graph_t* dijkstra_construct() {
+graph_t* dijkstra_construct(int invert) {
     graph_t* g = calloc(1, sizeof(graph_t));
     
     // add all edges to graph
@@ -97,7 +98,7 @@ graph_t* dijkstra_construct() {
                 }
                 tile_t* dest = _dungeon_array[y][x];
                 
-                add_edge(g, t, dest);
+                add_edge(g, t, dest, invert);
             }
         }
     }

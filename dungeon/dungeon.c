@@ -217,7 +217,7 @@ void dungeon_place_rooms() {
 void dungeon_pathfind() {
     logger.i("Generating Corridors...");
     
-    graph_t* g = dijkstraAPI.construct();
+    graph_t* g = dijkstraAPI.construct(0);
     point_t src;
     point_t dest;
     int i;
@@ -230,6 +230,18 @@ void dungeon_pathfind() {
         dijkstraAPI.dijkstra(g, &src, &dest);
         dijkstraAPI.place_path(g, &dest);
     }
+    dijkstraAPI.destruct(g);
+    
+    // Connect last room to first room
+    g = dijkstraAPI.construct(1);
+    
+    src.x = (rand() % _room_array[_room_size - 1]->width) + _room_array[_room_size - 1]->location->x;
+    src.y = (rand() % _room_array[_room_size - 1]->height) + _room_array[_room_size - 1]->location->y;
+    dest.x = (rand() % _room_array[0]->width) + _room_array[0]->location->x;
+    dest.y = (rand() % _room_array[0]->height) + _room_array[0]->location->y;
+    logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
+    dijkstraAPI.dijkstra(g, &src, &dest);
+    dijkstraAPI.place_path(g, &dest);
     
     dijkstraAPI.destruct(g);
     

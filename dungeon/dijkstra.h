@@ -33,7 +33,7 @@ typedef struct {
 } graph_t;
 
 typedef struct dijkstra_namespace {
-    graph_t* (*const construct)();
+    graph_t* (*const construct)(int invert);
     void     (*const destruct)(graph_t* g);
     void     (*const dijkstra)(graph_t* g, point_t* start, point_t* end);
     void     (*const place_path)(graph_t* g, point_t* end);
