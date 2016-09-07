@@ -11,12 +11,11 @@
 #include <time.h>
 
 #include "dungeon.h"
+#include "dijkstra.h"
 #include "../tile/tile.h"
 #include "../room/room.h"
 #include "../logger/logger.h"
 
-#define DUNGEON_HEIGHT 21
-#define DUNGEON_WIDTH 80
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 #define ROCK_HARD 220
 #define ROCK_MED  110
@@ -26,12 +25,8 @@
 // size will be 21 rows x 80 cols
 tile_t*** _dungeon_array;
 
-// Temporary!
-room_t** _room_array;
-int _room_size;
-
-//static room_t** _room_array;
-//static int _room_size;
+static room_t** _room_array;
+static int _room_size;
 
 static void write_dungeon_pgm(const char* file_name, int zone);
 static void accent_dungeon();
@@ -42,8 +37,11 @@ static void border_dungeon();
 static int is_open_space();
 static void add_rooms();
 
-static void d_print_room(room_t* r) {
+static void d_log_room(room_t* r) {
+#ifdef DEBUG
     printf("Room: x: %2d, y: %2d, w: %2d, h: %2d\n", r->location->x, r->location->y, r->width, r->height);
+#endif // DEBUG
+    logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
 void dungeon_construct() {
@@ -94,7 +92,7 @@ void dungeon_place_rooms() {
     _room_array = calloc(_room_size, sizeof(*_room_array));
     
     // initally create the 6 rooms and check if overlap is valid.
-    logger.t("Generating initial rooms...");
+    logger.d("Generating initial rooms...");
     do {
         for(i = 0; i < _room_size; i++) {
             do {
@@ -124,12 +122,12 @@ void dungeon_place_rooms() {
             }
         }
     } while(!overlap_valid);
-    logger.t("Initial Rooms Generated");
+    logger.d("Initial Rooms Generated");
     
     // Check if we have open space and add rooms one at a time
-    logger.t("Checking on adding more rooms");
+    logger.d("Checking on adding more rooms");
     while(is_open_space() && place_attempts_fail < 2000) {
-        logger.t("Adding one more room");
+        logger.d("Adding one more room");
         room_valid = 1;
         do {
             x = (rand() % (DUNGEON_WIDTH - 2)) + 1;
@@ -148,7 +146,11 @@ void dungeon_place_rooms() {
         
         room_t* new_room = roomAPI.construct(x, y, width, height);
         
-        logger.t("Room defined, checking overlap");
+        logger.d("Room defined: (%2d, %2d, %2d, %2d), checking overlap",
+                 new_room->location->x,
+                 new_room->location->y,
+                 new_room->width,
+                 new_room->height);
         overlap_valid = 1;
         for(i = 0; i < _room_size; i++) {
             if(roomAPI.is_overlap(new_room, _room_array[i])) {
@@ -159,7 +161,7 @@ void dungeon_place_rooms() {
         if(!overlap_valid) {
             place_attempts_fail++;
             roomAPI.destruct(new_room);
-            logger.t("Overlap Detected, Removing room and trying again");
+            logger.d("Overlap Detected, Removing room and trying again");
         } else {
             logger.t("Room is valid, reallocating room array and adding room...");
             room_t** new_room_array = (room_t**) realloc(_room_array, (_room_size + 1) * sizeof(*_room_array));
@@ -174,16 +176,14 @@ void dungeon_place_rooms() {
     }
     
     if(place_attempts_fail >= 2000) {
-        logger.t("Stopping room placement due to attempt failures: %d", place_attempts_fail);
+        logger.d("Stopping room placement due to attempt failures: %d", place_attempts_fail);
     }
     
     add_rooms();
     
-#ifdef DEBUG
     for(i = 0; i < _room_size; i++) {
-        d_print_room(_room_array[i]);
+        d_log_room(_room_array[i]);
     }
-#endif // DEBUG
     
     logger.i("Rooms Placed in Dungeon");
 }
@@ -191,9 +191,34 @@ void dungeon_place_rooms() {
 void dungeon_pathfind() {
     logger.i("Generating Corridors...");
     
+    graph_t* g = dijkstraAPI.construct();
+    int i;
+    for(i = 0; i < _room_size - 1; i++) {
+        dijkstraAPI.dijkstra(g, _room_array[i]->location, _room_array[i+1]->location);
+        dijkstraAPI.place_path(g, _room_array[i+1]->location);
+    }
     
+    dijkstraAPI.destruct(g);
     
     logger.i("Corridors Generated");
+}
+
+void dungeon_print() {
+    logger.i("Printing Dungeon...");
+    int i, j;
+    for(i = 0; i < 21; i++) {
+        for(j = 0; j < 80; j++) {
+            tile_t* t = _dungeon_array[i][j];
+            char out = t->content == tc_BORDER ? '%' :
+            t->content == tc_ROCK ? ' ' :
+            t->content == tc_ROOM ? '.' :
+            t->content == tc_PATH ? '#' : '$';
+            printf("%c", out);
+        }
+        printf("\n");
+    }
+    printf("\n");
+    logger.i("Dungeon Printed");
 }
 
 static void write_dungeon_pgm(const char* file_name, int zone) {
@@ -392,5 +417,6 @@ dungeon_namespace const dungeonAPI = {
     dungeon_destruct,
     dungeon_generate_terrain,
     dungeon_place_rooms,
-    dungeon_pathfind
+    dungeon_pathfind,
+    dungeon_print
 };

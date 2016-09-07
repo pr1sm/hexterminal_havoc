@@ -17,17 +17,17 @@
 #include "../logger/logger.h"
 
 static int point_to_index(point_t* p) {
-    return ((p->y - 1) * 80) + (p->x - 1);
+    // since outer rows and cols aren't being used
+    // subtract one from both so the index starts at 0
+    return ((p->y - 1) * DUNGEON_WIDTH) + (p->x - 1);
 }
 
-// TODO: Replace with DUNGEON_WIDTH
 static int index_to_y(int index) {
-    return (index / 80) + 1;
+    return (index / DUNGEON_WIDTH) + 1;
 }
 
-// TODO: Replace with DUNGEON_WIDTH
 static int index_to_x(int index) {
-    return (index % 80) + 1;
+    return (index % DUNGEON_WIDTH) + 1;
 }
 
 static void add_vertex(graph_t* g, point_t* p) {
@@ -85,10 +85,8 @@ graph_t* dijkstra_construct() {
     int i, j, k, x, y;
     int coord_adj[] = {-1, 0, 1, 0, -1};
     
-    // TODO: replace with DUNGEON_HEIGHT - 1
-    for(i = 1; i < 20; i++) {
-        // TODO: replace with DUNGEON_WIDTH - 1
-        for(j = 1; j < 79; j++) {
+    for(i = 1; i < DUNGEON_HEIGHT - 1; i++) {
+        for(j = 1; j < DUNGEON_WIDTH - 1; j++) {
             tile_t* t = _dungeon_array[i][j];
             for(k = 0; k < 4; k++) {
                 // check if we are in range
@@ -121,8 +119,8 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
     int i, j;
     int ia = point_to_index(a);
     int ib = point_to_index(b);
-    // TODO: starts at (1,1) = 81. figure out a generic way to write this!
     for(i = 0; i < g->size; i++) {
+        // Catch the outer rows and cols
         if(g->vertices[i] == NULL) continue;
         vertex_t* v = g->vertices[i];
         v->dist = INT_MAX;

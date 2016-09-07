@@ -11,12 +11,10 @@
 
 #include "../tile/tile.h"
 
-extern tile_t*** _dungeon_array;
+#define DUNGEON_HEIGHT 21
+#define DUNGEON_WIDTH 80
 
-// Temporary for testing!
-#include "../room/room.h"
-extern room_t** _room_array;
-extern int _room_size;
+extern tile_t*** _dungeon_array;
 
 typedef struct dungeon_namespace {
     void (*const construct)();
@@ -24,6 +22,7 @@ typedef struct dungeon_namespace {
     void (*const generate_terrain)();
     void (*const place_rooms)();
     void (*const pathfind)();
+    void (*const print)();
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
 
