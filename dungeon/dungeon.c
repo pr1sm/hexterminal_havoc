@@ -27,15 +27,16 @@ tile_t*** _dungeon_array;
 
 static room_t** _room_array;
 static int _room_size;
-
-static void write_dungeon_pgm(const char* file_name, int zone);
 static void accent_dungeon();
 static void diffuse_dungeon();
 static void smooth_dungeon();
 static void border_dungeon();
-
 static int is_open_space();
 static void add_rooms();
+
+#ifdef DEBUG
+static void write_dungeon_pgm(const char* file_name, int zone);
+#endif // DEBUG
 
 static void d_log_room(room_t* r) {
 #ifdef DEBUG
@@ -234,12 +235,7 @@ void dungeon_print() {
     int i, j;
     for(i = 0; i < 21; i++) {
         for(j = 0; j < 80; j++) {
-            tile_t* t = _dungeon_array[i][j];
-            char out = t->content == tc_BORDER ? '%' :
-            t->content == tc_ROCK ? ' ' :
-            t->content == tc_ROOM ? '.' :
-            t->content == tc_PATH ? '#' : '$';
-            printf("%c", out);
+            printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
         }
         printf("\n");
     }
@@ -247,6 +243,7 @@ void dungeon_print() {
     logger.i("Dungeon Printed");
 }
 
+#ifdef DEBUG
 static void write_dungeon_pgm(const char* file_name, int zone) {
     int i, j;
     FILE* pgm = fopen(file_name, "w+");
@@ -264,6 +261,7 @@ static void write_dungeon_pgm(const char* file_name, int zone) {
         fprintf(pgm, "\r\n");
     }
 }
+#endif // DEBUG
 
 static void accent_dungeon() {
     logger.t("Spiking Dungeon Out...");

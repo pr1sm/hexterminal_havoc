@@ -10,6 +10,16 @@
 
 #include "tile.h"
 
+#ifdef DEBUG
+#define BORDER_CHAR '%'
+#else
+#define BORDER_CHAR ' '
+#endif // DEBUG
+#define ROCK_CHAR ' '
+#define ROOM_CHAR '.'
+#define PATH_CHAR '#'
+#define DEFAULT_CHAR '?'
+
 tile_t* tile_construct(int x, int y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
     point_t* location = pointAPI.construct(x, y);
@@ -54,6 +64,13 @@ int tile_are_changes_proposed(tile_t* tile) {
            (tile->content != tile->changes->content);
 }
 
+char tile_char_for_content(tile_t* tile) {
+    return tile->content == tc_BORDER ? BORDER_CHAR :
+           tile->content == tc_ROCK   ? ROCK_CHAR   :
+           tile->content == tc_ROOM   ? ROOM_CHAR   :
+           tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
+}
+
 tile_namespace const tileAPI = {
     tile_construct,
     tile_destruct,
@@ -62,5 +79,6 @@ tile_namespace const tileAPI = {
     tile_propose_update_hardness,
     tile_propose_update_content,
     tile_commit_updates,
-    tile_are_changes_proposed
+    tile_are_changes_proposed,
+    tile_char_for_content
 };
