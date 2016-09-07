@@ -14,10 +14,13 @@
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '
 #define BORDER_CHAR (DEBUG_MODE ? BORDER_CHAR_DEBUG : BORDER_CHAR_NORM)
+#define DEFAULT_CHAR_NORM ' '
+#define DEFAULT_CHAR_DEBUG '?'
+#define DEFAULT_CHAR (DEBUG_MODE ? DEFAULT_CHAR_DEBUG : DEFAULT_CHAR_NORM)
 #define ROCK_CHAR ' '
 #define ROOM_CHAR '.'
 #define PATH_CHAR '#'
-#define DEFAULT_CHAR '?'
+
 
 tile_t* tile_construct(int x, int y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
