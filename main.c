@@ -13,12 +13,19 @@
 #include <errno.h>
 #include <limits.h>
 
+#include "env_flags/env_flags.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
 
 int main(int argc, const char * argv[]) {
     
-    logger.set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
+    setup_environment();
+    
+    if(DEBUG_MODE) {
+        logger.set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
+    } else {
+        logger.set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
+    }
     
     dungeonAPI.construct();
     

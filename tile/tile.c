@@ -9,12 +9,11 @@
 #include <stdlib.h>
 
 #include "tile.h"
+#include "../env_flags/env_flags.h"
 
-#ifdef DEBUG
-#define BORDER_CHAR '%'
-#else
-#define BORDER_CHAR ' '
-#endif // DEBUG
+#define BORDER_CHAR_DEBUG '%'
+#define BORDER_CHAR_NORM ' '
+#define BORDER_CHAR (DEBUG_MODE ? BORDER_CHAR_DEBUG : BORDER_CHAR_NORM)
 #define ROCK_CHAR ' '
 #define ROOM_CHAR '.'
 #define PATH_CHAR '#'

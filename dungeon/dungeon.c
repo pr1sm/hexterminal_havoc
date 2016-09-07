@@ -15,6 +15,7 @@
 #include "../tile/tile.h"
 #include "../room/room.h"
 #include "../logger/logger.h"
+#include "../env_flags/env_flags.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 #define ROCK_HARD 220
@@ -33,15 +34,12 @@ static void smooth_dungeon();
 static void border_dungeon();
 static int is_open_space();
 static void add_rooms();
-
-#ifdef DEBUG
 static void write_dungeon_pgm(const char* file_name, int zone);
-#endif // DEBUG
 
 static void d_log_room(room_t* r) {
-#ifdef DEBUG
-    printf("Room: x: %2d, y: %2d, w: %2d, h: %2d\n", r->location->x, r->location->y, r->width, r->height);
-#endif // DEBUG
+    if(DEBUG_MODE) {
+        printf("Room: x: %2d, y: %2d, w: %2d, h: %2d\n", r->location->x, r->location->y, r->width, r->height);
+    }
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
@@ -243,7 +241,6 @@ void dungeon_print() {
     logger.i("Dungeon Printed");
 }
 
-#ifdef DEBUG
 static void write_dungeon_pgm(const char* file_name, int zone) {
     int i, j;
     FILE* pgm = fopen(file_name, "w+");
@@ -261,7 +258,6 @@ static void write_dungeon_pgm(const char* file_name, int zone) {
         fprintf(pgm, "\r\n");
     }
 }
-#endif // DEBUG
 
 static void accent_dungeon() {
     logger.t("Spiking Dungeon Out...");
@@ -281,10 +277,10 @@ static void accent_dungeon() {
     
     logger.t("Dungeon Spiked Out");
     
-#ifdef DEBUG
-    logger.t("Writing map to pgm");
-    write_dungeon_pgm("rock_accent_map.pgm", 1);
-#endif // DEBUG
+    if(DEBUG_MODE) {
+        logger.t("Writing map to pgm");
+        write_dungeon_pgm("rock_accent_map.pgm", 1);
+    }
 }
 
 static void diffuse_dungeon() {
@@ -347,10 +343,10 @@ static void diffuse_dungeon() {
     }
     logger.t("Dungeon Diffused");
     
-#ifdef DEBUG
-    logger.t("Writing diffuse map out");
-    write_dungeon_pgm("rock_diffuse_map.pgm", 1);
-#endif // DEBUG
+    if(DEBUG_MODE) {
+        logger.t("Writing diffuse map out");
+        write_dungeon_pgm("rock_diffuse_map.pgm", 1);
+    }
 }
 
 static void smooth_dungeon() {
@@ -382,10 +378,10 @@ static void smooth_dungeon() {
     
     logger.t("Dungeon Smoothed");
     
-#ifdef DEBUG
-    logger.t("Writing smooth map out");
-    write_dungeon_pgm("rock_smooth_map.pgm", 0);
-#endif // DEBUG
+    if(DEBUG_MODE) {
+        logger.t("Writing smooth map out");
+        write_dungeon_pgm("rock_smooth_map.pgm", 0);
+    }
 }
 
 static void border_dungeon() {
@@ -407,10 +403,10 @@ static void border_dungeon() {
     
     logger.t("Dungeon Bordered");
     
-#ifdef DEBUG
-    logger.t("Writing terrain map out");
-    write_dungeon_pgm("rock_terrain_map.pgm", 0);
-#endif // DEBUG
+    if(DEBUG_MODE) {
+        logger.t("Writing terrain map out");
+        write_dungeon_pgm("rock_terrain_map.pgm", 0);
+    }
 }
 
 static int is_open_space() {
