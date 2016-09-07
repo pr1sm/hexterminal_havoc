@@ -19,9 +19,9 @@
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 #define ROCK_MAX 255
-#define ROCK_HARD 220
+#define ROCK_HARD 165
 #define ROCK_MED  110
-#define ROCK_SOFT 1
+#define ROCK_SOFT 55
 
 // Array of tiles for the dungeon
 // size will be 21 rows x 80 cols
