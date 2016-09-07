@@ -9,6 +9,18 @@
 #include <stdlib.h>
 
 #include "tile.h"
+#include "../env_flags/env_flags.h"
+
+#define BORDER_CHAR_DEBUG '%'
+#define BORDER_CHAR_NORM ' '
+#define BORDER_CHAR (DEBUG_MODE ? BORDER_CHAR_DEBUG : BORDER_CHAR_NORM)
+#define DEFAULT_CHAR_NORM ' '
+#define DEFAULT_CHAR_DEBUG '?'
+#define DEFAULT_CHAR (DEBUG_MODE ? DEFAULT_CHAR_DEBUG : DEFAULT_CHAR_NORM)
+#define ROCK_CHAR ' '
+#define ROOM_CHAR '.'
+#define PATH_CHAR '#'
+
 
 tile_t* tile_construct(int x, int y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
@@ -54,6 +66,13 @@ int tile_are_changes_proposed(tile_t* tile) {
            (tile->content != tile->changes->content);
 }
 
+char tile_char_for_content(tile_t* tile) {
+    return tile->content == tc_BORDER ? BORDER_CHAR :
+           tile->content == tc_ROCK   ? ROCK_CHAR   :
+           tile->content == tc_ROOM   ? ROOM_CHAR   :
+           tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
+}
+
 tile_namespace const tileAPI = {
     tile_construct,
     tile_destruct,
@@ -62,5 +81,6 @@ tile_namespace const tileAPI = {
     tile_propose_update_hardness,
     tile_propose_update_content,
     tile_commit_updates,
-    tile_are_changes_proposed
+    tile_are_changes_proposed,
+    tile_char_for_content
 };

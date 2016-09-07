@@ -12,7 +12,7 @@
 #include "../point/point.h"
 
 typedef enum {
-    tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM
+    tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM, tc_PATH
 } tile_content;
 
 typedef struct tile_t tile_t;
@@ -32,6 +32,7 @@ typedef struct {
     void    (*const propose_update_content)(tile_t* tile, tile_content value);
     void    (*const commit_updates)(tile_t* tile);
     int     (*const are_changes_proposed)(tile_t* tile);
+    char    (*const char_for_content)(tile_t* tile);
 } tile_namespace;
 extern tile_namespace const tileAPI;
 
