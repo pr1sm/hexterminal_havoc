@@ -15,6 +15,7 @@ typedef struct room_t {
     point_t* location;
     int width;
     int height;
+    int connected;
 } room_t;
 
 typedef struct room_namespace {

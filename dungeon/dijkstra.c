@@ -167,6 +167,8 @@ void dijkstra_place_path(graph_t* g, point_t* b) {
         tile_t* tile = _dungeon_array[y][x];
         if(tile->content == tc_ROCK) {
             tileAPI.update_content(tile, tc_PATH);
+        } else if(tile->content == tc_ROOM) {
+            dungeonAPI.connect_room(tile->location);
         }
         v = g->vertices[v->prev];
         if(v == NULL) break;

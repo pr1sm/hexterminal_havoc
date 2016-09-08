@@ -44,6 +44,7 @@ room_t* room_construct(int x, int y, int width, int height) {
     r->location = location;
     r->width = width;
     r->height = height;
+    r->connected = 0;
     return r;
 }
 
@@ -102,5 +103,6 @@ int room_contains(room_t* r, point_t* p) {
 room_namespace const roomAPI = {
     room_construct,
     room_destruct,
-    room_is_overlap
+    room_is_overlap,
+    room_contains
 };
