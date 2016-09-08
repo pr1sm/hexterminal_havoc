@@ -10,6 +10,7 @@
 #define dungeon_h
 
 #include "../tile/tile.h"
+#include "../point/point.h"
 
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
@@ -23,6 +24,7 @@ typedef struct dungeon_namespace {
     void (*const place_rooms)();
     void (*const pathfind)();
     void (*const print)();
+    int  (*const connect_room)(point_t* p);
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
 

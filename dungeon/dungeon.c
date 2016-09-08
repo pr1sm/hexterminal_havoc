@@ -18,9 +18,10 @@
 #include "../env_flags/env_flags.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
-#define ROCK_HARD 220
-#define ROCK_MED  110
-#define ROCK_SOFT 1
+#define ROCK_MAX 255
+#define ROCK_HARD 230
+#define ROCK_MED  130
+#define ROCK_SOFT 30
 
 // Array of tiles for the dungeon
 // size will be 21 rows x 80 cols
@@ -93,7 +94,7 @@ void dungeon_generate_terrain() {
 
 void dungeon_place_rooms() {
     logger.i("Placing rooms in dungeon...");
-    int i, j, k;
+    int i, j;
     int x, y, width, height, room_valid = 1;
     int overlap_valid = 1;
     int place_attempts_fail = 0;
@@ -147,6 +148,8 @@ void dungeon_place_rooms() {
                ((y + height) > DUNGEON_HEIGHT - 2)) {
                 room_valid = 0;
                 place_attempts_fail++;
+            } else {
+                room_valid = 1;
             }
         } while(!room_valid && place_attempts_fail < 2000);
         if(place_attempts_fail >= 2000) {
@@ -194,34 +197,37 @@ void dungeon_place_rooms() {
         d_log_room(_room_array[i]);
     }
     
-    // Change hardness of Rooms and borders to ROCK_HARD
-    // This should help pathfinding route around rooms instead
-    // of going through, leading to more winding paths and
-    // points of entry into rooms instead of entire walls.
-    for(i = 0; i < _room_size; i++) {
-        room_t* room = _room_array[i];
-        for(j = room->location->x - 1; j <= room->location->x + room->width; j++) {
-            for(k = room->location->y; k <= room->location->y + room->height; k++) {
-                if(j < 1 || j >= DUNGEON_WIDTH - 1 || k < 1 || k >= DUNGEON_HEIGHT - 1) {
-                    continue;
-                }
-                tileAPI.update_hardness(_dungeon_array[k][j], ROCK_HARD);
-            }
-        }
-    }
-    
     logger.i("Rooms Placed in Dungeon");
 }
 
 void dungeon_pathfind() {
     logger.i("Generating Corridors...");
     
-    graph_t* g = dijkstraAPI.construct();
+    graph_t* g = dijkstraAPI.construct(0);
+    point_t src;
+    point_t dest;
     int i;
     for(i = 0; i < _room_size - 1; i++) {
-        dijkstraAPI.dijkstra(g, _room_array[i]->location, _room_array[i+1]->location);
-        dijkstraAPI.place_path(g, _room_array[i+1]->location);
+        src.x = (rand() % _room_array[i]->width) + _room_array[i]->location->x;
+        src.y = (rand() % _room_array[i]->height) + _room_array[i]->location->y;
+        dest.x = (rand() % _room_array[i+1]->width) + _room_array[i+1]->location->x;
+        dest.y = (rand() % _room_array[i+1]->height) + _room_array[i+1]->location->y;
+        logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
+        dijkstraAPI.dijkstra(g, &src, &dest);
+        dijkstraAPI.place_path(g, &dest);
     }
+    dijkstraAPI.destruct(g);
+    
+    // Connect last room to first room
+    g = dijkstraAPI.construct(1);
+    
+    src.x = (rand() % _room_array[_room_size - 1]->width) + _room_array[_room_size - 1]->location->x;
+    src.y = (rand() % _room_array[_room_size - 1]->height) + _room_array[_room_size - 1]->location->y;
+    dest.x = (rand() % _room_array[0]->width) + _room_array[0]->location->x;
+    dest.y = (rand() % _room_array[0]->height) + _room_array[0]->location->y;
+    logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
+    dijkstraAPI.dijkstra(g, &src, &dest);
+    dijkstraAPI.place_path(g, &dest);
     
     dijkstraAPI.destruct(g);
     
@@ -231,14 +237,29 @@ void dungeon_pathfind() {
 void dungeon_print() {
     logger.i("Printing Dungeon...");
     int i, j;
-    for(i = 0; i < 21; i++) {
-        for(j = 0; j < 80; j++) {
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            char c = tileAPI.char_for_content(_dungeon_array[i][j]);
+            if(c == '?') {
+                logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
+            }
             printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
         }
         printf("\n");
     }
     printf("\n");
     logger.i("Dungeon Printed");
+}
+
+int dungeon_connect_room(point_t* p) {
+    int i;
+    for(i = 0; i < _room_size; i++) {
+        if(roomAPI.contains(_room_array[i], p)) {
+            _room_array[i]->connected = 1;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 static void write_dungeon_pgm(const char* file_name, int zone) {
@@ -391,13 +412,13 @@ static void border_dungeon() {
         if(i == 0 || i == DUNGEON_HEIGHT - 1) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
                 tileAPI.update_content(_dungeon_array[i][j], tc_BORDER);
-                tileAPI.update_hardness(_dungeon_array[i][j], 255);
+                tileAPI.update_hardness(_dungeon_array[i][j], ROCK_MAX);
             }
         } else {
             tileAPI.update_content(_dungeon_array[i][0], tc_BORDER);
-            tileAPI.update_hardness(_dungeon_array[i][0], 255);
+            tileAPI.update_hardness(_dungeon_array[i][0], ROCK_MAX);
             tileAPI.update_content(_dungeon_array[i][DUNGEON_WIDTH - 1], tc_BORDER);
-            tileAPI.update_hardness(_dungeon_array[i][DUNGEON_WIDTH - 1], 255);
+            tileAPI.update_hardness(_dungeon_array[i][DUNGEON_WIDTH - 1], ROCK_MAX);
         }
     }
     
@@ -417,7 +438,7 @@ static int is_open_space() {
         total_size += (_room_array[i]->height * _room_array[i]->width);
     }
     logger.t("Room Space taken: %d out of total space %d", total_size, DUNGEON_WIDTH * DUNGEON_HEIGHT);
-    return total_size < (DUNGEON_HEIGHT * DUNGEON_WIDTH * 0.25f);
+    return total_size < (DUNGEON_HEIGHT * DUNGEON_WIDTH * 0.20f);
 }
 
 static void add_rooms() {
@@ -438,5 +459,6 @@ dungeon_namespace const dungeonAPI = {
     dungeon_generate_terrain,
     dungeon_place_rooms,
     dungeon_pathfind,
-    dungeon_print
+    dungeon_print,
+    dungeon_connect_room
 };
