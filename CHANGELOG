@@ -13,4 +13,5 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Created Makefile with incremental build instructions
 - Created Readme with short description of Assignment 1.01
 - Created this Change Log
+- Added Environmental Variable setting for debub mode (`export ENV=DEBUG`)
 
