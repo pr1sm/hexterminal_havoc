@@ -208,15 +208,6 @@ void dungeon_pathfind() {
     point_t dest;
     int i;
     for(i = 0; i < _room_size - 1; i++) {
-        if(_room_array[i]->connected) {
-            logger.d("Room: (%2d, %2d, %2d, %2d) has already been connected, skiping this path",
-                     _room_array[i]->location->x,
-                     _room_array[i]->location->y,
-                     _room_array[i]->width,
-                     _room_array[i]->height);
-            continue;
-        }
-        
         src.x = (rand() % _room_array[i]->width) + _room_array[i]->location->x;
         src.y = (rand() % _room_array[i]->height) + _room_array[i]->location->y;
         dest.x = (rand() % _room_array[i+1]->width) + _room_array[i+1]->location->x;
@@ -260,14 +251,15 @@ void dungeon_print() {
     logger.i("Dungeon Printed");
 }
 
-void dungeon_connect_room(point_t* p) {
+int dungeon_connect_room(point_t* p) {
     int i;
     for(i = 0; i < _room_size; i++) {
         if(roomAPI.contains(_room_array[i], p)) {
             _room_array[i]->connected = 1;
-            return;
+            return 1;
         }
     }
+    return 0;
 }
 
 static void write_dungeon_pgm(const char* file_name, int zone) {

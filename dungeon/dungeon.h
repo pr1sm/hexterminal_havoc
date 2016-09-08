@@ -24,7 +24,7 @@ typedef struct dungeon_namespace {
     void (*const place_rooms)();
     void (*const pathfind)();
     void (*const print)();
-    void (*const connect_room)(point_t* p);
+    int  (*const connect_room)(point_t* p);
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
 
