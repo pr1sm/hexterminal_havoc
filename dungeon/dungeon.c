@@ -15,7 +15,7 @@
 #include "../tile/tile.h"
 #include "../room/room.h"
 #include "../logger/logger.h"
-#include "../env_flags/env_flags.h"
+#include "../env/env.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 #define ROCK_MAX 255

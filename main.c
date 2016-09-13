@@ -13,11 +13,13 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "env_flags/env_flags.h"
+#include "env/env.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * argv[]) {
+    
+    parse_args(argc, argv);
     
     setup_environment();
     
