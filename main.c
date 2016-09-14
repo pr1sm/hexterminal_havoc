@@ -19,8 +19,8 @@
 
 int main(int argc, char * argv[]) {
     
-    envAPI.parse_args(argc, argv);
     envAPI.setup_environment();
+    envAPI.parse_args(argc, argv);
     
     if(DEBUG_MODE) {
         logger.set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
@@ -43,6 +43,7 @@ int main(int argc, char * argv[]) {
     }
     
     dungeonAPI.destruct();
+    envAPI.cleanup();
     
     return 0;
 }

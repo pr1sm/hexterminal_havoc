@@ -19,11 +19,14 @@ int DEBUG_MODE = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
 char* HOME = "";
+char* LOAD_FILE;
+char* SAVE_FILE;
 
 static char* help_text = "Usage: hexterm_havoc [options]\n\n"
-                         "-l,\t--load\tLoad dungeon from the save file.\n"
-                         "-h,\t--help\tPrint this help message.\n"
-                         "-s,\t--save\tSave the dungeon after loading/generating it.\n";
+                         "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
+                         "-h,       --help        | Print this help message.\n"
+                         "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
+                         "                        |   name <name> (in save directory).\n";
 
 void env_setup_environment() {
     logger.i("%%%% SETTING ENVIRONMENT %%%%");
@@ -62,14 +65,14 @@ void env_parse_args(int argc, char** argv) {
     while(1) {
         // Setup options
         static struct option long_options[] = {
-            {"load", no_argument, 0, 'l'},
-            {"save", no_argument, 0, 's'},
+            {"load", optional_argument, 0, 'l'},
+            {"save", optional_argument, 0, 's'},
             {"help", no_argument, 0, 'h'},
             {0, 0, 0, 0}
         };
         
         int option_index = 0;
-        flag = getopt_long(argc, argv, "hsl", long_options, &option_index);
+        flag = getopt_long(argc, argv, "hs::l::", long_options, &option_index);
         
         if(flag == -1) {
             break;
@@ -93,10 +96,29 @@ void env_parse_args(int argc, char** argv) {
                 
             case 's':
                 SAVE_DUNGEON = 1;
+                if(optarg && *optarg) {
+                    SAVE_FILE = (char*) calloc(strlen(HOME) + strlen("/.rlg327/") + strlen(optarg)+1, sizeof(char));
+                    sprintf(SAVE_FILE, "%s/.rlg327/%s", HOME, optarg);
+                } else {
+                    SAVE_FILE = (char*) calloc(strlen(HOME) + strlen("/.rlg327/dungeon")+1, sizeof(char));
+                    sprintf(SAVE_FILE, "%s/.rlg327/dungeon", HOME);
+                }
+                logger.i("Save File Set: %s", SAVE_FILE);
                 break;
                 
             case 'l':
                 LOAD_DUNGEON = 1;
+                if(optarg && *optarg) {
+                    LOAD_FILE = (char*) calloc(strlen(HOME) + strlen("/.rlg327/") + strlen(optarg)+1, sizeof(char));
+                    sprintf(LOAD_FILE, "%s/.rlg327/%s", HOME, optarg);
+                } else {
+                    LOAD_FILE = (char*) calloc(strlen(HOME)+strlen("/.rlg327/dungeon")+1, sizeof(char));
+                    sprintf(LOAD_FILE, "%s/.rlg327/dungeon", HOME);
+                }
+                logger.i("Load File Set: %s", LOAD_FILE);
+                break;
+                
+            case '?':
                 break;
             
             default:
@@ -115,12 +137,23 @@ void env_parse_args(int argc, char** argv) {
 }
 
 void env_exit_gracefully() {
+    envAPI.cleanup();
     printf("%s", help_text);
     exit(0);
+}
+
+void env_cleanup() {
+    if(SAVE_FILE) {
+        free(SAVE_FILE);
+    }
+    if(LOAD_FILE) {
+        free(LOAD_FILE);
+    }
 }
 
 const env_namespace envAPI = {
     env_parse_args,
     env_setup_environment,
-    env_exit_gracefully
+    env_exit_gracefully,
+    env_cleanup
 };

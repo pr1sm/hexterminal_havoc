@@ -120,6 +120,7 @@ void dungeon_print() {
 }
 
 void dungeon_load() {
+    logger.i("Loading Dungeon...");
     FILE* f;
     int version;
     int size;
@@ -127,15 +128,12 @@ void dungeon_load() {
     int num_rooms = 0;
     unsigned char room_data[4];
     char* semantic = (char*)malloc(7*sizeof(char));
-    char* filename = (char*)malloc((17 + strlen(HOME))*sizeof(char));
     unsigned char* hardness_map = (unsigned char*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(unsigned char));
-    sprintf(filename, "%s/.rlg327/dungeon", HOME);
     
-    f = fopen(filename, "rb");
+    f = fopen(LOAD_FILE, "rb");
     if(f == NULL) {
-        logger.f("Dungeon save file could not be loaded: %s.  Exiting with error!", filename);
+        logger.f("Dungeon save file could not be loaded: %s.  Exiting with error!", LOAD_FILE);
         free(semantic);
-        free(filename);
         free(hardness_map);
         abort();
     }
@@ -145,9 +143,8 @@ void dungeon_load() {
     fread(&size, sizeof(int), 1, f);
     
     if(strcmp(semantic, "RLG327")) {
-        logger.e("File %s is of a different format: %s, not RLG327! aborting now!", filename, semantic);
+        logger.e("File %s is of a different format: %s, not RLG327! aborting now!", LOAD_FILE, semantic);
         free(semantic);
-        free(filename);
         free(hardness_map);
         fclose(f);
         abort();
@@ -183,28 +180,25 @@ void dungeon_load() {
         }
     }
     
-    
+    logger.i("Dungeon Loaded");
     free(semantic);
-    free(filename);
     free(hardness_map);
     fclose(f);
 }
 
 void dungeon_save() {
+    logger.i("Saving Dungeon...");
     FILE* f;
     int version = 0;
     int size = (_room_size*4) + 1694;
     int i, j;
     unsigned char room_data[4];
     char* semantic = "RLG327";
-    char* filename = (char*) malloc((17+strlen(HOME))*sizeof(char));
     unsigned char* hardness_map = (unsigned char*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(unsigned char));
-    sprintf(filename, "%s/.rlg327/dungeon", HOME);
     
-    f = fopen(filename, "wb");
+    f = fopen(SAVE_FILE, "wb");
     if(f == NULL) {
-        logger.f("Dungeon save file could not be opened: %s.  Aborting now", filename);
-        free(filename);
+        logger.f("Dungeon save file could not be opened: %s.  Aborting now", SAVE_FILE);
         free(hardness_map);
         fclose(f);
         abort();
@@ -228,7 +222,8 @@ void dungeon_save() {
         fwrite(room_data, sizeof(unsigned char), 4, f);
     }
     
-    free(filename);
+    logger.i("Dungeon Saved");
+    
     free(hardness_map);
     fclose(f);
 }
@@ -401,7 +396,7 @@ static void update_path_hardnesses() {
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             t = _dungeon_array[i][j];
-            if(t->content == tc_ROCK || t->content == tc_PATH) {
+            if(t->content == tc_ROOM || t->content == tc_PATH) {
                 tileAPI.update_hardness(t, 0);
             }
         }
