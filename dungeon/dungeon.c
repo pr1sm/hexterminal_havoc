@@ -8,7 +8,25 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#ifdef __APPLE__
+    #include <libkern/OSByteOrder.h>
+    #define htobe16(x) OSSwapHostToBigInt16(x)
+    #define htole16(x) OSSwapHostToLittleInt16(x)
+    #define be16toh(x) OSSwapBigToHostInt16(x)
+    #define le16toh(x) OSSwapLittleToHostInt16(x)
+    #define htobe32(x) OSSwapHostToBigInt32(x)
+    #define htole32(x) OSSwapHostToLittleInt32(x)
+    #define be32toh(x) OSSwapBigToHostInt32(x)
+    #define le32toh(x) OSSwapLittleToHostInt32(x)
+    #define htobe64(x) OSSwapHostToBigInt64(x)
+    #define htole64(x) OSSwapHostToLittleInt64(x)
+    #define be64toh(x) OSSwapBigToHostInt64(x)
+    #define le64toh(x) OSSwapLittleToHostInt64(x)
+#else
+    #include <endian.h>
+#endif // __APPLE__
 
 #include "dungeon.h"
 #include "dijkstra.h"
@@ -39,6 +57,7 @@ static void write_dungeon_pgm(const char* file_name, int zone);
 static void generate_terrain();
 static void place_rooms();
 static void pathfind();
+static void update_path_hardnesses();
 
 static void d_log_room(room_t* r) {
     if(DEBUG_MODE) {
@@ -80,6 +99,7 @@ void dungeon_generate() {
     generate_terrain();
     place_rooms();
     pathfind();
+    update_path_hardnesses();
 }
 
 void dungeon_print() {
@@ -101,6 +121,74 @@ void dungeon_print() {
 
 void dungeon_load() {
     // TODO: Implement
+    FILE* f;
+    int version;
+    int size;
+    int i, j, k;
+    int num_rooms = 0;
+    unsigned char room_data[4];
+    char* semantic = (char*)malloc(7*sizeof(char));
+    char* filename = (char*)malloc((17 + strlen(HOME))*sizeof(char));
+    unsigned char* hardness_map = (unsigned char*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(unsigned char));
+    sprintf(filename, "%s/.rlg327/dungeon", HOME);
+    
+    f = fopen(filename, "rb");
+    if(f == NULL) {
+        logger.f("Dungeon save file could not be loaded: %s.  Exiting with error!", filename);
+        free(semantic);
+        free(filename);
+        free(hardness_map);
+        abort();
+    }
+    
+    fread(semantic, sizeof(char), 6, f);
+    fread(&version, sizeof(int), 1, f);
+    fread(&size, sizeof(int), 1, f);
+    
+    if(strcmp(semantic, "RLG327")) {
+        logger.e("File %s is of a different format: %s, not RLG327! aborting now!", filename, semantic);
+        free(semantic);
+        free(filename);
+        free(hardness_map);
+        fclose(f);
+        abort();
+    }
+    
+    version = be32toh(version);
+    size = be32toh(size);
+    num_rooms = (size - 1694) / 4;
+    
+    logger.i("Parsing file with version: %d, total size: %d", version, size);
+    logger.i("Estimating the number of rooms: %d", num_rooms);
+    
+    fread(hardness_map, sizeof(unsigned char), DUNGEON_HEIGHT*DUNGEON_WIDTH, f);
+    
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            tileAPI.import_tile(_dungeon_array[i][j], hardness_map[i*DUNGEON_WIDTH + j], 0);
+        }
+    }
+    
+    _room_size = num_rooms;
+    _room_array = calloc(_room_size, sizeof(*_room_array));
+    for(i = 0; i < num_rooms; i++) {
+        // read in room data
+        fread(room_data, sizeof(unsigned char), 4, f);
+        _room_array[i] = roomAPI.construct(room_data[0], room_data[2], room_data[1], room_data[3]);
+        
+        // change room tiles to be rooms
+        for(j = _room_array[i]->location->y; j < _room_array[i]->location->y + _room_array[i]->height; j++) {
+            for(k = _room_array[i]->location->x; k < _room_array[i]->location->x + _room_array[i]->width; k++) {
+                tileAPI.import_tile(_dungeon_array[j][k], _dungeon_array[j][k]->rock_hardness, 1);
+            }
+        }
+    }
+    
+    
+    free(semantic);
+    free(filename);
+    free(hardness_map);
+    fclose(f);
 }
 
 void dungeon_save() {
@@ -266,6 +354,20 @@ static void pathfind() {
     dijkstraAPI.destruct(g);
     
     logger.i("Corridors Generated");
+}
+
+static void update_path_hardnesses() {
+    int i, j;
+    tile_t* t;
+    
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            t = _dungeon_array[i][j];
+            if(t->content == tc_ROCK || t->content == tc_PATH) {
+                tileAPI.update_hardness(t, 0);
+            }
+        }
+    }
 }
 
 static void write_dungeon_pgm(const char* file_name, int zone) {

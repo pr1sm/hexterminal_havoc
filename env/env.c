@@ -18,6 +18,7 @@
 int DEBUG_MODE = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
+char* HOME = "";
 
 static char* help_text = "Usage: hexterm_havoc [options]\n\n"
                          "-l,\t--load\tLoad dungeon from the save file.\n"
@@ -30,6 +31,12 @@ void env_setup_environment() {
     if((env = getenv("ENV"))) {
         if(!strcmp(env, "DEBUG")) {
             DEBUG_MODE = 1;
+        }
+    }
+    
+    if((env = getenv("HOME"))) {
+        if(strlen(env) > 0) {
+            HOME = env;
         }
     }
     

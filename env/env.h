@@ -12,6 +12,7 @@
 extern int DEBUG_MODE;
 extern int LOAD_DUNGEON;
 extern int SAVE_DUNGEON;
+extern char* HOME;
 
 typedef struct env_namespace {
     void (*const parse_args)(int argc, char** argv);
