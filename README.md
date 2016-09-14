@@ -25,6 +25,21 @@ the game.
 $ ./hexterm_havoc
 ```
 
+### Command Line Flags
+
+There are options for saving and loading dungeons based on flags passed through
+the command line.  To see all options, run `./hexterm_havoc -h`.  A menu 
+detailing all options should be printed similar to this: 
+
+```bash
+Usage: hexterm_havoc [options]
+
+-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).
+-h,       --help        | Print this help message.
+-s<name>, --save=<name> | Save the dungeon after loading/generating it with
+                        |   name <name> (in save directory).
+```
+
 ## Assignments
 
 ### Assignment 1.02 - Dungeon Saving/Loading
