@@ -23,6 +23,7 @@ typedef struct room_namespace {
     void (*const destruct)(room_t* room);
     int  (*const is_overlap)(room_t* r1, room_t* r2);
     int  (*const contains)(room_t* r, point_t* p);
+    void (*const export_room)(room_t* r, unsigned char* data);
 } room_namespace;
 extern room_namespace const roomAPI;
 

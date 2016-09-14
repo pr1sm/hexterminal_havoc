@@ -100,9 +100,18 @@ int room_contains(room_t* r, point_t* p) {
     return 0;
 }
 
+void room_export_room(room_t* r, unsigned char* data) {
+    // ASSUME: data is an array with length of 4
+    data[0] = r->location->x;
+    data[1] = r->width;
+    data[2] = r->location->y;
+    data[3] = r->height;
+}
+
 room_namespace const roomAPI = {
     room_construct,
     room_destruct,
     room_is_overlap,
-    room_contains
+    room_contains,
+    room_export_room
 };

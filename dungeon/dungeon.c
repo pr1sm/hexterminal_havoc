@@ -120,7 +120,6 @@ void dungeon_print() {
 }
 
 void dungeon_load() {
-    // TODO: Implement
     FILE* f;
     int version;
     int size;
@@ -192,7 +191,46 @@ void dungeon_load() {
 }
 
 void dungeon_save() {
-    // TODO: Implement
+    FILE* f;
+    int version = 0;
+    int size = (_room_size*4) + 1694;
+    int i, j;
+    unsigned char room_data[4];
+    char* semantic = "RLG327";
+    char* filename = (char*) malloc((17+strlen(HOME))*sizeof(char));
+    unsigned char* hardness_map = (unsigned char*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(unsigned char));
+    sprintf(filename, "%s/.rlg327/dungeon", HOME);
+    
+    f = fopen(filename, "wb");
+    if(f == NULL) {
+        logger.f("Dungeon save file could not be opened: %s.  Aborting now", filename);
+        free(filename);
+        free(hardness_map);
+        fclose(f);
+        abort();
+    }
+    
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            hardness_map[i*DUNGEON_WIDTH + j] = _dungeon_array[i][j]->rock_hardness;
+        }
+    }
+    
+    version = htobe32(version);
+    size = htobe32(size);
+    fwrite(semantic, sizeof(char), 6, f);
+    fwrite(&version, sizeof(int), 1, f);
+    fwrite(&size, sizeof(int), 1, f);
+    fwrite(hardness_map, sizeof(unsigned char), DUNGEON_WIDTH*DUNGEON_HEIGHT, f);
+    
+    for(i = 0; i < _room_size; i++) {
+        roomAPI.export_room(_room_array[i], room_data);
+        fwrite(room_data, sizeof(unsigned char), 4, f);
+    }
+    
+    free(filename);
+    free(hardness_map);
+    fclose(f);
 }
 
 static void generate_terrain() {
