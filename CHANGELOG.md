@@ -6,6 +6,12 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Dungeon Saving (added CLI flag and optional argument to specify the name)
+- Dungeon Loading (added CLI flag and optional argument to specify the name)
+- CLI help message to provide info on what flags there are
+
+
 ## [1.01] - 2016-9-7
 
 ### Added
