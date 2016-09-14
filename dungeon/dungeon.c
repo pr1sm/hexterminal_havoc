@@ -135,7 +135,7 @@ void dungeon_load() {
         logger.f("Dungeon save file could not be loaded: %s.  Exiting with error!", LOAD_FILE);
         free(semantic);
         free(hardness_map);
-        abort();
+        exit(3);
     }
     
     fread(semantic, sizeof(char), 6, f);
@@ -147,7 +147,7 @@ void dungeon_load() {
         free(semantic);
         free(hardness_map);
         fclose(f);
-        abort();
+        exit(3);
     }
     
     version = be32toh(version);
@@ -201,7 +201,7 @@ void dungeon_save() {
         logger.f("Dungeon save file could not be opened: %s.  Aborting now", SAVE_FILE);
         free(hardness_map);
         fclose(f);
-        abort();
+        exit(3);
     }
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {

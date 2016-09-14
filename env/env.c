@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
+#include <errno.h>
+#include <sys/stat.h>
 
 #include "env.h"
 #include "../logger/logger.h"
@@ -59,6 +61,8 @@ void env_parse_args(int argc, char** argv) {
     
     int flag;
     int help_flag = 0;
+    int e;
+    size_t size;
     
     opterr = 0;
     
@@ -96,25 +100,33 @@ void env_parse_args(int argc, char** argv) {
                 
             case 's':
                 SAVE_DUNGEON = 1;
-                if(optarg && *optarg) {
-                    SAVE_FILE = (char*) calloc(strlen(HOME) + strlen("/.rlg327/") + strlen(optarg)+1, sizeof(char));
-                    sprintf(SAVE_FILE, "%s/.rlg327/%s", HOME, optarg);
+                size = 1 + strlen(HOME) + strlen("/.rlg327/") + ((optarg && *optarg) ? strlen(optarg) : strlen("dungeon"));
+                SAVE_FILE = (char*)calloc(size, sizeof(char));
+                sprintf(SAVE_FILE, "%s/.rlg327/", HOME);
+                e = mkdir(SAVE_FILE, 0755);
+                // clear the error if there is one.
+                if(e == -1) {
+                    errno = 0;
                 } else {
-                    SAVE_FILE = (char*) calloc(strlen(HOME) + strlen("/.rlg327/dungeon")+1, sizeof(char));
-                    sprintf(SAVE_FILE, "%s/.rlg327/dungeon", HOME);
+                    logger.i("Creating save directory...");
                 }
+                strcat(SAVE_FILE, (optarg && *optarg) ? optarg : "dungeon");
                 logger.i("Save File Set: %s", SAVE_FILE);
                 break;
                 
             case 'l':
                 LOAD_DUNGEON = 1;
-                if(optarg && *optarg) {
-                    LOAD_FILE = (char*) calloc(strlen(HOME) + strlen("/.rlg327/") + strlen(optarg)+1, sizeof(char));
-                    sprintf(LOAD_FILE, "%s/.rlg327/%s", HOME, optarg);
+                size = 1 + strlen(HOME) + strlen("/.rlg327/") + ((optarg && *optarg) ? strlen(optarg) : strlen("dungeon"));
+                LOAD_FILE = (char*)calloc(size, sizeof(char));
+                sprintf(LOAD_FILE, "%s/.rlg327/", HOME);
+                e = mkdir(LOAD_FILE, 0755);
+                // clear the error if there is one.
+                if(e == -1) {
+                    errno = 0;
                 } else {
-                    LOAD_FILE = (char*) calloc(strlen(HOME)+strlen("/.rlg327/dungeon")+1, sizeof(char));
-                    sprintf(LOAD_FILE, "%s/.rlg327/dungeon", HOME);
+                    logger.i("Creating save directory...");
                 }
+                strcat(LOAD_FILE, (optarg && *optarg) ? optarg : "dungeon");
                 logger.i("Load File Set: %s", LOAD_FILE);
                 break;
                 
