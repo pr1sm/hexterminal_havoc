@@ -36,6 +36,9 @@ static void border_dungeon();
 static int is_open_space();
 static void add_rooms();
 static void write_dungeon_pgm(const char* file_name, int zone);
+static void generate_terrain();
+static void place_rooms();
+static void pathfind();
 
 static void d_log_room(room_t* r) {
     if(DEBUG_MODE) {
@@ -73,7 +76,38 @@ void dungeon_destruct() {
     logger.i("Dungeon Destructed");
 }
 
-void dungeon_generate_terrain() {
+void dungeon_generate() {
+    generate_terrain();
+    place_rooms();
+    pathfind();
+}
+
+void dungeon_print() {
+    logger.i("Printing Dungeon...");
+    int i, j;
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            char c = tileAPI.char_for_content(_dungeon_array[i][j]);
+            if(c == '?') {
+                logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
+            }
+            printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
+        }
+        printf("\n");
+    }
+    printf("\n");
+    logger.i("Dungeon Printed");
+}
+
+void dungeon_load() {
+    // TODO: Implement
+}
+
+void dungeon_save() {
+    // TODO: Implement
+}
+
+static void generate_terrain() {
     logger.i("Generating Terrain...");
     accent_dungeon();
     diffuse_dungeon();
@@ -92,7 +126,7 @@ void dungeon_generate_terrain() {
     }
 }
 
-void dungeon_place_rooms() {
+static void place_rooms() {
     logger.i("Placing rooms in dungeon...");
     int i, j;
     int x, y, width, height, room_valid = 1;
@@ -200,7 +234,7 @@ void dungeon_place_rooms() {
     logger.i("Rooms Placed in Dungeon");
 }
 
-void dungeon_pathfind() {
+static void pathfind() {
     logger.i("Generating Corridors...");
     
     graph_t* g = dijkstraAPI.construct(0);
@@ -232,34 +266,6 @@ void dungeon_pathfind() {
     dijkstraAPI.destruct(g);
     
     logger.i("Corridors Generated");
-}
-
-void dungeon_print() {
-    logger.i("Printing Dungeon...");
-    int i, j;
-    for(i = 0; i < DUNGEON_HEIGHT; i++) {
-        for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c = tileAPI.char_for_content(_dungeon_array[i][j]);
-            if(c == '?') {
-                logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
-            }
-            printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
-        }
-        printf("\n");
-    }
-    printf("\n");
-    logger.i("Dungeon Printed");
-}
-
-int dungeon_connect_room(point_t* p) {
-    int i;
-    for(i = 0; i < _room_size; i++) {
-        if(roomAPI.contains(_room_array[i], p)) {
-            _room_array[i]->connected = 1;
-            return 1;
-        }
-    }
-    return 0;
 }
 
 static void write_dungeon_pgm(const char* file_name, int zone) {
@@ -456,9 +462,8 @@ static void add_rooms() {
 dungeon_namespace const dungeonAPI = {
     dungeon_construct,
     dungeon_destruct,
-    dungeon_generate_terrain,
-    dungeon_place_rooms,
-    dungeon_pathfind,
+    dungeon_generate,
     dungeon_print,
-    dungeon_connect_room
+    dungeon_load,
+    dungeon_save
 };

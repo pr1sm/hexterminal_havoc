@@ -20,11 +20,10 @@ extern tile_t*** _dungeon_array;
 typedef struct dungeon_namespace {
     void (*const construct)();
     void (*const destruct)();
-    void (*const generate_terrain)();
-    void (*const place_rooms)();
-    void (*const pathfind)();
+    void (*const generate)();
     void (*const print)();
-    int  (*const connect_room)(point_t* p);
+    void (*const load)();
+    void (*const save)();
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
 

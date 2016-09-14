@@ -24,7 +24,7 @@ static char* help_text = "Usage: hexterm_havoc [options]\n\n"
                          "-h,\t--help\tPrint this help message.\n"
                          "-s,\t--save\tSave the dungeon after loading/generating it.\n";
 
-void setup_environment() {
+void env_setup_environment() {
     logger.i("%%%% SETTING ENVIRONMENT %%%%");
     char* env;
     if((env = getenv("ENV"))) {
@@ -44,7 +44,7 @@ void setup_environment() {
     logger.i("%%%% ENVIRONMENT SET %%%%");
 }
 
-void parse_args(int argc, char** argv) {
+void env_parse_args(int argc, char** argv) {
     if(argc <= 1) return;
     
     int flag;
@@ -93,21 +93,27 @@ void parse_args(int argc, char** argv) {
                 break;
             
             default:
-                exit_gracefully();
+                envAPI.exit_gracefully();
         }
     }
     
     if(opterr) {
         fprintf(stderr, "Error: invalid flag parsed.\n");
-        exit_gracefully();
+        envAPI.exit_gracefully();
     }
     
     if(help_flag) {
-        exit_gracefully();
+        envAPI.exit_gracefully();
     }
 }
 
-void exit_gracefully() {
+void env_exit_gracefully() {
     printf("%s", help_text);
     exit(0);
 }
+
+const env_namespace envAPI = {
+    env_parse_args,
+    env_setup_environment,
+    env_exit_gracefully
+};
