@@ -18,7 +18,7 @@ typedef enum {
 typedef struct tile_t tile_t;
 struct tile_t {
     point_t* location;
-    int rock_hardness;
+    unsigned char rock_hardness;
     tile_content content;
     tile_t* changes;
 };
@@ -26,13 +26,14 @@ struct tile_t {
 typedef struct {
     tile_t* (*const construct)(int x, int y);
     void    (*const destruct)(tile_t* tile);
-    void    (*const update_hardness)(tile_t* tile, int value);
+    void    (*const update_hardness)(tile_t* tile, unsigned char value);
     void    (*const update_content)(tile_t* tile, tile_content value);
     void    (*const propose_update_hardness)(tile_t* tile, int value);
     void    (*const propose_update_content)(tile_t* tile, tile_content value);
     void    (*const commit_updates)(tile_t* tile);
     int     (*const are_changes_proposed)(tile_t* tile);
     char    (*const char_for_content)(tile_t* tile);
+    void    (*const import_tile)(tile_t* tile, unsigned char value, int room);
 } tile_namespace;
 extern tile_namespace const tileAPI;
 
