@@ -11,10 +11,10 @@
 
 #include "dijkstra.h"
 #include "dungeon.h"
-#include "../heap/heap.h"
-#include "../tile/tile.h"
-#include "../point/point.h"
-#include "../logger/logger.h"
+#include "heap.h"
+#include "tile.h"
+#include "point.h"
+#include "logger.h"
 
 static int point_to_index(point_t* p) {
     // since outer rows and cols aren't being used

@@ -13,9 +13,9 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "env/env.h"
-#include "dungeon/dungeon.h"
-#include "logger/logger.h"
+#include "src/env.h"
+#include "src/dungeon.h"
+#include "src/logger.h"
 
 int main(int argc, char * argv[]) {
     

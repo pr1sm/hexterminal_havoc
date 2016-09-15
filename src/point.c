@@ -11,7 +11,7 @@
 #include <stdio.h>
 
 #include "point.h"
-#include "../logger/logger.h"
+#include "logger.h"
 
 point_t* point_construct(uint8_t x, uint8_t y) {
     point_t* point = (point_t*)malloc(sizeof(point_t));
