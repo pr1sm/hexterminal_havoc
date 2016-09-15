@@ -9,6 +9,11 @@
 #ifndef env_h
 #define env_h
 
+#ifndef _UINT8_T
+#define _UINT8_T
+typedef unsigned char uint8_t;
+#endif // _UINT8_T
+
 extern int DEBUG_MODE;
 extern int LOAD_DUNGEON;
 extern int SAVE_DUNGEON;

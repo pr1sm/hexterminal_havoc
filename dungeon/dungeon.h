@@ -11,6 +11,7 @@
 
 #include "../tile/tile.h"
 #include "../point/point.h"
+#include "../env/env.h"
 
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80

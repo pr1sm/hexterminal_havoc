@@ -10,6 +10,7 @@
 #define tile_h
 
 #include "../point/point.h"
+#include "../env/env.h"
 
 typedef enum {
     tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM, tc_PATH

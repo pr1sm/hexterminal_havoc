@@ -9,6 +9,8 @@
 #ifndef point_h
 #define point_h
 
+#include "../env/env.h"
+
 typedef struct point_t {
     uint8_t x;
     uint8_t y;

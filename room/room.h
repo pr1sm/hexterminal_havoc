@@ -10,6 +10,7 @@
 #define room_h
 
 #include "../point/point.h"
+#include "../env/env.h"
 
 typedef struct room_t {
     point_t* location;
