@@ -126,9 +126,9 @@ void dungeon_load() {
     int size;
     int i, j, k;
     int num_rooms = 0;
-    unsigned char room_data[4];
+    uint8_t room_data[4];
     char* semantic = (char*)malloc(7*sizeof(char));
-    unsigned char* hardness_map = (unsigned char*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(unsigned char));
+    uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(LOAD_FILE, "rb");
     if(f == NULL) {
@@ -157,7 +157,7 @@ void dungeon_load() {
     logger.i("Parsing file with version: %d, total size: %d", version, size);
     logger.i("Estimating the number of rooms: %d", num_rooms);
     
-    fread(hardness_map, sizeof(unsigned char), DUNGEON_HEIGHT*DUNGEON_WIDTH, f);
+    fread(hardness_map, sizeof(uint8_t), DUNGEON_HEIGHT*DUNGEON_WIDTH, f);
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
@@ -169,7 +169,7 @@ void dungeon_load() {
     _room_array = calloc(_room_size, sizeof(*_room_array));
     for(i = 0; i < num_rooms; i++) {
         // read in room data
-        fread(room_data, sizeof(unsigned char), 4, f);
+        fread(room_data, sizeof(uint8_t), 4, f);
         _room_array[i] = roomAPI.construct(room_data[0], room_data[2], room_data[1], room_data[3]);
         
         // change room tiles to be rooms
@@ -192,9 +192,9 @@ void dungeon_save() {
     int version = 0;
     int size = (_room_size*4) + 1694;
     int i, j;
-    unsigned char room_data[4];
+    uint8_t room_data[4];
     char* semantic = "RLG327";
-    unsigned char* hardness_map = (unsigned char*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(unsigned char));
+    uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(SAVE_FILE, "wb");
     if(f == NULL) {
@@ -215,11 +215,11 @@ void dungeon_save() {
     fwrite(semantic, sizeof(char), 6, f);
     fwrite(&version, sizeof(int), 1, f);
     fwrite(&size, sizeof(int), 1, f);
-    fwrite(hardness_map, sizeof(unsigned char), DUNGEON_WIDTH*DUNGEON_HEIGHT, f);
+    fwrite(hardness_map, sizeof(uint8_t), DUNGEON_WIDTH*DUNGEON_HEIGHT, f);
     
     for(i = 0; i < _room_size; i++) {
         roomAPI.export_room(_room_array[i], room_data);
-        fwrite(room_data, sizeof(unsigned char), 4, f);
+        fwrite(room_data, sizeof(uint8_t), 4, f);
     }
     
     logger.i("Dungeon Saved");

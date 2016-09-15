@@ -22,7 +22,7 @@
 #define PATH_CHAR '#'
 
 
-tile_t* tile_construct(int x, int y) {
+tile_t* tile_construct(uint8_t x, uint8_t y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
     point_t* location = pointAPI.construct(x, y);
     t->location = location;
@@ -38,7 +38,7 @@ void tile_destruct(tile_t* tile) {
     free(tile);
 }
 
-void tile_update_hardness(tile_t* tile, unsigned char value) {
+void tile_update_hardness(tile_t* tile, uint8_t value) {
     tile->rock_hardness = value;
     tile->changes->rock_hardness = value;
 }
@@ -48,7 +48,7 @@ void tile_update_content(tile_t* tile, tile_content value) {
     tile->changes->content = value;
 }
 
-void tile_propose_update_hardness(tile_t* tile, int value) {
+void tile_propose_update_hardness(tile_t* tile, uint8_t value) {
     tile->changes->rock_hardness = value;
 }
 

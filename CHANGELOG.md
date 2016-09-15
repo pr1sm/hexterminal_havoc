@@ -4,13 +4,17 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [1.02] - 2016-9-14
 
 ### Added
 - Dungeon Saving (added CLI flag and optional argument to specify the name)
 - Dungeon Loading (added CLI flag and optional argument to specify the name)
-- CLI help message to provide info on what flags there are
+- CLI help message to provide info on flags
 
+### Changed
+- Updated Dungeon API to include saving and loading
+- Updated Dungeon API to have only one function for generating dungeons
+- Changed Point, Tile, Room components to use uint8_t instead of int
 
 ## [1.01] - 2016-9-7
 

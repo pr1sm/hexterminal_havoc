@@ -13,7 +13,7 @@
 #include "point.h"
 #include "../logger/logger.h"
 
-point_t* point_construct(int x, int y) {
+point_t* point_construct(uint8_t x, uint8_t y) {
     point_t* point = (point_t*)malloc(sizeof(point_t));
     point->x = x;
     point->y = y;
