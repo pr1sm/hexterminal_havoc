@@ -9,6 +9,8 @@
 #ifndef logger_h
 #define logger_h
 
+#include "../env/env.h"
+
 typedef enum logger_mode {
     LOG_T = 1,
     LOG_D = 2,

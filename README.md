@@ -25,7 +25,44 @@ the game.
 $ ./hexterm_havoc
 ```
 
+### Command Line Flags
+
+There are options for saving and loading dungeons based on flags passed through
+the command line.  To see all options, run `./hexterm_havoc -h`.  A menu 
+detailing all options should be printed similar to this: 
+
+```bash
+Usage: hexterm_havoc [options]
+
+-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).
+-h,       --help        | Print this help message.
+-s<name>, --save=<name> | Save the dungeon after loading/generating it with
+                        |   name <name> (in save directory).
+```
+
 ## Assignments
+
+### Assignment 1.02 - Dungeon Saving/Loading
+
+For this assignment, we were tasked with implementing saving and loading
+features into our game.  Based on two switches (`--save` and `--load`) we had 
+to change the flow of our game.  If the `--load` flag was set, instead of 
+generating a dungeon, we had to load a dungeon file from a save directory 
+(`~/.rlg327/`), reconstruct it, and print it out.  If the `--save` flag was 
+set, we had to export our dungeon to binary file following a specific format 
+and save it to the save directory.  
+
+To aid in testing, I added optional arguments to both switches.  A name of the 
+dungeon could be specified with each option and I would load/save that dungeon 
+instead of the default one.  Both are optional and separate, so I can load a 
+dungeon with one name and save it with another name.  
+
+The file format of this binary file consisted of a header with the type of the 
+file, the version number, and the size of the total file.  After the header, we 
+wrote out all of the hardness values of each tile in the dungeon.  Then, we 
+wrote out all of the rooms.  Each room was described by 4 bytes, one for the x 
+location, width, y location, and height.
+
 
 ### Assignment 1.01 - Dungeon Generation
 

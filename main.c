@@ -13,13 +13,14 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "env_flags/env_flags.h"
+#include "env/env.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
 
-int main(int argc, const char * argv[]) {
+int main(int argc, char * argv[]) {
     
-    setup_environment();
+    envAPI.setup_environment();
+    envAPI.parse_args(argc, argv);
     
     if(DEBUG_MODE) {
         logger.set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
@@ -29,12 +30,20 @@ int main(int argc, const char * argv[]) {
     
     dungeonAPI.construct();
     
-    dungeonAPI.generate_terrain();
-    dungeonAPI.place_rooms();
-    dungeonAPI.pathfind();
-    dungeonAPI.print();
+    if(LOAD_DUNGEON) {
+        dungeonAPI.load();
+    } else {
+        dungeonAPI.generate();
+    }
+    
+     dungeonAPI.print();
+    
+    if(SAVE_DUNGEON) {
+        dungeonAPI.save();
+    }
     
     dungeonAPI.destruct();
+    envAPI.cleanup();
     
     return 0;
 }

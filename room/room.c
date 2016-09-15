@@ -17,7 +17,7 @@
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 
-room_t* room_construct(int x, int y, int width, int height) {
+room_t* room_construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     room_t* r = (room_t*)malloc(sizeof(room_t));
     
     if(x < 1 || x >= DUNGEON_WIDTH - 1) {
@@ -100,9 +100,18 @@ int room_contains(room_t* r, point_t* p) {
     return 0;
 }
 
+void room_export_room(room_t* r, uint8_t* data) {
+    // ASSUME: data is an array with length of 4
+    data[0] = r->location->x;
+    data[1] = r->width;
+    data[2] = r->location->y;
+    data[3] = r->height;
+}
+
 room_namespace const roomAPI = {
     room_construct,
     room_destruct,
     room_is_overlap,
-    room_contains
+    room_contains,
+    room_export_room
 };
