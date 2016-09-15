@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "tile.h"
-#include "../env_flags/env_flags.h"
+#include "../env/env.h"
 
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '
@@ -22,7 +22,7 @@
 #define PATH_CHAR '#'
 
 
-tile_t* tile_construct(int x, int y) {
+tile_t* tile_construct(uint8_t x, uint8_t y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
     point_t* location = pointAPI.construct(x, y);
     t->location = location;
@@ -38,7 +38,7 @@ void tile_destruct(tile_t* tile) {
     free(tile);
 }
 
-void tile_update_hardness(tile_t* tile, int value) {
+void tile_update_hardness(tile_t* tile, uint8_t value) {
     tile->rock_hardness = value;
     tile->changes->rock_hardness = value;
 }
@@ -48,7 +48,7 @@ void tile_update_content(tile_t* tile, tile_content value) {
     tile->changes->content = value;
 }
 
-void tile_propose_update_hardness(tile_t* tile, int value) {
+void tile_propose_update_hardness(tile_t* tile, uint8_t value) {
     tile->changes->rock_hardness = value;
 }
 
@@ -73,6 +73,23 @@ char tile_char_for_content(tile_t* tile) {
            tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
 }
 
+void import_tile(tile_t* tile, unsigned char value, int room) {
+    tileAPI.propose_update_hardness(tile, value);
+    if(value == 255) {
+        tileAPI.propose_update_content(tile, tc_BORDER);
+    } else if(value == 0) {
+        tileAPI.propose_update_content(tile, tc_PATH);
+    } else {
+        tileAPI.propose_update_content(tile, tc_ROCK);
+    }
+    
+    if(room) {
+        tileAPI.propose_update_content(tile, tc_ROOM);
+    }
+    
+    tileAPI.commit_updates(tile);
+}
+
 tile_namespace const tileAPI = {
     tile_construct,
     tile_destruct,
@@ -82,5 +99,6 @@ tile_namespace const tileAPI = {
     tile_propose_update_content,
     tile_commit_updates,
     tile_are_changes_proposed,
-    tile_char_for_content
+    tile_char_for_content,
+    import_tile
 };

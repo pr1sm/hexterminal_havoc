@@ -10,6 +10,7 @@
 #define dijkstra_h
 
 #include "../point/point.h"
+#include "../env/env.h"
 
 typedef struct {
     int dest;
