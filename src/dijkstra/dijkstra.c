@@ -10,7 +10,7 @@
 #include <limits.h>
 
 #include "dijkstra.h"
-#include "dungeon.h"
+#include "../dungeon/dungeon.h"
 #include "../heap/heap.h"
 #include "../tile/tile.h"
 #include "../point/point.h"

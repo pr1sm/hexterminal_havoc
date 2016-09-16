@@ -29,7 +29,7 @@
 #endif // __APPLE__
 
 #include "dungeon.h"
-#include "dijkstra.h"
+#include "../dijkstra/dijkstra.h"
 #include "../tile/tile.h"
 #include "../room/room.h"
 #include "../logger/logger.h"
