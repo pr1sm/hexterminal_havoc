@@ -15,7 +15,7 @@
 #include <sys/stat.h>
 
 #include "env.h"
-#include "logger.h"
+#include "../logger/logger.h"
 
 int DEBUG_MODE = 0;
 int LOAD_DUNGEON = 0;

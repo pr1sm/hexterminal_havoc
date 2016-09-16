@@ -9,8 +9,8 @@
 #include <stdlib.h>
 
 #include "room.h"
-#include "point.h"
-#include "logger.h"
+#include "../point/point.h"
+#include "../logger/logger.h"
 
 #define MIN_WIDTH 4
 #define MIN_HEIGHT 3

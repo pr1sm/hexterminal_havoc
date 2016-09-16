@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "tile.h"
-#include "env.h"
+#include "../env/env.h"
 
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '

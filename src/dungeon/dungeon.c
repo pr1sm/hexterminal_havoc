@@ -29,11 +29,11 @@
 #endif // __APPLE__
 
 #include "dungeon.h"
-#include "dijkstra.h"
-#include "tile.h"
-#include "room.h"
-#include "logger.h"
-#include "env.h"
+#include "../dijkstra/dijkstra.h"
+#include "../tile/tile.h"
+#include "../room/room.h"
+#include "../logger/logger.h"
+#include "../env/env.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 #define ROCK_MAX 255
