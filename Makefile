@@ -5,6 +5,9 @@
 #  This makefile has been adapted to fit the project needs from the 
 #  following source: https://gist.github.com/kbingham/4414922
 
+#  Define echo for displaying messages
+ECHO = echo
+
 #  the compiler: using gcc for C
 CC = gcc
 
@@ -37,20 +40,25 @@ DEPENDS := $(SOURCES:.c=.d)
 
 #  Top Level Build Rule
 all: ${TARGET}
+	@$(ECHO) Done!
 
 #  Generic rule for dependencies
 %.d: %.c
-	$(CC) -M $(CFLAGS) -MQ '$*.o' $< | sed 's|$*\.o[ :]*|&$@ |g' > $@
+	@$(ECHO) Building $<...
+	@$(CC) -M $(CFLAGS) -MQ '$*.o' $< | sed 's|$*\.o[ :]*|&$@ |g' > $@
 
 -include $(DEPENDS)
 
 #  Target build based on objects
 $(TARGET): $(OBJECTS)
-	$(CC) $(CFLAGS) -o $@ $^
+	@$(ECHO) Linking $@...
+	@$(CC) $(CFLAGS) -o $@ $^
 
 #  Clean instruction
 clean: 
-	$(RM) -rf $(TARGET) $(OBJECTS) $(DEPENDS) *.pgm *~ *.dSYM/ logs/
+	@$(ECHO) Cleaning...
+	@$(RM) -rf $(TARGET) $(OBJECTS) $(DEPENDS) *.pgm *~ *.dSYM/ logs/
+	@$(ECHO) Done!
 
 #  More info for debugging
 help: printvars helpsummary
