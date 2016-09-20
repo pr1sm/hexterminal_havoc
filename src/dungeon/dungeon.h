@@ -15,6 +15,10 @@
 
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
+#define ROCK_MAX 255
+#define ROCK_HARD 230
+#define ROCK_MED  130
+#define ROCK_SOFT 30
 
 extern tile_t*** _dungeon_array;
 

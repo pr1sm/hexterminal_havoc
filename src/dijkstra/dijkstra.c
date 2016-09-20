@@ -10,109 +10,15 @@
 #include <limits.h>
 
 #include "dijkstra.h"
-#include "../dungeon/dungeon.h"
+#include "../graph/graph.h"
 #include "../heap/heap.h"
-#include "../tile/tile.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
-
-static int vert_count = 0;
-static int edge_count = 0;
-
-static int point_to_index(point_t* p) {
-    // since outer rows and cols aren't being used
-    // subtract one from both so the index starts at 0
-    return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
-}
-
-static int index_to_y(int index) {
-    return (index / (DUNGEON_WIDTH-2)) + 1;
-}
-
-static int index_to_x(int index) {
-    return (index % (DUNGEON_WIDTH-2)) + 1;
-}
-
-static void add_vertex(graph_t* g, point_t* p) {
-    int i = point_to_index(p);
-    if (g->size < i + 1) {
-        int size = g->size * 2 > i ? g->size * 2 : i + 4;
-        g->vertices = realloc(g->vertices, size * sizeof (vertex_t *));
-        for (int j = g->size; j < size; j++)
-            g->vertices[j] = NULL;
-        g->size = size;
-    }
-    if (!g->vertices[i]) {
-        g->vertices[i] = calloc(1, sizeof (vertex_t));
-        g->vertices[i]->index = i;
-        g->len++;
-        vert_count++;
-    }
-}
-
-static void add_edge(graph_t* g, tile_t* src, tile_t* dest, int invert) {
-    add_vertex(g, src->location);
-    add_vertex(g, dest->location);
-    vertex_t* v = g->vertices[point_to_index(src->location)];
-    if(v->edges_len >= v->edges_size) {
-        v->edges_size = v->edges_size ? v->edges_size * 2 : 5;
-        // TODO: Deal with this possible realloc error
-        v->edges = realloc(v->edges, v->edges_size * sizeof (*v->edges));
-    }
-    edge_t* e = calloc(1, sizeof(edge_t));
-    e->dest = point_to_index(dest->location);
-    // Invert the rock hardness based on flag
-    e->weight = invert ? 255-dest->rock_hardness : dest->rock_hardness;
-    v->edges[v->edges_len++] = e;
-    edge_count++;
-    
-}
-
-static int compare_vertices(const void *a, const void *b)
-{
-    const vertex_t* a_v = (const vertex_t*) a;
-    const vertex_t* b_v = (const vertex_t*) b;
-    return a_v->dist - b_v->dist;
-}
-
-static void teardown_vertex(vertex_t* v) {
-    int i;
-    for(i = 0; i < v->edges_len; i++) {
-        free(v->edges[i]);
-    }
-    free(v);
-}
 
 graph_t* dijkstra_construct(int invert) {
     graph_t* g = calloc(1, sizeof(graph_t));
     
-    // add all edges to graph
-    
-    // just use adjacent tiles for now
-    int i, j, k, x, y;
-    int coord_adj[] = {-1, 0, 1, 0, -1};
-    vert_count = 0;
-    edge_count = 0;
-    
-    for(i = 1; i < DUNGEON_HEIGHT - 1; i++) {
-        for(j = 1; j < DUNGEON_WIDTH - 1; j++) {
-            tile_t* t = _dungeon_array[i][j];
-            for(k = 0; k < 4; k++) {
-                // check if we are in range
-                y = i + coord_adj[k];
-                x = j + coord_adj[k + 1];
-                if(x < 1 || x >= DUNGEON_WIDTH - 1 || y < 1 || y >= DUNGEON_HEIGHT - 1) {
-                    continue;
-                }
-                tile_t* dest = _dungeon_array[y][x];
-                
-                add_edge(g, t, dest, invert);
-            }
-        }
-    }
-    
-    logger.t("Final Vertex Count: %d", vert_count);
-    logger.t("Final Edge Count: %d", edge_count);
+    // Implement a general case!
     
     return g;
 }
@@ -121,13 +27,13 @@ void dijkstra_destruct(graph_t* g) {
     int i;
     for(i = 0; i < g->size; i++) {
         if(g->vertices[i] != NULL) {
-            teardown_vertex(g->vertices[i]);
+            graphAPI.free_vertex(g->vertices[i]);
         }
     }
     free(g);
 }
 
-void dijkstra(graph_t* g, point_t* a, point_t* b) {
+void dijkstra(graph_t* g, point_t* a, point_t* b, int (*point_to_index)(point_t* p)) {
     int i, j;
     int ia = point_to_index(a);
     int ib = point_to_index(b);
@@ -141,7 +47,7 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
     }
     vertex_t* start = g->vertices[ia];
     start->dist = 0;
-    heap_t* h = heapAPI.construct(compare_vertices, NULL);
+    heap_t* h = heapAPI.construct(graphAPI.compare_vertices, NULL);
     heapAPI.insert(h, start);
     while(h->size) {
         vertex_t* v = heapAPI.remove(h);
@@ -163,35 +69,8 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
     }
 }
 
-void dijkstra_place_path(graph_t* g, point_t* b) {
-    int n;
-    vertex_t* v;
-    point_t p;
-    v = g->vertices[point_to_index(b)];
-    if(v->dist == INT_MAX) {
-        logger.e("no path! exiting program");
-        exit(1);
-    }
-    for(n = 1; v->dist; n++) {
-        int x = index_to_x(v->index);
-        int y = index_to_y(v->index);
-        
-        tile_t* tile = _dungeon_array[y][x];
-        if(tile->content == tc_ROCK) {
-            tileAPI.update_content(tile, tc_PATH);
-        } else if(tile->content == tc_ROOM) {
-            p.x = x;
-            p.y = y;
-            dungeonAPI.check_room_intercept(&p);
-        }
-        v = g->vertices[v->prev];
-        if(v == NULL) break;
-    }
-}
-
 dijkstra_namespace const dijkstraAPI = {
     dijkstra_construct,
     dijkstra_destruct,
-    dijkstra,
-    dijkstra_place_path
+    dijkstra
 } ;
