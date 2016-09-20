@@ -46,12 +46,12 @@
 tile_t*** _dungeon_array;
 
 static room_t** _room_array;
-static int _room_size;
+static int  _room_size;
 static void accent_dungeon();
 static void diffuse_dungeon();
 static void smooth_dungeon();
 static void border_dungeon();
-static int is_open_space();
+static int  is_open_space();
 static void add_rooms();
 static void write_dungeon_pgm(const char* file_name, int zone);
 static void generate_terrain();
@@ -100,6 +100,22 @@ void dungeon_generate() {
     place_rooms();
     pathfind();
     update_path_hardnesses();
+}
+
+void dungeon_check_room_intercept(point_t* point) {
+    if(_room_size < 0) {
+        logger.w("Check room called before rooms have been generated!");
+        return;
+    }
+    
+    int i;
+    for(i = 0; i < _room_size; i++) {
+        if(roomAPI.contains(_room_array[i], point) && !_room_array[i]->connected) {
+            _room_array[i]->connected = 1;
+            logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
+            return;
+        }
+    }
 }
 
 void dungeon_print() {
@@ -264,8 +280,8 @@ static void place_rooms() {
                 room_valid = 1;
                 x = (rand() % (DUNGEON_WIDTH - 2)) + 1;
                 y = (rand() % (DUNGEON_HEIGHT - 2)) + 1;
-                width = (rand() % 8) + 4;
-                height = (rand() % 8) + 3;
+                width = (rand() % 12) + 4;
+                height = (rand() % 10) + 3;
                 if(((x + width) > DUNGEON_WIDTH - 2) ||
                    ((y + height) > DUNGEON_HEIGHT - 2)) {
                     room_valid = 0;
@@ -363,6 +379,11 @@ static void pathfind() {
     point_t dest;
     int i;
     for(i = 0; i < _room_size - 1; i++) {
+        if(_room_array[i]->connected && _room_array[i+1]->connected) {
+            logger.t("Room %d and %d are already connected, moving to next path", i, i+1);
+            continue;
+        }
+        
         src.x = (rand() % _room_array[i]->width) + _room_array[i]->location->x;
         src.y = (rand() % _room_array[i]->height) + _room_array[i]->location->y;
         dest.x = (rand() % _room_array[i+1]->width) + _room_array[i+1]->location->x;
@@ -370,6 +391,8 @@ static void pathfind() {
         logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
         dijkstraAPI.dijkstra(g, &src, &dest);
         dijkstraAPI.place_path(g, &dest);
+        _room_array[i]->connected = 1;
+        _room_array[i+1]->connected = 1;
     }
     dijkstraAPI.destruct(g);
     
@@ -598,6 +621,7 @@ dungeon_namespace const dungeonAPI = {
     dungeon_construct,
     dungeon_destruct,
     dungeon_generate,
+    dungeon_check_room_intercept,
     dungeon_print,
     dungeon_load,
     dungeon_save

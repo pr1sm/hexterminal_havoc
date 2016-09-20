@@ -16,18 +16,21 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 
+static int vert_count = 0;
+static int edge_count = 0;
+
 static int point_to_index(point_t* p) {
     // since outer rows and cols aren't being used
     // subtract one from both so the index starts at 0
-    return ((p->y - 1) * DUNGEON_WIDTH) + (p->x - 1);
+    return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
 }
 
 static int index_to_y(int index) {
-    return (index / DUNGEON_WIDTH) + 1;
+    return (index / (DUNGEON_WIDTH-2)) + 1;
 }
 
 static int index_to_x(int index) {
-    return (index % DUNGEON_WIDTH) + 1;
+    return (index % (DUNGEON_WIDTH-2)) + 1;
 }
 
 static void add_vertex(graph_t* g, point_t* p) {
@@ -43,6 +46,7 @@ static void add_vertex(graph_t* g, point_t* p) {
         g->vertices[i] = calloc(1, sizeof (vertex_t));
         g->vertices[i]->index = i;
         g->len++;
+        vert_count++;
     }
 }
 
@@ -60,6 +64,8 @@ static void add_edge(graph_t* g, tile_t* src, tile_t* dest, int invert) {
     // Invert the rock hardness based on flag
     e->weight = invert ? 255-dest->rock_hardness : dest->rock_hardness;
     v->edges[v->edges_len++] = e;
+    edge_count++;
+    
 }
 
 static int compare_vertices(const void *a, const void *b)
@@ -85,6 +91,8 @@ graph_t* dijkstra_construct(int invert) {
     // just use adjacent tiles for now
     int i, j, k, x, y;
     int coord_adj[] = {-1, 0, 1, 0, -1};
+    vert_count = 0;
+    edge_count = 0;
     
     for(i = 1; i < DUNGEON_HEIGHT - 1; i++) {
         for(j = 1; j < DUNGEON_WIDTH - 1; j++) {
@@ -102,6 +110,9 @@ graph_t* dijkstra_construct(int invert) {
             }
         }
     }
+    
+    logger.t("Final Vertex Count: %d", vert_count);
+    logger.t("Final Edge Count: %d", edge_count);
     
     return g;
 }
@@ -155,6 +166,7 @@ void dijkstra(graph_t* g, point_t* a, point_t* b) {
 void dijkstra_place_path(graph_t* g, point_t* b) {
     int n;
     vertex_t* v;
+    point_t p;
     v = g->vertices[point_to_index(b)];
     if(v->dist == INT_MAX) {
         logger.e("no path! exiting program");
@@ -167,6 +179,10 @@ void dijkstra_place_path(graph_t* g, point_t* b) {
         tile_t* tile = _dungeon_array[y][x];
         if(tile->content == tc_ROCK) {
             tileAPI.update_content(tile, tc_PATH);
+        } else if(tile->content == tc_ROOM) {
+            p.x = x;
+            p.y = y;
+            dungeonAPI.check_room_intercept(&p);
         }
         v = g->vertices[v->prev];
         if(v == NULL) break;
