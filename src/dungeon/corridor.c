@@ -1,5 +1,5 @@
 //
-//  pathfinder.c
+//  corridor.c
 //  cs_327
 //
 //  Created by Srinivas Dhanwada on 9/20/16.
@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "pathfinder.h"
+#include "corridor.h"
 #include "dungeon.h"
 #include "../dijkstra/dijkstra.h"
 #include "../graph/graph.h"
@@ -104,7 +104,7 @@ static void place_path(graph_t* g, point_t* b) {
 }
 
 
-pathfinder_namespace const pathfinderAPI = {
+corridor_namespace const corridorAPI = {
     path_construct,
     path_destruct,
     path_pathfind

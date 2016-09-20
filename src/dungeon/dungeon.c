@@ -12,7 +12,7 @@
 #include <time.h>
 
 #include "dungeon.h"
-#include "pathfinder.h"
+#include "corridor.h"
 #include "../util/portable_endian.h"
 #include "../graph/graph.h"
 #include "../tile/tile.h"
@@ -355,7 +355,7 @@ static void place_rooms() {
 static void pathfind() {
     logger.i("Generating Corridors...");
     
-    graph_t* g = pathfinderAPI.construct(0);
+    graph_t* g = corridorAPI.construct(0);
     point_t src;
     point_t dest;
     int num_paths = 0;
@@ -371,25 +371,25 @@ static void pathfind() {
         dest.x = (rand() % _room_array[i+1]->width) + _room_array[i+1]->location->x;
         dest.y = (rand() % _room_array[i+1]->height) + _room_array[i+1]->location->y;
         logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
-        pathfinderAPI.pathfind(g, &src, &dest);
+        corridorAPI.pathfind(g, &src, &dest);
         _room_array[i]->connected = 1;
         _room_array[i+1]->connected = 1;
         num_paths++;
     }
-    pathfinderAPI.destruct(g);
+    corridorAPI.destruct(g);
     
     // Connect last room to first room
-    g = pathfinderAPI.construct(1);
+    g = corridorAPI.construct(1);
     
     src.x = (rand() % _room_array[_room_size - 1]->width) + _room_array[_room_size - 1]->location->x;
     src.y = (rand() % _room_array[_room_size - 1]->height) + _room_array[_room_size - 1]->location->y;
     dest.x = (rand() % _room_array[0]->width) + _room_array[0]->location->x;
     dest.y = (rand() % _room_array[0]->height) + _room_array[0]->location->y;
     logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
-    pathfinderAPI.pathfind(g, &src, &dest);
+    corridorAPI.pathfind(g, &src, &dest);
     num_paths++;
     
-    pathfinderAPI.destruct(g);
+    corridorAPI.destruct(g);
     
     logger.i("Generated %d paths", num_paths);
     logger.i("Corridors Generated");
