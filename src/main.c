@@ -41,12 +41,18 @@ int main(int argc, char * argv[]) {
     
     dungeonAPI.print(0);
     
-    point_t p = {23, 3};
+    point_t p = {58, 3};
     graph_t* g = pathfinderAPI.construct(0);
     pathfinderAPI.generate_pathmap(g, &p, 0);
     pathfinderAPI.destruct(g);
     
     dungeonAPI.print(1);
+    
+    g = pathfinderAPI.construct(1);
+    pathfinderAPI.generate_pathmap(g, &p, 1);
+    pathfinderAPI.destruct(g);
+    
+    dungeonAPI.print(2);
     
     if(SAVE_DUNGEON) {
         dungeonAPI.save();

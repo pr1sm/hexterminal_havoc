@@ -99,26 +99,27 @@ void dungeon_check_room_intercept(point_t* point) {
     }
 }
 
-char test_print_helper(tile_t* t) {
-    if(t->dist < 10) {
-        return t->dist + '0';
-    } else if(t->dist < 36) {
-        return t->dist - 10 + 'a';
-    } else if(t->dist < 62) {
-        return t->dist - 36 + 'A';
+char test_print_helper(tile_t* t, int mode) {
+    uint8_t val = mode == 1 ? t->dist : t->dist_tunnel;
+    if(val < 10) {
+        return val + '0';
+    } else if(val < 36) {
+        return val - 10 + 'a';
+    } else if(val < 62) {
+        return val - 36 + 'A';
     } else {
         return tileAPI.char_for_content(t);
     }
 }
 
 void dungeon_print(int mode) {
-    logger.i("Printing Dungeon mode; %d...", mode);
+    logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             char c;
-            if(mode == 1) {
-                c = test_print_helper(_dungeon_array[i][j]);
+            if(mode == 1 || mode == 2) {
+                c = test_print_helper(_dungeon_array[i][j], mode);
             } else {
                 c = tileAPI.char_for_content(_dungeon_array[i][j]);
             }
