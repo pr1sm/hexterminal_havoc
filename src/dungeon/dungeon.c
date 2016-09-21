@@ -101,30 +101,12 @@ void dungeon_check_room_intercept(point_t* point) {
     }
 }
 
-char test_print_helper(tile_t* t, int mode) {
-    uint8_t val = mode == 1 ? t->dist : t->dist_tunnel;
-    if(val < 10) {
-        return val + '0';
-    } else if(val < 36) {
-        return val - 10 + 'a';
-    } else if(val < 62) {
-        return val - 36 + 'A';
-    } else {
-        return tileAPI.char_for_content(t);
-    }
-}
-
 void dungeon_print(int mode) {
     logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c;
-            if(mode == 1 || mode == 2) {
-                c = test_print_helper(_dungeon_array[i][j], mode);
-            } else {
-                c = tileAPI.char_for_content(_dungeon_array[i][j]);
-            }
+            char c = tileAPI.char_for_content(_dungeon_array[i][j], mode);;
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
             }

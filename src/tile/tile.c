@@ -94,15 +94,29 @@ int tile_are_changes_proposed(tile_t* tile) {
            (tile->dist_tunnel != tile->changes->dist_tunnel);
 }
 
-char tile_char_for_content(tile_t* tile) {
-    point_t* player_pos = dungeonAPI.get_player_pos();
-    if(pointAPI.distance(tile->location, player_pos) == 0) {
-        return PC_CHAR;
+char tile_char_for_content(tile_t* tile, int mode) {
+    if(mode == PM_DUNGEON) {
+        point_t* player_pos = dungeonAPI.get_player_pos();
+        if(pointAPI.distance(tile->location, player_pos) == 0) {
+            return PC_CHAR;
+        }
+        return tile->content == tc_BORDER ? BORDER_CHAR :
+        tile->content == tc_ROCK   ? ROCK_CHAR   :
+        tile->content == tc_ROOM   ? ROOM_CHAR   :
+        tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
+    } else if(mode == PM_ROOM_PATH_MAP || mode == PM_TUNN_PATH_MAP) {
+        uint8_t val = mode == 1 ? tile->dist : tile->dist_tunnel;
+        if(val < 10) {
+            return val + '0';
+        } else if(val < 36) {
+            return val - 10 + 'a';
+        } else if(val < 62) {
+            return val - 36 + 'A';
+        } else {
+            return tileAPI.char_for_content(tile, PM_DUNGEON);
+        }
     }
-    return tile->content == tc_BORDER ? BORDER_CHAR :
-           tile->content == tc_ROCK   ? ROCK_CHAR   :
-           tile->content == tc_ROOM   ? ROOM_CHAR   :
-           tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
+    return DEFAULT_CHAR;
 }
 
 void import_tile(tile_t* tile, unsigned char value, int room) {
@@ -118,6 +132,8 @@ void import_tile(tile_t* tile, unsigned char value, int room) {
     if(room) {
         tileAPI.propose_update_content(tile, tc_ROOM);
     }
+    tileAPI.propose_update_dist(tile, 255);
+    tileAPI.propose_update_dist_tunnel(tile, 255);
     
     tileAPI.commit_updates(tile);
 }

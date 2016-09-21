@@ -10,7 +10,6 @@
 #include <string.h>
 
 #include "heap.h"
-#include "../logger/logger.h"
 
 #define HEAP_START_SIZE 128
 
