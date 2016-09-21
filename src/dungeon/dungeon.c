@@ -26,6 +26,7 @@
 // size will be 21 rows x 80 cols
 tile_t*** _dungeon_array;
 
+static point_t* player_pos;
 static room_t** _room_array;
 static int  _room_size;
 static void accent_dungeon();
@@ -50,7 +51,7 @@ static void d_log_room(room_t* r) {
 void dungeon_construct() {
     logger.i("Constructing Dungeon...");
     int i, j;
-//    srand((unsigned)time(NULL));
+    srand((unsigned)time(NULL));
     
     _dungeon_array = calloc(DUNGEON_HEIGHT, sizeof(*_dungeon_array));
     
@@ -81,6 +82,7 @@ void dungeon_generate() {
     place_rooms();
     pathfind();
     update_path_hardnesses();
+    dungeonAPI.set_player_pos(NULL);
 }
 
 void dungeon_check_room_intercept(point_t* point) {
@@ -241,6 +243,23 @@ void dungeon_save() {
     
     free(hardness_map);
     fclose(f);
+}
+
+void dungeon_set_player_pos(point_t* p) {
+    // TODO: Check error bounds
+    if(p == NULL) {
+        int i = rand() % _room_size;
+        room_t* r = _room_array[i];
+        int j = rand() % r->width;
+        int k = rand() % r->height;
+        player_pos = _dungeon_array[r->location->y+k][r->location->x+j]->location;
+    } else {
+        player_pos = p;
+    }
+}
+
+point_t* dungeon_get_player_pos() {
+    return player_pos;
 }
 
 static void generate_terrain() {
@@ -625,5 +644,7 @@ dungeon_namespace const dungeonAPI = {
     dungeon_check_room_intercept,
     dungeon_print,
     dungeon_load,
-    dungeon_save
+    dungeon_save,
+    dungeon_set_player_pos,
+    dungeon_get_player_pos
 };

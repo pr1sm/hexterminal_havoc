@@ -11,6 +11,8 @@
 
 #include "tile.h"
 #include "../env/env.h"
+#include "../dungeon/dungeon.h"
+#include "../point/point.h"
 
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '
@@ -21,6 +23,7 @@
 #define ROCK_CHAR ' '
 #define ROOM_CHAR '.'
 #define PATH_CHAR '#'
+#define PC_CHAR '@'
 
 
 tile_t* tile_construct(uint8_t x, uint8_t y) {
@@ -92,6 +95,10 @@ int tile_are_changes_proposed(tile_t* tile) {
 }
 
 char tile_char_for_content(tile_t* tile) {
+    point_t* player_pos = dungeonAPI.get_player_pos();
+    if(pointAPI.distance(tile->location, player_pos) == 0) {
+        return PC_CHAR;
+    }
     return tile->content == tc_BORDER ? BORDER_CHAR :
            tile->content == tc_ROCK   ? ROCK_CHAR   :
            tile->content == tc_ROOM   ? ROOM_CHAR   :

@@ -30,6 +30,9 @@ typedef struct dungeon_namespace {
     void (*const print)(int mode);
     void (*const load)();
     void (*const save)();
+    // should be moved to playerAPI:
+    void (*const set_player_pos)(point_t* p);
+    point_t* (*const get_player_pos)();
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
 
