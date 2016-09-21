@@ -16,9 +16,6 @@
 #include "env/env.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
-#include "dungeon/pathfinder.h"
-#include "graph/graph.h"
-#include "point/point.h"
 #include "tile/tile.h"
 
 int main(int argc, char * argv[]) {
@@ -40,18 +37,11 @@ int main(int argc, char * argv[]) {
         dungeonAPI.generate();
     }
     
+    dungeonAPI.update_path_maps();
+    
     dungeonAPI.print(PM_DUNGEON);
     
-    point_t* p = dungeonAPI.get_player_pos();
-    graph_t* g = pathfinderAPI.construct(0);
-    pathfinderAPI.generate_pathmap(g, p, 0);
-    pathfinderAPI.destruct(g);
-    
     dungeonAPI.print(PM_ROOM_PATH_MAP);
-    
-    g = pathfinderAPI.construct(1);
-    pathfinderAPI.generate_pathmap(g, p, 1);
-    pathfinderAPI.destruct(g);
     
     dungeonAPI.print(PM_TUNN_PATH_MAP);
     

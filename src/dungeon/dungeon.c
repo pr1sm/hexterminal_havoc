@@ -13,6 +13,7 @@
 
 #include "dungeon.h"
 #include "corridor.h"
+#include "pathfinder.h"
 #include "../util/portable_endian.h"
 #include "../graph/graph.h"
 #include "../tile/tile.h"
@@ -85,6 +86,16 @@ static void generate() {
     dungeonAPI.set_player_pos(NULL);
 }
 
+static void update_path_maps() {
+    point_t* p = dungeonAPI.get_player_pos();
+    graph_t* g = pathfinderAPI.construct(0);
+    pathfinderAPI.generate_pathmap(g, p, 0);
+    pathfinderAPI.destruct(g);
+    g = pathfinderAPI.construct(1);
+    pathfinderAPI.generate_pathmap(g, p, 1);
+    pathfinderAPI.destruct(g);
+}
+
 static void check_room_intercept(point_t* point) {
     if(_room_size < 0) {
         logger.w("Check room called before rooms have been generated!");
@@ -106,7 +117,7 @@ static void print(int mode) {
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c = tileAPI.char_for_content(_dungeon_array[i][j], mode);;
+            char c = tileAPI.char_for_content(_dungeon_array[i][j], mode);
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
             }
@@ -178,6 +189,7 @@ static void load() {
             }
         }
     }
+    dungeonAPI.set_player_pos(NULL);
     
     logger.i("Dungeon Loaded");
     free(semantic);
@@ -623,6 +635,7 @@ dungeon_namespace const dungeonAPI = {
     construct,
     destruct,
     generate,
+    update_path_maps,
     check_room_intercept,
     print,
     load,

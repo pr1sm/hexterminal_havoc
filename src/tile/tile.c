@@ -105,7 +105,7 @@ static char char_for_content(tile_t* tile, int mode) {
         tile->content == tc_ROOM   ? ROOM_CHAR   :
         tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
     } else if(mode == PM_ROOM_PATH_MAP || mode == PM_TUNN_PATH_MAP) {
-        uint8_t val = mode == 1 ? tile->dist : tile->dist_tunnel;
+        uint8_t val = (mode == 1 ? tile->dist : tile->dist_tunnel);
         if(val < 10) {
             return val + '0';
         } else if(val < 36) {
