@@ -17,9 +17,9 @@
 #include "../tile/tile.h"
 #include "../logger/logger.h"
 
-static void path_update_tiles(graph_t* g, int tunnel);
+static void update_tiles(graph_t* g, int tunnel);
 
-static int path_point_to_index(point_t* p) {
+static int point_to_index(point_t* p) {
     // since outer rows and cols aren't being used
     // subtract one from both so the index starts at 0
     return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
@@ -39,7 +39,7 @@ static int hardness_to_weight(int hardness) {
            hardness < 171 ? 2 : 3;
 }
 
-graph_t* path_construct(int tunnel) {
+static graph_t* construct(int tunnel) {
     logger.d("Constructing Graph for path mapping%s...", tunnel ? " with tunnelling" : "");
     graph_t* g = calloc(1, sizeof(graph_t));
     
@@ -67,7 +67,7 @@ graph_t* path_construct(int tunnel) {
                     
                     int weight = 1 + (tunnel ? hardness_to_weight(dest->rock_hardness) : 0);
                     
-                    graphAPI.add_edge(g, t->location, dest->location, weight, path_point_to_index);
+                    graphAPI.add_edge(g, t->location, dest->location, weight, point_to_index);
                 }
             }
         }
@@ -79,7 +79,7 @@ graph_t* path_construct(int tunnel) {
     return g;
 }
 
-void path_destruct(graph_t* g) {
+static void destruct(graph_t* g) {
     logger.d("Destructing graph for path mapping...");
     int i;
     for(i = 0; i < g->size; i++) {
@@ -91,14 +91,14 @@ void path_destruct(graph_t* g) {
     logger.d("Graph for path mapping destructed");
 }
 
-void path_gen_map(graph_t* g, point_t* start, int tunnel) {
+static void gen_map(graph_t* g, point_t* start, int tunnel) {
     logger.i("Generating path map%s...", tunnel ? " with tunnelling" : "");
-    dijkstraAPI.dijkstra(g, start, NULL, path_point_to_index);
-    path_update_tiles(g, tunnel);
+    dijkstraAPI.dijkstra(g, start, NULL, point_to_index);
+    update_tiles(g, tunnel);
     logger.i("Path map Generated");
 }
 
-static void path_update_tiles(graph_t* g, int tunnel) {
+static void update_tiles(graph_t* g, int tunnel) {
     int i;
     for(i = 0; i < g->size; i++) {
         vertex_t* v = g->vertices[i];
@@ -116,7 +116,7 @@ static void path_update_tiles(graph_t* g, int tunnel) {
 }
 
 pathfinder_namespace const pathfinderAPI = {
-    path_construct,
-    path_destruct,
-    path_gen_map
+    construct,
+    destruct,
+    gen_map
 };

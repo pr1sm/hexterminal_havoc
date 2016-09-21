@@ -12,7 +12,7 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 
-void graph_add_vertex(graph_t* g, point_t* p, int (*point_to_index)(point_t* p)) {
+static void add_vertex(graph_t* g, point_t* p, int (*point_to_index)(point_t* p)) {
     if(point_to_index == NULL) {
         logger.w("point_to_index was null, could not convert point to an index!");
         return;
@@ -43,7 +43,7 @@ void graph_add_vertex(graph_t* g, point_t* p, int (*point_to_index)(point_t* p))
     }
 }
 
-void graph_free_vertex(vertex_t* v) {
+static void free_vertex(vertex_t* v) {
     if(v == NULL) {
         logger.w("Could not free NULL vertex!");
         return;
@@ -55,7 +55,7 @@ void graph_free_vertex(vertex_t* v) {
     free(v);
 }
 
-void graph_add_edge(graph_t* g, point_t* src, point_t* dest, int weight, int (*point_to_index)(point_t* p)) {
+static void add_edge(graph_t* g, point_t* src, point_t* dest, int weight, int (*point_to_index)(point_t* p)) {
     if(point_to_index == NULL) {
         logger.w("point_to_index was null! could not add edge");
         return;
@@ -87,15 +87,15 @@ void graph_add_edge(graph_t* g, point_t* src, point_t* dest, int weight, int (*p
     g->edge_count++;
 }
 
-int graph_compare_vertices(const void* a, const void* b) {
+static int compare_vertices(const void* a, const void* b) {
     const vertex_t* a_v = (const vertex_t*)a;
     const vertex_t* b_v = (const vertex_t*)b;
     return a_v->dist - b_v->dist;
 }
 
 graph_namespace const graphAPI = {
-    graph_add_vertex,
-    graph_add_edge,
-    graph_free_vertex,
-    graph_compare_vertices
+    add_vertex,
+    add_edge,
+    free_vertex,
+    compare_vertices
 };

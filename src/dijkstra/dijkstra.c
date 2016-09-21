@@ -15,7 +15,7 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 
-graph_t* dijkstra_construct(int invert) {
+static graph_t* construct(int invert) {
     graph_t* g = calloc(1, sizeof(graph_t));
     
     // Implement a general case!
@@ -23,7 +23,7 @@ graph_t* dijkstra_construct(int invert) {
     return g;
 }
 
-void dijkstra_destruct(graph_t* g) {
+static void destruct(graph_t* g) {
     int i;
     for(i = 0; i < g->size; i++) {
         if(g->vertices[i] != NULL) {
@@ -33,7 +33,7 @@ void dijkstra_destruct(graph_t* g) {
     free(g);
 }
 
-void dijkstra(graph_t* g, point_t* a, point_t* b, int (*point_to_index)(point_t* p)) {
+static void dijkstra(graph_t* g, point_t* a, point_t* b, int (*point_to_index)(point_t* p)) {
     int i, j;
     int ia = point_to_index(a);
     // if no point b is passed in, we will visit all points
@@ -70,7 +70,7 @@ void dijkstra(graph_t* g, point_t* a, point_t* b, int (*point_to_index)(point_t*
 }
 
 dijkstra_namespace const dijkstraAPI = {
-    dijkstra_construct,
-    dijkstra_destruct,
+    construct,
+    destruct,
     dijkstra
 } ;

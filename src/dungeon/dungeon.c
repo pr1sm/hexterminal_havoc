@@ -48,7 +48,7 @@ static void d_log_room(room_t* r) {
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
-void dungeon_construct() {
+static void construct() {
     logger.i("Constructing Dungeon...");
     int i, j;
     srand((unsigned)time(NULL));
@@ -64,7 +64,7 @@ void dungeon_construct() {
     logger.i("Dungeon Constructed");
 }
 
-void dungeon_destruct() {
+static void destruct() {
     logger.i("Destructing Dungeon...");
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -77,7 +77,7 @@ void dungeon_destruct() {
     logger.i("Dungeon Destructed");
 }
 
-void dungeon_generate() {
+static void generate() {
     generate_terrain();
     place_rooms();
     pathfind();
@@ -85,7 +85,7 @@ void dungeon_generate() {
     dungeonAPI.set_player_pos(NULL);
 }
 
-void dungeon_check_room_intercept(point_t* point) {
+static void check_room_intercept(point_t* point) {
     if(_room_size < 0) {
         logger.w("Check room called before rooms have been generated!");
         return;
@@ -101,7 +101,7 @@ void dungeon_check_room_intercept(point_t* point) {
     }
 }
 
-void dungeon_print(int mode) {
+static void print(int mode) {
     logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -118,7 +118,7 @@ void dungeon_print(int mode) {
     logger.i("Dungeon Printed");
 }
 
-void dungeon_load() {
+static void load() {
     logger.i("Loading Dungeon...");
     FILE* f;
     int version;
@@ -185,7 +185,7 @@ void dungeon_load() {
     fclose(f);
 }
 
-void dungeon_save() {
+static void save() {
     logger.i("Saving Dungeon...");
     FILE* f;
     int version = 0;
@@ -227,7 +227,7 @@ void dungeon_save() {
     fclose(f);
 }
 
-void dungeon_set_player_pos(point_t* p) {
+static void set_player_pos(point_t* p) {
     // TODO: Check error bounds
     if(p == NULL) {
         int i = rand() % _room_size;
@@ -240,7 +240,7 @@ void dungeon_set_player_pos(point_t* p) {
     }
 }
 
-point_t* dungeon_get_player_pos() {
+static point_t* get_player_pos() {
     return player_pos;
 }
 
@@ -620,13 +620,13 @@ static void add_rooms() {
 }
 
 dungeon_namespace const dungeonAPI = {
-    dungeon_construct,
-    dungeon_destruct,
-    dungeon_generate,
-    dungeon_check_room_intercept,
-    dungeon_print,
-    dungeon_load,
-    dungeon_save,
-    dungeon_set_player_pos,
-    dungeon_get_player_pos
+    construct,
+    destruct,
+    generate,
+    check_room_intercept,
+    print,
+    load,
+    save,
+    set_player_pos,
+    get_player_pos
 };

@@ -30,7 +30,7 @@ static char* help_text = "Usage: hexterm_havoc [options]\n\n"
                          "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
                          "                        |   name <name> (in save directory).\n";
 
-void env_setup_environment() {
+static void setup_environment() {
     logger.i("%%%% SETTING ENVIRONMENT %%%%");
     char* env;
     if((env = getenv("ENV"))) {
@@ -56,7 +56,7 @@ void env_setup_environment() {
     logger.i("%%%% ENVIRONMENT SET %%%%");
 }
 
-void env_parse_args(int argc, char** argv) {
+static void parse_args(int argc, char** argv) {
     if(argc <= 1) return;
     
     int flag;
@@ -148,13 +148,13 @@ void env_parse_args(int argc, char** argv) {
     }
 }
 
-void env_exit_gracefully() {
+static void exit_gracefully() {
     envAPI.cleanup();
     printf("%s", help_text);
     exit(0);
 }
 
-void env_cleanup() {
+static void cleanup() {
     if(SAVE_FILE) {
         free(SAVE_FILE);
     }
@@ -164,8 +164,8 @@ void env_cleanup() {
 }
 
 const env_namespace envAPI = {
-    env_parse_args,
-    env_setup_environment,
-    env_exit_gracefully,
-    env_cleanup
+    parse_args,
+    setup_environment,
+    exit_gracefully,
+    cleanup
 };

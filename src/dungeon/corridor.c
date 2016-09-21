@@ -19,7 +19,7 @@
 
 static void place_path(graph_t* g, point_t* b);
 
-static int cor_point_to_index(point_t* p) {
+static int point_to_index(point_t* p) {
     // since outer rows and cols aren't being used
     // subtract one from both so the index starts at 0
     return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
@@ -30,7 +30,7 @@ static point_t index_to_point(int index) {
     return p;
 }
 
-graph_t* cor_construct(int invert) {
+static graph_t* construct(int invert) {
     logger.d("Constructing Graph for pathfinding...");
     graph_t* g = calloc(1, sizeof(graph_t));
     
@@ -52,7 +52,7 @@ graph_t* cor_construct(int invert) {
                 tile_t* dest = _dungeon_array[y][x];
                 
                 int weight = invert ? ROCK_MAX-dest->rock_hardness : dest->rock_hardness;
-                graphAPI.add_edge(g, t->location, dest->location, weight, cor_point_to_index);
+                graphAPI.add_edge(g, t->location, dest->location, weight, point_to_index);
             }
         }
     }
@@ -63,7 +63,7 @@ graph_t* cor_construct(int invert) {
     return g;
 }
 
-void cor_destruct(graph_t* g) {
+static void destruct(graph_t* g) {
     logger.d("Destructing graph for pathfinding...");
     int i;
     for(i = 0; i < g->size; i++) {
@@ -75,8 +75,8 @@ void cor_destruct(graph_t* g) {
     logger.d("Graph for pathfinding destructed");
 }
 
-void cor_pathfind(graph_t* g, point_t* start, point_t* end) {
-    dijkstraAPI.dijkstra(g, start, end, cor_point_to_index);
+static void pathfind(graph_t* g, point_t* start, point_t* end) {
+    dijkstraAPI.dijkstra(g, start, end, point_to_index);
     place_path(g, end);
 }
 
@@ -84,7 +84,7 @@ static void place_path(graph_t* g, point_t* b) {
     int n;
     vertex_t* v;
     point_t p;
-    v = g->vertices[cor_point_to_index(b)];
+    v = g->vertices[point_to_index(b)];
     if(v->dist == INT_MAX) {
         logger.e("no path! exiting program");
         exit(1);
@@ -105,7 +105,7 @@ static void place_path(graph_t* g, point_t* b) {
 
 
 corridor_namespace const corridorAPI = {
-    cor_construct,
-    cor_destruct,
-    cor_pathfind
+    construct,
+    destruct,
+    pathfind
 };

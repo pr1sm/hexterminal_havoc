@@ -26,7 +26,7 @@
 #define PC_CHAR '@'
 
 
-tile_t* tile_construct(uint8_t x, uint8_t y) {
+static tile_t* construct(uint8_t x, uint8_t y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
     point_t* location = pointAPI.construct(x, y);
     t->location = location;
@@ -38,63 +38,63 @@ tile_t* tile_construct(uint8_t x, uint8_t y) {
     return t;
 }
 
-void tile_destruct(tile_t* tile) {
+static void destruct(tile_t* tile) {
     free(tile->changes);
     free(tile->location);
     free(tile);
 }
 
-void tile_update_hardness(tile_t* tile, uint8_t value) {
+static void update_hardness(tile_t* tile, uint8_t value) {
     tile->rock_hardness = value;
     tile->changes->rock_hardness = value;
 }
 
-void tile_update_content(tile_t* tile, tile_content value) {
+static void update_content(tile_t* tile, tile_content value) {
     tile->content = value;
     tile->changes->content = value;
 }
 
-void tile_update_dist(tile_t* tile, uint8_t value) {
+static void update_dist(tile_t* tile, uint8_t value) {
     tile->dist = value;
     tile->changes->dist = value;
 }
 
-void tile_update_dist_tunnel(tile_t* tile, uint8_t value) {
+static void update_dist_tunnel(tile_t* tile, uint8_t value) {
     tile->dist_tunnel = value;
     tile->changes->dist_tunnel = value;
 }
 
-void tile_propose_update_hardness(tile_t* tile, uint8_t value) {
+static void propose_update_hardness(tile_t* tile, uint8_t value) {
     tile->changes->rock_hardness = value;
 }
 
-void tile_propose_update_content(tile_t* tile, tile_content value) {
+static void propose_update_content(tile_t* tile, tile_content value) {
     tile->changes->content = value;
 }
 
-void tile_propose_update_dist(tile_t* tile, uint8_t value) {
+static void propose_update_dist(tile_t* tile, uint8_t value) {
     tile->changes->dist = value;
 }
 
-void tile_propose_update_dist_tunnel(tile_t* tile, uint8_t value) {
+static void propose_update_dist_tunnel(tile_t* tile, uint8_t value) {
     tile->changes->dist_tunnel = value;
 }
 
-void tile_commit_updates(tile_t* tile) {
+static void commit_updates(tile_t* tile) {
     tile->rock_hardness = tile->changes->rock_hardness;
     tile->content       = tile->changes->content;
     tile->dist          = tile->changes->dist;
     tile->dist_tunnel   = tile->changes->dist_tunnel;
 }
 
-int tile_are_changes_proposed(tile_t* tile) {
+static int are_changes_proposed(tile_t* tile) {
     return (tile->rock_hardness != tile->changes->rock_hardness) ||
            (tile->content != tile->changes->content) ||
            (tile->dist != tile->changes->dist) ||
            (tile->dist_tunnel != tile->changes->dist_tunnel);
 }
 
-char tile_char_for_content(tile_t* tile, int mode) {
+static char char_for_content(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
         point_t* player_pos = dungeonAPI.get_player_pos();
         if(pointAPI.distance(tile->location, player_pos) == 0) {
@@ -119,7 +119,7 @@ char tile_char_for_content(tile_t* tile, int mode) {
     return DEFAULT_CHAR;
 }
 
-void import_tile(tile_t* tile, unsigned char value, int room) {
+static void import_tile(tile_t* tile, unsigned char value, int room) {
     tileAPI.propose_update_hardness(tile, value);
     if(value == 255) {
         tileAPI.propose_update_content(tile, tc_BORDER);
@@ -139,18 +139,18 @@ void import_tile(tile_t* tile, unsigned char value, int room) {
 }
 
 tile_namespace const tileAPI = {
-    tile_construct,
-    tile_destruct,
-    tile_update_hardness,
-    tile_update_content,
-    tile_update_dist,
-    tile_update_dist_tunnel,
-    tile_propose_update_hardness,
-    tile_propose_update_content,
-    tile_propose_update_dist,
-    tile_propose_update_dist_tunnel,
-    tile_commit_updates,
-    tile_are_changes_proposed,
-    tile_char_for_content,
+    construct,
+    destruct,
+    update_hardness,
+    update_content,
+    update_dist,
+    update_dist_tunnel,
+    propose_update_hardness,
+    propose_update_content,
+    propose_update_dist,
+    propose_update_dist_tunnel,
+    commit_updates,
+    are_changes_proposed,
+    char_for_content,
     import_tile
 };
