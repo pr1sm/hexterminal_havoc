@@ -36,7 +36,7 @@ static room_t* construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     }
     
     if(height < MIN_HEIGHT) {
-        logger.w("Invalid width given (%d), should be at least %d.  Defaulting to minimum width", height, MIN_HEIGHT);
+        logger.w("Invalid height given (%d), should be at least %d.  Defaulting to minimum height", height, MIN_HEIGHT);
         height = MIN_HEIGHT;
     }
     
