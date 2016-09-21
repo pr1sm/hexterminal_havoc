@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "heap.h"
+#include "../logger/logger.h"
 
 #define HEAP_START_SIZE 128
 
@@ -105,6 +106,14 @@ void heap_destruct(heap_t* h) {
 heap_node_t* heap_insert(heap_t* h, void* v) {
     heap_node_t** tmp;
     heap_node_t* retval;
+    int i;
+    for(i = 0; i < h->size; i++) {
+        if(h->array[i]->data == v) {
+            heapify(h);
+            retval = h->array[i];
+            return retval;
+        }
+    }
     
     if(h->size == h->arr_size) {
         h->arr_size *= 2;

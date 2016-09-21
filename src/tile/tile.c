@@ -7,6 +7,7 @@
 //
 
 #include <stdlib.h>
+#include <limits.h>
 
 #include "tile.h"
 #include "../env/env.h"
@@ -29,6 +30,8 @@ tile_t* tile_construct(uint8_t x, uint8_t y) {
     t->content = tc_UNSET;
     t->rock_hardness = 0;
     t->changes = (tile_t*)malloc(sizeof(tile_t));
+    tileAPI.update_dist(t, 255);
+    tileAPI.update_dist_tunnel(t, 255);
     return t;
 }
 
@@ -48,6 +51,16 @@ void tile_update_content(tile_t* tile, tile_content value) {
     tile->changes->content = value;
 }
 
+void tile_update_dist(tile_t* tile, uint8_t value) {
+    tile->dist = value;
+    tile->changes->dist = value;
+}
+
+void tile_update_dist_tunnel(tile_t* tile, uint8_t value) {
+    tile->dist_tunnel = value;
+    tile->changes->dist_tunnel = value;
+}
+
 void tile_propose_update_hardness(tile_t* tile, uint8_t value) {
     tile->changes->rock_hardness = value;
 }
@@ -56,14 +69,26 @@ void tile_propose_update_content(tile_t* tile, tile_content value) {
     tile->changes->content = value;
 }
 
+void tile_propose_update_dist(tile_t* tile, uint8_t value) {
+    tile->changes->dist = value;
+}
+
+void tile_propose_update_dist_tunnel(tile_t* tile, uint8_t value) {
+    tile->changes->dist_tunnel = value;
+}
+
 void tile_commit_updates(tile_t* tile) {
     tile->rock_hardness = tile->changes->rock_hardness;
-    tile->content = tile->changes->content;
+    tile->content       = tile->changes->content;
+    tile->dist          = tile->changes->dist;
+    tile->dist_tunnel   = tile->changes->dist_tunnel;
 }
 
 int tile_are_changes_proposed(tile_t* tile) {
     return (tile->rock_hardness != tile->changes->rock_hardness) ||
-           (tile->content != tile->changes->content);
+           (tile->content != tile->changes->content) ||
+           (tile->dist != tile->changes->dist) ||
+           (tile->dist_tunnel != tile->changes->dist_tunnel);
 }
 
 char tile_char_for_content(tile_t* tile) {
@@ -95,8 +120,12 @@ tile_namespace const tileAPI = {
     tile_destruct,
     tile_update_hardness,
     tile_update_content,
+    tile_update_dist,
+    tile_update_dist_tunnel,
     tile_propose_update_hardness,
     tile_propose_update_content,
+    tile_propose_update_dist,
+    tile_propose_update_dist_tunnel,
     tile_commit_updates,
     tile_are_changes_proposed,
     tile_char_for_content,

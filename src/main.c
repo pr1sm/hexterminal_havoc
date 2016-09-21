@@ -16,6 +16,9 @@
 #include "env/env.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
+#include "dungeon/pathfinder.h"
+#include "graph/graph.h"
+#include "point/point.h"
 
 int main(int argc, char * argv[]) {
     
@@ -36,7 +39,14 @@ int main(int argc, char * argv[]) {
         dungeonAPI.generate();
     }
     
-     dungeonAPI.print();
+    dungeonAPI.print(0);
+    
+    point_t p = {23, 3};
+    graph_t* g = pathfinderAPI.construct(0);
+    pathfinderAPI.generate_pathmap(g, &p, 0);
+    pathfinderAPI.destruct(g);
+    
+    dungeonAPI.print(1);
     
     if(SAVE_DUNGEON) {
         dungeonAPI.save();

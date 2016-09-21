@@ -50,7 +50,7 @@ static void d_log_room(room_t* r) {
 void dungeon_construct() {
     logger.i("Constructing Dungeon...");
     int i, j;
-    srand((unsigned)time(NULL));
+//    srand((unsigned)time(NULL));
     
     _dungeon_array = calloc(DUNGEON_HEIGHT, sizeof(*_dungeon_array));
     
@@ -99,16 +99,33 @@ void dungeon_check_room_intercept(point_t* point) {
     }
 }
 
-void dungeon_print() {
-    logger.i("Printing Dungeon...");
+char test_print_helper(tile_t* t) {
+    if(t->dist < 10) {
+        return t->dist + '0';
+    } else if(t->dist < 36) {
+        return t->dist - 10 + 'a';
+    } else if(t->dist < 62) {
+        return t->dist - 36 + 'A';
+    } else {
+        return tileAPI.char_for_content(t);
+    }
+}
+
+void dungeon_print(int mode) {
+    logger.i("Printing Dungeon mode; %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c = tileAPI.char_for_content(_dungeon_array[i][j]);
+            char c;
+            if(mode == 1) {
+                c = test_print_helper(_dungeon_array[i][j]);
+            } else {
+                c = tileAPI.char_for_content(_dungeon_array[i][j]);
+            }
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
             }
-            printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
+            printf("%c", c);
         }
         printf("\n");
     }

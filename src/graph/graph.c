@@ -39,6 +39,7 @@ void graph_add_vertex(graph_t* g, point_t* p, int (*point_to_index)(point_t* p))
         g->vertices[i] = calloc(1, sizeof (vertex_t));
         g->vertices[i]->index = i;
         g->len++;
+        logger.t("Added vertex at index: %d", i);
     }
 }
 

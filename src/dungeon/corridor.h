@@ -15,7 +15,7 @@
 
 typedef struct corridor_namespace {
     graph_t* (*const construct)(int invert);
-    void     (*const destruct)();
+    void     (*const destruct)(graph_t* g);
     void     (*const pathfind)(graph_t* g, point_t* start, point_t* end);
 } corridor_namespace;
 extern corridor_namespace const corridorAPI;

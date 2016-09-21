@@ -27,7 +27,7 @@ typedef struct dungeon_namespace {
     void (*const destruct)();
     void (*const generate)();
     void (*const check_room_intercept)(point_t* point);
-    void (*const print)();
+    void (*const print)(int mode);
     void (*const load)();
     void (*const save)();
 } dungeon_namespace;
