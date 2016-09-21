@@ -16,7 +16,7 @@
 typedef struct dijkstra_namespace {
     graph_t* (*const construct)(int invert);
     void     (*const destruct)(graph_t* g);
-    void     (*const dijkstra)(graph_t* g, point_t* start, point_t* end, int (*point_to_index)(point_t* p));
+    void     (*const dijkstra)(graph_t* g, point_t* start, point_t* end);
 } dijkstra_namespace;
 extern dijkstra_namespace const dijkstraAPI;
 

@@ -42,6 +42,7 @@ static int hardness_to_weight(int hardness) {
 static graph_t* construct(int tunnel) {
     logger.d("Constructing Graph for path mapping%s...", tunnel ? " with tunnelling" : "");
     graph_t* g = calloc(1, sizeof(graph_t));
+    g->point_to_index = point_to_index;
     
     // add all edges to graph
     // just use adjacent tiles for now
@@ -67,7 +68,7 @@ static graph_t* construct(int tunnel) {
                     
                     int weight = 1 + (tunnel ? hardness_to_weight(dest->rock_hardness) : 0);
                     
-                    graphAPI.add_edge(g, t->location, dest->location, weight, point_to_index);
+                    graphAPI.add_edge(g, t->location, dest->location, weight);
                 }
             }
         }
@@ -93,7 +94,7 @@ static void destruct(graph_t* g) {
 
 static void gen_map(graph_t* g, point_t* start, int tunnel) {
     logger.i("Generating path map%s...", tunnel ? " with tunnelling" : "");
-    dijkstraAPI.dijkstra(g, start, NULL, point_to_index);
+    dijkstraAPI.dijkstra(g, start, NULL);
     update_tiles(g, tunnel);
     logger.i("Path map Generated");
 }

@@ -12,8 +12,8 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 
-static void add_vertex(graph_t* g, point_t* p, int (*point_to_index)(point_t* p)) {
-    if(point_to_index == NULL) {
+static void add_vertex(graph_t* g, point_t* p) {
+    if(g->point_to_index == NULL) {
         logger.w("point_to_index was null, could not convert point to an index!");
         return;
     }
@@ -27,7 +27,7 @@ static void add_vertex(graph_t* g, point_t* p, int (*point_to_index)(point_t* p)
         logger.w("point was NULL! not adding vertex");
     }
     
-    int i = point_to_index(p);
+    int i = g->point_to_index(p);
     if (g->size < i + 1) {
         int size = g->size * 2 > i ? g->size * 2 : i + 4;
         g->vertices = realloc(g->vertices, size * sizeof (vertex_t *));
@@ -55,8 +55,8 @@ static void free_vertex(vertex_t* v) {
     free(v);
 }
 
-static void add_edge(graph_t* g, point_t* src, point_t* dest, int weight, int (*point_to_index)(point_t* p)) {
-    if(point_to_index == NULL) {
+static void add_edge(graph_t* g, point_t* src, point_t* dest, int weight) {
+    if(g->point_to_index == NULL) {
         logger.w("point_to_index was null! could not add edge");
         return;
     }
@@ -71,16 +71,16 @@ static void add_edge(graph_t* g, point_t* src, point_t* dest, int weight, int (*
         return;
     }
     
-    graphAPI.add_vertex(g, src, point_to_index);
-    graphAPI.add_vertex(g, dest, point_to_index);
-    vertex_t* v = g->vertices[point_to_index(src)];
+    graphAPI.add_vertex(g, src);
+    graphAPI.add_vertex(g, dest);
+    vertex_t* v = g->vertices[g->point_to_index(src)];
     if(v->edges_len >= v->edges_size) {
         v->edges_size = v->edges_size ? v->edges_size * 2 : 5;
         // TODO: Deal with this possible realloc error
         v->edges = realloc(v->edges, v->edges_size * sizeof (*v->edges));
     }
     edge_t* e = calloc(1, sizeof(edge_t));
-    e->dest = point_to_index(dest);
+    e->dest = g->point_to_index(dest);
     // Invert the rock hardness based on flag
     e->weight = weight;
     v->edges[v->edges_len++] = e;

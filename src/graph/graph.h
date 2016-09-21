@@ -31,11 +31,12 @@ typedef struct {
     int size;
     int len;
     int edge_count;
+    int (*point_to_index)(point_t* p);
 } graph_t;
 
 typedef struct graph_namespace {
-    void (*const add_vertex)(graph_t* g, point_t* p, int (*point_to_index)(point_t* p));
-    void (*const add_edge)(graph_t* g, point_t* src, point_t* dest, int weight, int (*point_to_index)(point_t* p));
+    void (*const add_vertex)(graph_t* g, point_t* p);
+    void (*const add_edge)(graph_t* g, point_t* src, point_t* dest, int weight);
     void (*const free_vertex)(vertex_t* v);
     int  (*const compare_vertices)(const void* a, const void* b);
 } graph_namespace;

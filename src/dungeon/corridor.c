@@ -33,6 +33,7 @@ static point_t index_to_point(int index) {
 static graph_t* construct(int invert) {
     logger.d("Constructing Graph for pathfinding...");
     graph_t* g = calloc(1, sizeof(graph_t));
+    g->point_to_index = point_to_index;
     
     // add all edges to graph
     // just use adjacent tiles for now
@@ -52,7 +53,7 @@ static graph_t* construct(int invert) {
                 tile_t* dest = _dungeon_array[y][x];
                 
                 int weight = invert ? ROCK_MAX-dest->rock_hardness : dest->rock_hardness;
-                graphAPI.add_edge(g, t->location, dest->location, weight, point_to_index);
+                graphAPI.add_edge(g, t->location, dest->location, weight);
             }
         }
     }
@@ -76,7 +77,7 @@ static void destruct(graph_t* g) {
 }
 
 static void pathfind(graph_t* g, point_t* start, point_t* end) {
-    dijkstraAPI.dijkstra(g, start, end, point_to_index);
+    dijkstraAPI.dijkstra(g, start, end);
     place_path(g, end);
 }
 

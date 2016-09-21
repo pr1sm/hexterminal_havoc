@@ -33,11 +33,11 @@ static void destruct(graph_t* g) {
     free(g);
 }
 
-static void dijkstra(graph_t* g, point_t* a, point_t* b, int (*point_to_index)(point_t* p)) {
+static void dijkstra(graph_t* g, point_t* a, point_t* b) {
     int i, j;
-    int ia = point_to_index(a);
+    int ia = g->point_to_index(a);
     // if no point b is passed in, we will visit all points
-    int ib = b != NULL ? point_to_index(b) : -1;
+    int ib = b != NULL ? g->point_to_index(b) : -1;
     for(i = 0; i < g->size; i++) {
         // Catch the outer rows and cols
         if(g->vertices[i] == NULL) continue;
