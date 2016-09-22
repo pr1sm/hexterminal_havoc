@@ -13,7 +13,6 @@
 #include "../env/env.h"
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
-#include "../logger/logger.h"
 
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '
@@ -89,24 +88,10 @@ static void commit_updates(tile_t* tile) {
 }
 
 static int are_changes_proposed(tile_t* tile) {
-    if(tile == NULL) {
-        logger.w("tile changes proposed called with NULL tile ptr!");
-        return 0;
-    }
-    
-    if(tile->changes == NULL) {
-        logger.w("tile changes proposed called with NULL tile->changes ptr!");
-        return 0;
-    }
-    uint8_t dist = tile->dist;
-    uint8_t dist_change = tile->changes->dist;
-    uint8_t hardness = tile->rock_hardness;
-    uint8_t hardness_change = tile->changes->rock_hardness;
-    uint8_t content = tile->content;
-    uint8_t content_change = tile->changes->content;
-    uint8_t dist_tunnel = tile->dist_tunnel;
-    uint8_t dist_tunnel_change = tile->changes->dist_tunnel;
-    return ((hardness != hardness_change) || (content != content_change) || (dist != dist_change) || (dist_tunnel != dist_tunnel_change));
+    return (tile->rock_hardness != tile->changes->rock_hardness) ||
+           (tile->content != tile->changes->content) ||
+           (tile->dist != tile->changes->dist) ||
+           (tile->dist_tunnel != tile->changes->dist_tunnel);
 }
 
 static char char_for_content(tile_t* tile, int mode) {
