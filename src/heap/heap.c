@@ -56,7 +56,7 @@ static void heapify(heap_t* h) {
     percolate_down(h, 0);
 }
 
-heap_t* heap_construct(int (*compare)(const void* a, const void* b),
+static heap_t* construct(int (*compare)(const void* a, const void* b),
                        void (*data_delete)(void *)) {
     heap_t* h = malloc(sizeof(heap_t));
     h->size = 0;
@@ -67,7 +67,7 @@ heap_t* heap_construct(int (*compare)(const void* a, const void* b),
     return h;
 }
 
-heap_t* heap_construct_from_array(void* array,
+static heap_t* construct_from_array(void* array,
                                   int size,
                                   int num_members,
                                   int (*compare)(const void* a, const void* b),
@@ -90,7 +90,7 @@ heap_t* heap_construct_from_array(void* array,
     return h;
 }
 
-void heap_destruct(heap_t* h) {
+static void destruct(heap_t* h) {
     int i;
     for(i = 0; i < h->size; i++) {
         if(h->data_delete) {
@@ -102,9 +102,17 @@ void heap_destruct(heap_t* h) {
     free(h);
 }
 
-heap_node_t* heap_insert(heap_t* h, void* v) {
+static heap_node_t* insert(heap_t* h, void* v) {
     heap_node_t** tmp;
     heap_node_t* retval;
+    int i;
+    for(i = 0; i < h->size; i++) {
+        if(h->array[i]->data == v) {
+            heapify(h);
+            retval = h->array[i];
+            return retval;
+        }
+    }
     
     if(h->size == h->arr_size) {
         h->arr_size *= 2;
@@ -126,11 +134,11 @@ heap_node_t* heap_insert(heap_t* h, void* v) {
     return retval;
 }
 
-void* heap_peek(heap_t* h) {
+static void* peek(heap_t* h) {
     return h->size ? h->array[0]->data : NULL;
 }
 
-void* heap_remove(heap_t* h) {
+static void* remove(heap_t* h) {
     void* tmp;
     if(!h->size) {
         return NULL;
@@ -144,21 +152,21 @@ void* heap_remove(heap_t* h) {
     return tmp;
 }
 
-void heap_decrease_key(heap_t* h, heap_node_t* n) {
+static void decrease_key(heap_t* h, heap_node_t* n) {
     percolate_up(h, n->index);
 }
 
-int heap_is_empty(heap_t* h) {
+static int is_empty(heap_t* h) {
     return !h->size;
 }
 
 heap_namespace const heapAPI = {
-    heap_construct,
-    heap_construct_from_array,
-    heap_destruct,
-    heap_insert,
-    heap_peek,
-    heap_remove,
-    heap_decrease_key,
-    heap_is_empty
+    construct,
+    construct_from_array,
+    destruct,
+    insert,
+    peek,
+    remove,
+    decrease_key,
+    is_empty
 };

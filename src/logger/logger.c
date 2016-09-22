@@ -35,7 +35,7 @@ static void  write_log(logger_mode mode, const char* str, va_list args);
 // Create function.  This function creates
 // a log file as well as moves an existing log
 // file to a backup state.
-void create(const char* name) {
+static void create(const char* name) {
     char cwd[256];
     char log_file[256];
     FILE* log;
@@ -70,49 +70,49 @@ void create(const char* name) {
     initialized = 1;
 }
 
-void t(const char* str, ...) {
+static void t(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_T, str, args);
     va_end(args);
 }
 
-void d(const char* str, ...) {
+static void d(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_D, str, args);
     va_end(args);
 }
 
-void i(const char* str, ...) {
+static void i(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_I, str, args);
     va_end(args);
 }
 
-void w(const char* str, ...) {
+static void w(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_W, str, args);
     va_end(args);
 }
 
-void e(const char* str, ...) {
+static void e(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_E, str, args);
     va_end(args);
 }
 
-void f(const char* str, ...) {
+static void f(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_F, str, args);
     va_end(args);
 }
 
-void set_modes_enabled(int modes) {
+static void set_modes_enabled(int modes) {
     modes_enabled = 0;
     modes_enabled += (modes & LOG_T) ? LOG_T : 0;
     modes_enabled += (modes & LOG_D) ? LOG_D : 0;
@@ -310,4 +310,13 @@ static void write_log(logger_mode mode, const char* str, va_list args) {
     }
 }
 
-logger_namespace const logger = { t, d, i, w, e, f, create, set_modes_enabled };
+logger_namespace const logger = {
+    t,
+    d,
+    i,
+    w,
+    e,
+    f,
+    create,
+    set_modes_enabled
+};

@@ -16,6 +16,7 @@
 #include "env/env.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
+#include "tile/tile.h"
 
 int main(int argc, char * argv[]) {
     
@@ -36,7 +37,13 @@ int main(int argc, char * argv[]) {
         dungeonAPI.generate();
     }
     
-     dungeonAPI.print();
+    dungeonAPI.update_path_maps();
+    
+    dungeonAPI.print(PM_DUNGEON);
+    
+    dungeonAPI.print(PM_ROOM_PATH_MAP);
+    
+    dungeonAPI.print(PM_TUNN_PATH_MAP);
     
     if(SAVE_DUNGEON) {
         dungeonAPI.save();

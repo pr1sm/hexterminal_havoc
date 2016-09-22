@@ -20,6 +20,8 @@ extern int SAVE_DUNGEON;
 extern char* HOME;
 extern char* LOAD_FILE;
 extern char* SAVE_FILE;
+extern uint8_t X_START;
+extern uint8_t Y_START;
 
 typedef struct env_namespace {
     void (*const parse_args)(int argc, char** argv);

@@ -17,7 +17,7 @@
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 
-room_t* room_construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+static room_t* construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     room_t* r = (room_t*)malloc(sizeof(room_t));
     
     if(x < 1 || x >= DUNGEON_WIDTH - 1) {
@@ -36,7 +36,7 @@ room_t* room_construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     }
     
     if(height < MIN_HEIGHT) {
-        logger.w("Invalid width given (%d), should be at least %d.  Defaulting to minimum width", height, MIN_HEIGHT);
+        logger.w("Invalid height given (%d), should be at least %d.  Defaulting to minimum height", height, MIN_HEIGHT);
         height = MIN_HEIGHT;
     }
     
@@ -48,12 +48,12 @@ room_t* room_construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     return r;
 }
 
-void room_destruct(room_t* room) {
+static void destruct(room_t* room) {
     free(room->location);
     free(room);
 }
 
-int room_is_overlap(room_t* r1, room_t* r2) {
+static int is_overlap(room_t* r1, room_t* r2) {
     int small_x, large_x, x_diff;
     int small_y, large_y, y_diff;
     int min_x_dim = (r1->width + r2->width + 1);
@@ -83,7 +83,7 @@ int room_is_overlap(room_t* r1, room_t* r2) {
     return 0;
 }
 
-int room_contains(room_t* r, point_t* p) {
+static int contains(room_t* r, point_t* p) {
     logger.t("Checking room: (%2d, %2d, %2d, %2d) contains point: (%2d, %2d)...",
              r->location->x,
              r->location->y,
@@ -100,7 +100,7 @@ int room_contains(room_t* r, point_t* p) {
     return 0;
 }
 
-void room_export_room(room_t* r, uint8_t* data) {
+static void export_room(room_t* r, uint8_t* data) {
     // ASSUME: data is an array with length of 4
     data[0] = r->location->x;
     data[1] = r->width;
@@ -109,9 +109,9 @@ void room_export_room(room_t* r, uint8_t* data) {
 }
 
 room_namespace const roomAPI = {
-    room_construct,
-    room_destruct,
-    room_is_overlap,
-    room_contains,
-    room_export_room
+    construct,
+    destruct,
+    is_overlap,
+    contains,
+    export_room
 };
