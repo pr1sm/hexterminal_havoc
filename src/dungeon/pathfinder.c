@@ -31,10 +31,11 @@ static point_t index_to_point(int index) {
 }
 
 static int hardness_to_weight(int hardness) {
-    if(hardness == 255) {
-        logger.w("Shouldn't convert hardness 255 to weight! defaulting to 3");
+    if(hardness >= 255) {
+        logger.w("Shouldn't convert hardness 255 to weight! defaulting to INT_MAX");
+        return INT_MAX;
     }
-    return hardness == 0 ? 0 :
+    return hardness == 0 ? 1 :
            hardness < 85 ? 1 :
            hardness < 171 ? 2 : 3;
 }
@@ -66,7 +67,7 @@ static graph_t* construct(int tunnel) {
                         continue;
                     }
                     
-                    int weight = 1 + (tunnel ? hardness_to_weight(dest->rock_hardness) : 0);
+                    int weight = tunnel ? hardness_to_weight(dest->rock_hardness) : 1;
                     
                     graphAPI.add_edge(g, t->location, dest->location, weight);
                 }

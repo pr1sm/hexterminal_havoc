@@ -20,15 +20,21 @@
 int DEBUG_MODE = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
+uint8_t X_START = 255;
+uint8_t Y_START = 255;
 char* HOME = "";
 char* LOAD_FILE;
 char* SAVE_FILE;
+
+static int is_number(char* str);
 
 static char* help_text = "Usage: hexterm_havoc [options]\n\n"
                          "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
                          "-h,       --help        | Print this help message.\n"
                          "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
-                         "                        |   name <name> (in save directory).\n";
+                         "                        |   name <name> (in save directory).\n"
+                         "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
+                         "-y<val> , --ypos <val>  | Start the player at a specified y coord\n";
 
 static void setup_environment() {
     logger.i("%%%% SETTING ENVIRONMENT %%%%");
@@ -62,6 +68,7 @@ static void parse_args(int argc, char** argv) {
     int flag;
     int help_flag = 0;
     int e;
+    int num;
     size_t size;
     
     opterr = 0;
@@ -72,11 +79,13 @@ static void parse_args(int argc, char** argv) {
             {"load", optional_argument, 0, 'l'},
             {"save", optional_argument, 0, 's'},
             {"help", no_argument, 0, 'h'},
+            {"xpos", required_argument, 0, 'x'},
+            {"ypos", required_argument, 0, 'y'},
             {0, 0, 0, 0}
         };
         
         int option_index = 0;
-        flag = getopt_long(argc, argv, "hs::l::", long_options, &option_index);
+        flag = getopt_long(argc, argv, "hx:y:s::l::", long_options, &option_index);
         
         if(flag == -1) {
             break;
@@ -130,6 +139,26 @@ static void parse_args(int argc, char** argv) {
                 logger.i("Load File Set: %s", LOAD_FILE);
                 break;
                 
+            case 'x':
+                num = is_number(optarg);
+                if(num <= 1 || num > 79) {
+                    logger.w("Input X is out of bounds! Must be in range [1, 79]");
+                    fprintf(stderr, "Error: starting x coordinate must be in range [1, 79]");
+                    envAPI.exit_gracefully();
+                }
+                X_START = num;
+                break;
+                
+            case 'y':
+                num = is_number(optarg);
+                if(num <= 1 || num > 20) {
+                    logger.w("Input Y is out of bounds! Must be in range [1, 20]");
+                    fprintf(stderr, "Error: starting y coordinate must be in range [1, 20]");
+                    envAPI.exit_gracefully();
+                }
+                Y_START = num;
+                break;
+                
             case '?':
                 break;
             
@@ -161,6 +190,11 @@ static void cleanup() {
     if(LOAD_FILE) {
         free(LOAD_FILE);
     }
+}
+
+static int is_number(char* str) {
+    int val = atoi(str);
+    return (val > 0 || (val == 0 && strlen(str) == 1)) ? val : -1;
 }
 
 const env_namespace envAPI = {

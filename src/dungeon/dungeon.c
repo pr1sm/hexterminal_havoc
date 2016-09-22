@@ -242,11 +242,16 @@ static void save() {
 static void set_player_pos(point_t* p) {
     // TODO: Check error bounds
     if(p == NULL) {
-        int i = rand() % _room_size;
-        room_t* r = _room_array[i];
-        int j = rand() % r->width;
-        int k = rand() % r->height;
-        player_pos = _dungeon_array[r->location->y+k][r->location->x+j]->location;
+        // Generate random point or use starting values
+        if(X_START < 80 && Y_START < 80) {
+            player_pos = _dungeon_array[Y_START][X_START]->location;
+        } else {
+            int i = rand() % _room_size;
+            room_t* r = _room_array[i];
+            int j = rand() % r->width;
+            int k = rand() % r->height;
+            player_pos = _dungeon_array[r->location->y+k][r->location->x+j]->location;
+        }
     } else {
         player_pos = p;
     }
