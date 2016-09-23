@@ -68,6 +68,10 @@ static void construct() {
 static void destruct() {
     logger.i("Destructing Dungeon...");
     int i, j;
+    for(i = 0; i < _room_size; i++) {
+        roomAPI.destruct(_room_array[i]);
+    }
+    free(_room_array);
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             tileAPI.destruct(_dungeon_array[i][j]);
@@ -316,6 +320,10 @@ static void place_rooms() {
                 }
             }
             if(!overlap_valid) {
+                // cleanup rooms, we don't have a valid room series
+                for(j = 0; j < _room_size; j++) {
+                    roomAPI.destruct(_room_array[j]);
+                }
                 break;
             }
         }

@@ -89,6 +89,7 @@ static void destruct(graph_t* g) {
             graphAPI.free_vertex(g->vertices[i]);
         }
     }
+    free(g->vertices);
     free(g);
     logger.d("Graph for path mapping destructed");
 }

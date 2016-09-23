@@ -28,10 +28,11 @@ static void add_vertex(graph_t* g, point_t* p) {
     }
     
     int i = g->point_to_index(p);
+    int j;
     if (g->size < i + 1) {
         int size = g->size * 2 > i ? g->size * 2 : i + 4;
         g->vertices = realloc(g->vertices, size * sizeof (vertex_t *));
-        for (int j = g->size; j < size; j++)
+        for (j = g->size; j < size; j++)
             g->vertices[j] = NULL;
         g->size = size;
     }
@@ -52,6 +53,7 @@ static void free_vertex(vertex_t* v) {
     for(i = 0; i < v->edges_len; i++) {
         free(v->edges[i]);
     }
+    free(v->edges);
     free(v);
 }
 
