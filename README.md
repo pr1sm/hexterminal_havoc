@@ -60,7 +60,7 @@ APIs changed.  There were a lot of small tweaks that I completed which added
 up to a pretty big refactor.  One of the big refactors was a full general
 Makefile.  This allows me to keep the same Makefile as I add more source code
 and have it automatically detect new files/changes and build those instead of
-having to create rule for each individual object file. I also separated a lot 
+having to create a rule for each individual object file. I also separated a lot 
 of the dijkstra's algorithm api into separate files so the apis would be more 
 modular.  There is one api that controls all the setup for a graph structure 
 and there is another api that controls the path finding setup of the graph as 
