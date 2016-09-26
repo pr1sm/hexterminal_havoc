@@ -67,7 +67,7 @@ static graph_t* construct(int tunnel) {
                         continue;
                     }
                     
-                    int weight = tunnel ? hardness_to_weight(dest->rock_hardness) : 1;
+                    int weight = tunnel ? hardness_to_weight(t->rock_hardness) : 1;
                     
                     graphAPI.add_edge(g, t->location, dest->location, weight);
                 }
@@ -89,6 +89,7 @@ static void destruct(graph_t* g) {
             graphAPI.free_vertex(g->vertices[i]);
         }
     }
+    free(g->vertices);
     free(g);
     logger.d("Graph for path mapping destructed");
 }

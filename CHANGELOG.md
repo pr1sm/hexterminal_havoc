@@ -27,6 +27,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Fixed
 - Bug with heap re-inserting items already on the queue
+- Memory leaks when destructing path map graphs
 
 ## [1.02] - 2016-9-14
 

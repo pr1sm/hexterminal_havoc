@@ -30,6 +30,7 @@ static void destruct(graph_t* g) {
             graphAPI.free_vertex(g->vertices[i]);
         }
     }
+    free(g->vertices);
     free(g);
 }
 
@@ -67,6 +68,7 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
             }
         }
     }
+    heapAPI.destruct(h);
 }
 
 dijkstra_namespace const dijkstraAPI = {

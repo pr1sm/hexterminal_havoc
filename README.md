@@ -58,14 +58,16 @@ My solution uses the dijkstra's algorithm I already implemented for the
 first assignment.  This week I spent a lot of time refactoring my code as the
 APIs changed.  There were a lot of small tweaks that I completed which added
 up to a pretty big refactor.  One of the big refactors was a full general
-Makefile.  This allows me to keep the same Makefile as I add more source code.
-I also separated a lot of the dijkstra's algorithm api into separate files so
-the apis would be more modular.  There is one api that controls all the setup
-for a graph structure and there is another api that controls the path finding 
-setup of the graph as well as one for the corridor generation.  The program
-now includes all the functionality from before, but also prints the maps
-created for tunneling and nontunneling.  The player position is also generated
-everytime the game runs, or it can be passed in through the command line.   
+Makefile.  This allows me to keep the same Makefile as I add more source code
+and have it automatically detect new files/changes and build those instead of
+having to create a rule for each individual object file. I also separated a lot 
+of the dijkstra's algorithm api into separate files so the apis would be more 
+modular.  There is one api that controls all the setup for a graph structure 
+and there is another api that controls the path finding setup of the graph as 
+well as one for the corridor generation.  The program now includes all the 
+functionality from before, but also prints the maps created for tunneling and 
+nontunneling.  The player position is also generated everytime the game runs, 
+or it can be passed in through the command line.   
 
 ### Assignment 1.02 - Dungeon Saving/Loading
 

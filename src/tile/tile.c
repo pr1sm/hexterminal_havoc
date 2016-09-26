@@ -32,7 +32,7 @@ static tile_t* construct(uint8_t x, uint8_t y) {
     t->location = location;
     t->content = tc_UNSET;
     t->rock_hardness = 0;
-    t->changes = (tile_t*)malloc(sizeof(tile_t));
+    t->changes = (tile_t*)calloc(1, sizeof(tile_t));
     tileAPI.update_dist(t, 255);
     tileAPI.update_dist_tunnel(t, 255);
     return t;
