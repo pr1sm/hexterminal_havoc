@@ -79,6 +79,7 @@ static void destruct(dungeon_t* d) {
         free(d->tiles[i]);
     }
     free(d->tiles);
+    free(d);
     logger.i("Dungeon Destructed");
 }
 
