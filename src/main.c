@@ -29,27 +29,27 @@ int main(int argc, char * argv[]) {
         logger.set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
     }
     
-    dungeonAPI.construct();
+    dungeon_t* d = dungeonAPI.construct();
     
     if(LOAD_DUNGEON) {
-        dungeonAPI.load();
+        dungeonAPI.load(d);
     } else {
-        dungeonAPI.generate();
+        dungeonAPI.generate(d);
     }
     
-    dungeonAPI.update_path_maps();
+    dungeonAPI.update_path_maps(d);
     
-    dungeonAPI.print(PM_DUNGEON);
+    dungeonAPI.print(d, PM_DUNGEON);
     
-    dungeonAPI.print(PM_ROOM_PATH_MAP);
+    dungeonAPI.print(d, PM_ROOM_PATH_MAP);
     
-    dungeonAPI.print(PM_TUNN_PATH_MAP);
+    dungeonAPI.print(d, PM_TUNN_PATH_MAP);
     
     if(SAVE_DUNGEON) {
-        dungeonAPI.save();
+        dungeonAPI.save(d);
     }
     
-    dungeonAPI.destruct();
+    dungeonAPI.destruct(d);
     envAPI.cleanup();
     
     return 0;
