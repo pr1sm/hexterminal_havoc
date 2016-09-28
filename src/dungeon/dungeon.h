@@ -12,6 +12,7 @@
 #include "../tile/tile.h"
 #include "../point/point.h"
 #include "../env/env.h"
+#include "../room/room.h"
 
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
@@ -20,19 +21,23 @@
 #define ROCK_MED  130
 #define ROCK_SOFT 30
 
-extern tile_t*** _dungeon_array;
+typedef struct dungeon_t {
+    tile_t*** tiles;
+    room_t**  rooms;
+    int       room_size;
+} dungeon_t;
 
 typedef struct dungeon_namespace {
-    void (*const construct)();
-    void (*const destruct)();
-    void (*const generate)();
-    void (*const update_path_maps)();
-    void (*const check_room_intercept)(point_t* point);
-    void (*const print)(int mode);
-    void (*const load)();
-    void (*const save)();
+    dungeon_t* (*const construct)();
+    void (*const destruct)(dungeon_t* d);
+    void (*const generate)(dungeon_t* d);
+    void (*const update_path_maps)(dungeon_t* d);
+    void (*const check_room_intercept)(dungeon_t* d, point_t* point);
+    void (*const print)(dungeon_t* d, int mode);
+    void (*const load)(dungeon_t* d);
+    void (*const save)(dungeon_t* d);
     // should be moved to playerAPI:
-    void (*const set_player_pos)(point_t* p);
+    void (*const set_player_pos)(dungeon_t* d, point_t* p);
     point_t* (*const get_player_pos)();
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
