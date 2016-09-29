@@ -10,48 +10,31 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#ifdef __APPLE__
-    #include <libkern/OSByteOrder.h>
-    #define htobe16(x) OSSwapHostToBigInt16(x)
-    #define htole16(x) OSSwapHostToLittleInt16(x)
-    #define be16toh(x) OSSwapBigToHostInt16(x)
-    #define le16toh(x) OSSwapLittleToHostInt16(x)
-    #define htobe32(x) OSSwapHostToBigInt32(x)
-    #define htole32(x) OSSwapHostToLittleInt32(x)
-    #define be32toh(x) OSSwapBigToHostInt32(x)
-    #define le32toh(x) OSSwapLittleToHostInt32(x)
-    #define htobe64(x) OSSwapHostToBigInt64(x)
-    #define htole64(x) OSSwapHostToLittleInt64(x)
-    #define be64toh(x) OSSwapBigToHostInt64(x)
-    #define le64toh(x) OSSwapLittleToHostInt64(x)
-#else
-    #include <endian.h>
-#endif // __APPLE__
 
 #include "dungeon.h"
-#include "dijkstra.h"
+#include "corridor.h"
+#include "pathfinder.h"
+#include "../util/portable_endian.h"
+#include "../graph/graph.h"
 #include "../tile/tile.h"
 #include "../room/room.h"
 #include "../logger/logger.h"
 #include "../env/env.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
-#define ROCK_MAX 255
-#define ROCK_HARD 230
-#define ROCK_MED  130
-#define ROCK_SOFT 30
 
 // Array of tiles for the dungeon
 // size will be 21 rows x 80 cols
 tile_t*** _dungeon_array;
 
+static point_t* player_pos;
 static room_t** _room_array;
-static int _room_size;
+static int  _room_size;
 static void accent_dungeon();
 static void diffuse_dungeon();
 static void smooth_dungeon();
 static void border_dungeon();
-static int is_open_space();
+static int  is_open_space();
 static void add_rooms();
 static void write_dungeon_pgm(const char* file_name, int zone);
 static void generate_terrain();
@@ -66,7 +49,7 @@ static void d_log_room(room_t* r) {
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
-void dungeon_construct() {
+static void construct() {
     logger.i("Constructing Dungeon...");
     int i, j;
     srand((unsigned)time(NULL));
@@ -82,9 +65,13 @@ void dungeon_construct() {
     logger.i("Dungeon Constructed");
 }
 
-void dungeon_destruct() {
+static void destruct() {
     logger.i("Destructing Dungeon...");
     int i, j;
+    for(i = 0; i < _room_size; i++) {
+        roomAPI.destruct(_room_array[i]);
+    }
+    free(_room_array);
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             tileAPI.destruct(_dungeon_array[i][j]);
@@ -95,23 +82,50 @@ void dungeon_destruct() {
     logger.i("Dungeon Destructed");
 }
 
-void dungeon_generate() {
+static void generate() {
     generate_terrain();
     place_rooms();
     pathfind();
     update_path_hardnesses();
+    dungeonAPI.set_player_pos(NULL);
 }
 
-void dungeon_print() {
-    logger.i("Printing Dungeon...");
+static void update_path_maps() {
+    point_t* p = dungeonAPI.get_player_pos();
+    graph_t* g = pathfinderAPI.construct(0);
+    pathfinderAPI.generate_pathmap(g, p, 0);
+    pathfinderAPI.destruct(g);
+    g = pathfinderAPI.construct(1);
+    pathfinderAPI.generate_pathmap(g, p, 1);
+    pathfinderAPI.destruct(g);
+}
+
+static void check_room_intercept(point_t* point) {
+    if(_room_size < 0) {
+        logger.w("Check room called before rooms have been generated!");
+        return;
+    }
+    
+    int i;
+    for(i = 0; i < _room_size; i++) {
+        if(roomAPI.contains(_room_array[i], point) && !_room_array[i]->connected) {
+            _room_array[i]->connected = 1;
+            logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
+            return;
+        }
+    }
+}
+
+static void print(int mode) {
+    logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c = tileAPI.char_for_content(_dungeon_array[i][j]);
+            char c = tileAPI.char_for_content(_dungeon_array[i][j], mode);
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", _dungeon_array[i][j]->location->x, _dungeon_array[i][j]->location->y, _dungeon_array[i][j]->content);
             }
-            printf("%c", tileAPI.char_for_content(_dungeon_array[i][j]));
+            printf("%c", c);
         }
         printf("\n");
     }
@@ -119,7 +133,7 @@ void dungeon_print() {
     logger.i("Dungeon Printed");
 }
 
-void dungeon_load() {
+static void load() {
     logger.i("Loading Dungeon...");
     FILE* f;
     int version;
@@ -179,6 +193,7 @@ void dungeon_load() {
             }
         }
     }
+    dungeonAPI.set_player_pos(NULL);
     
     logger.i("Dungeon Loaded");
     free(semantic);
@@ -186,7 +201,7 @@ void dungeon_load() {
     fclose(f);
 }
 
-void dungeon_save() {
+static void save() {
     logger.i("Saving Dungeon...");
     FILE* f;
     int version = 0;
@@ -228,6 +243,28 @@ void dungeon_save() {
     fclose(f);
 }
 
+static void set_player_pos(point_t* p) {
+    // TODO: Check error bounds
+    if(p == NULL) {
+        // Generate random point or use starting values
+        if(X_START < 80 && Y_START < 80) {
+            player_pos = _dungeon_array[Y_START][X_START]->location;
+        } else {
+            int i = rand() % _room_size;
+            room_t* r = _room_array[i];
+            int j = rand() % r->width;
+            int k = rand() % r->height;
+            player_pos = _dungeon_array[r->location->y+k][r->location->x+j]->location;
+        }
+    } else {
+        player_pos = p;
+    }
+}
+
+static point_t* get_player_pos() {
+    return player_pos;
+}
+
 static void generate_terrain() {
     logger.i("Generating Terrain...");
     accent_dungeon();
@@ -264,8 +301,8 @@ static void place_rooms() {
                 room_valid = 1;
                 x = (rand() % (DUNGEON_WIDTH - 2)) + 1;
                 y = (rand() % (DUNGEON_HEIGHT - 2)) + 1;
-                width = (rand() % 8) + 4;
-                height = (rand() % 8) + 3;
+                width = (rand() % 12) + 4;
+                height = (rand() % 10) + 3;
                 if(((x + width) > DUNGEON_WIDTH - 2) ||
                    ((y + height) > DUNGEON_HEIGHT - 2)) {
                     room_valid = 0;
@@ -283,6 +320,10 @@ static void place_rooms() {
                 }
             }
             if(!overlap_valid) {
+                // cleanup rooms, we don't have a valid room series
+                for(j = 0; j < _room_size; j++) {
+                    roomAPI.destruct(_room_array[j]);
+                }
                 break;
             }
         }
@@ -358,34 +399,43 @@ static void place_rooms() {
 static void pathfind() {
     logger.i("Generating Corridors...");
     
-    graph_t* g = dijkstraAPI.construct(0);
+    graph_t* g = corridorAPI.construct(0);
     point_t src;
     point_t dest;
+    int num_paths = 0;
     int i;
     for(i = 0; i < _room_size - 1; i++) {
+        if(_room_array[i]->connected && _room_array[i+1]->connected) {
+            logger.t("Room %d and %d are already connected, moving to next path", i, i+1);
+            continue;
+        }
+        
         src.x = (rand() % _room_array[i]->width) + _room_array[i]->location->x;
         src.y = (rand() % _room_array[i]->height) + _room_array[i]->location->y;
         dest.x = (rand() % _room_array[i+1]->width) + _room_array[i+1]->location->x;
         dest.y = (rand() % _room_array[i+1]->height) + _room_array[i+1]->location->y;
         logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
-        dijkstraAPI.dijkstra(g, &src, &dest);
-        dijkstraAPI.place_path(g, &dest);
+        corridorAPI.pathfind(g, &src, &dest);
+        _room_array[i]->connected = 1;
+        _room_array[i+1]->connected = 1;
+        num_paths++;
     }
-    dijkstraAPI.destruct(g);
+    corridorAPI.destruct(g);
     
     // Connect last room to first room
-    g = dijkstraAPI.construct(1);
+    g = corridorAPI.construct(1);
     
     src.x = (rand() % _room_array[_room_size - 1]->width) + _room_array[_room_size - 1]->location->x;
     src.y = (rand() % _room_array[_room_size - 1]->height) + _room_array[_room_size - 1]->location->y;
     dest.x = (rand() % _room_array[0]->width) + _room_array[0]->location->x;
     dest.y = (rand() % _room_array[0]->height) + _room_array[0]->location->y;
     logger.d("Room Path %2d: Routing from (%2d, %2d) to (%2d, %2d)", i, src.x, src.y, dest.x, dest.y);
-    dijkstraAPI.dijkstra(g, &src, &dest);
-    dijkstraAPI.place_path(g, &dest);
+    corridorAPI.pathfind(g, &src, &dest);
+    num_paths++;
     
-    dijkstraAPI.destruct(g);
+    corridorAPI.destruct(g);
     
+    logger.i("Generated %d paths", num_paths);
     logger.i("Corridors Generated");
 }
 
@@ -595,10 +645,14 @@ static void add_rooms() {
 }
 
 dungeon_namespace const dungeonAPI = {
-    dungeon_construct,
-    dungeon_destruct,
-    dungeon_generate,
-    dungeon_print,
-    dungeon_load,
-    dungeon_save
+    construct,
+    destruct,
+    generate,
+    update_path_maps,
+    check_room_intercept,
+    print,
+    load,
+    save,
+    set_player_pos,
+    get_player_pos
 };

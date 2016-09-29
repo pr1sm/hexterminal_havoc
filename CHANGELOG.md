@@ -4,6 +4,31 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.03] - 2016-8-21
+
+### Added
+- Player Marker on the dungeon (gets randomly spawned on dungeon load or generate)
+- Path maps for NPCs (different ones for tunneling and non-tunneling npcs)
+- New pathfinderAPI to control path maps
+- Print mode for printing the dungeon or path maps
+- More Logging!
+
+### Changed
+- Makefile is now generic and will find and build all source code
+- Broke dijkstraAPI up into 3 APIs
+    - dijkstraAPI - controls dikjstras algorithm
+    - graphAPI - controls graph related functions
+    - corridorAPI - controls corridor generation
+- Changed all functions to be static (now only accessible through apis)
+- Corridor generation
+    - Marks rooms as connected when path goes through them without being the target
+    - Does not create paths if both rooms are already connected
+- Various API changes (to make things clearer)
+
+### Fixed
+- Bug with heap re-inserting items already on the queue
+- Memory leaks when destructing path map graphs
+
 ## [1.02] - 2016-9-14
 
 ### Added
