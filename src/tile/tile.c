@@ -121,7 +121,7 @@ static int are_changes_proposed_impl(tile_t* tile) {
 static char char_for_content_impl(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
         point_t* player_pos = dungeonAPI.get_player_pos();
-        if(pointAPI.distance(tile->location, player_pos) == 0) {
+        if(player_pos->distance(tile->location, player_pos) == 0) {
             return PC_CHAR;
         }
         return tile->content == tc_BORDER ? BORDER_CHAR :
