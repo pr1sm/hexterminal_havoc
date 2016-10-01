@@ -35,11 +35,12 @@ static void check_room_intercept(dungeon_t* d, point_t* point) {
         logger.w("Check room called before rooms have been generated!");
         return;
     }
-    
+    room_t* r;
     int i;
     for(i = 0; i < d->room_size; i++) {
-        if(roomAPI.contains(d->rooms[i], point) && !d->rooms[i]->connected) {
-            d->rooms[i]->connected = 1;
+        r = d->rooms[i];
+        if(r->contains(r, point) && !r->connected) {
+            r->connected = 1;
             logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
             return;
         }
@@ -101,6 +102,7 @@ static void pathfind(graph_t* g, dungeon_t* d, point_t* start, point_t* end) {
 static void place_path(graph_t* g, dungeon_t* d, point_t* b) {
     int n;
     vertex_t* v;
+    tile_t* tile;
     point_t p;
     v = g->vertices[point_to_index(b)];
     if(v->dist == INT_MAX) {
@@ -110,9 +112,9 @@ static void place_path(graph_t* g, dungeon_t* d, point_t* b) {
     for(n = 1; v->dist; n++) {
         p = index_to_point(v->index);
         
-        tile_t* tile = d->tiles[p.y][p.x];
+        tile = d->tiles[p.y][p.x];
         if(tile->content == tc_ROCK) {
-            tileAPI.update_content(tile, tc_PATH);
+            tile->update_content(tile, tc_PATH);
         } else if(tile->content == tc_ROOM) {
             check_room_intercept(d, &p);
         }

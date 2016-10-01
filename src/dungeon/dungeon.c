@@ -23,8 +23,14 @@
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
-// Array of tiles for the dungeon
-// size will be 21 rows x 80 cols
+// Public Functions
+
+static void update_path_maps_impl(dungeon_t* d);
+static void print_impl(dungeon_t* d, int mode);
+static void load_impl(dungeon_t* d);
+static void save_impl(dungeon_t* d);
+
+// Private Functions
 
 static point_t* player_pos;
 static void accent_dungeon(dungeon_t* d);
@@ -46,7 +52,7 @@ static void d_log_room(room_t* r) {
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
-static dungeon_t* construct() {
+static dungeon_t* construct_impl() {
     logger.i("Constructing Dungeon...");
     int i, j;
     srand((unsigned)time(NULL));
@@ -61,11 +67,16 @@ static dungeon_t* construct() {
             d->tiles[i][j] = tileAPI.construct(j, i);
         }
     }
+    
+    d->update_path_maps = update_path_maps_impl;
+    d->print = print_impl;
+    d->load = load_impl;
+    d->save = save_impl;
     logger.i("Dungeon Constructed");
     return d;
 }
 
-static void destruct(dungeon_t* d) {
+static void destruct_impl(dungeon_t* d) {
     logger.i("Destructing Dungeon...");
     int i, j;
     for(i = 0; i < d->room_size; i++) {
@@ -83,7 +94,7 @@ static void destruct(dungeon_t* d) {
     logger.i("Dungeon Destructed");
 }
 
-static void generate(dungeon_t* d) {
+static void generate_impl(dungeon_t* d) {
     generate_terrain(d);
     place_rooms(d);
     pathfind(d);
@@ -91,7 +102,7 @@ static void generate(dungeon_t* d) {
     dungeonAPI.set_player_pos(d, NULL);
 }
 
-static void update_path_maps(dungeon_t* d) {
+static void update_path_maps_impl(dungeon_t* d) {
     point_t* p = dungeonAPI.get_player_pos();
     graph_t* g = pathfinderAPI.construct(d, 0);
     pathfinderAPI.generate_pathmap(g, d, p, 0);
@@ -101,12 +112,12 @@ static void update_path_maps(dungeon_t* d) {
     pathfinderAPI.destruct(g);
 }
 
-static void print(dungeon_t* d, int mode) {
+static void print_impl(dungeon_t* d, int mode) {
     logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c = tileAPI.char_for_content(d->tiles[i][j], mode);
+            char c = d->tiles[i][j]->char_for_content(d->tiles[i][j], mode);
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", d->tiles[i][j]->location->x, d->tiles[i][j]->location->y, d->tiles[i][j]->content);
             }
@@ -118,7 +129,7 @@ static void print(dungeon_t* d, int mode) {
     logger.i("Dungeon Printed");
 }
 
-static void load(dungeon_t* d) {
+static void load_impl(dungeon_t* d) {
     logger.i("Loading Dungeon...");
     FILE* f;
     int version;
@@ -186,12 +197,13 @@ static void load(dungeon_t* d) {
     fclose(f);
 }
 
-static void save(dungeon_t* d) {
+static void save_impl(dungeon_t* d) {
     logger.i("Saving Dungeon...");
     FILE* f;
     int version = 0;
     int size = (d->room_size*4) + 1694;
     int i, j;
+    room_t* r;
     uint8_t room_data[4];
     char* semantic = "RLG327";
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
@@ -218,7 +230,8 @@ static void save(dungeon_t* d) {
     fwrite(hardness_map, sizeof(uint8_t), DUNGEON_WIDTH*DUNGEON_HEIGHT, f);
     
     for(i = 0; i < d->room_size; i++) {
-        roomAPI.export_room(d->rooms[i], room_data);
+        r = d->rooms[i];
+        r->export_room(r, room_data);
         fwrite(room_data, sizeof(uint8_t), 4, f);
     }
     
@@ -299,7 +312,7 @@ static void place_rooms(dungeon_t* d) {
         overlap_valid = 1;
         for(i = 0; i < d->room_size; i++) {
             for(j = 0; j < i; j++) {
-                if(roomAPI.is_overlap(d->rooms[i], d->rooms[j])) {
+                if(d->rooms[i]->is_overlap(d->rooms[i], d->rooms[j])) {
                     overlap_valid = 0;
                     break;
                 }
@@ -346,7 +359,7 @@ static void place_rooms(dungeon_t* d) {
                  new_room->height);
         overlap_valid = 1;
         for(i = 0; i < d->room_size; i++) {
-            if(roomAPI.is_overlap(new_room, d->rooms[i])) {
+            if(new_room->is_overlap(new_room, d->rooms[i])) {
                 overlap_valid = 0;
                 break;
             }
@@ -432,7 +445,7 @@ static void update_path_hardnesses(dungeon_t* d) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             t = d->tiles[i][j];
             if(t->content == tc_ROOM || t->content == tc_PATH) {
-                tileAPI.update_hardness(t, 0);
+                t->update_hardness(t, 0);
             }
         }
     }
@@ -459,6 +472,7 @@ static void write_dungeon_pgm(dungeon_t* d, const char* file_name, int zone) {
 static void accent_dungeon(dungeon_t* d) {
     logger.t("Spiking Dungeon Out...");
     int i, j;
+    tile_t* t;
     int hardnesses[] = {ROCK_HARD, ROCK_MED, ROCK_SOFT};
     
     for(i = 0; i < 3; i++) {
@@ -467,8 +481,9 @@ static void accent_dungeon(dungeon_t* d) {
             do {
                 pos = rand() % (DUNGEON_WIDTH * DUNGEON_HEIGHT);
             } while(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH]->content != tc_UNSET);
-            tileAPI.update_hardness(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH], hardnesses[i]);
-            tileAPI.update_content(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH], tc_ROCK);
+            t = d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH];
+            t->update_hardness(t, hardnesses[i]);
+            t->update_content(t, tc_ROCK);
         }
     }
     
@@ -488,6 +503,7 @@ static void diffuse_dungeon(dungeon_t* d) {
     int hardness;
     int x_coords[] = {0, 1, 0, -1, 1, 1, -1, -1};
     int y_coords[] = {-1, 0, 1, 0, -1, 1, 1, -1};
+    tile_t* t;
     while(points_hit < (DUNGEON_WIDTH * DUNGEON_HEIGHT)) {
         for(i = 0; i < DUNGEON_HEIGHT; i++) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
@@ -505,8 +521,9 @@ static void diffuse_dungeon(dungeon_t* d) {
                         continue;
                     }
                     // Check if the tile has already been set or has had changes proposed
-                    if(d->tiles[y_adj][x_adj]->content != tc_UNSET ||
-                       tileAPI.are_changes_proposed(d->tiles[y_adj][x_adj])) {
+                    t = d->tiles[y_adj][x_adj];
+                    if(t->content != tc_UNSET ||
+                       t->are_changes_proposed(t)) {
                         continue;
                     }
                     
@@ -517,8 +534,8 @@ static void diffuse_dungeon(dungeon_t* d) {
                        (k == 6 && pass_bitmap >= 12) ||
                        (k == 7 && pass_bitmap >= 9)) {
                         // propose the new changes to the tile
-                        tileAPI.propose_update_content(d->tiles[y_adj][x_adj], tc_ROCK);
-                        tileAPI.propose_update_hardness(d->tiles[y_adj][x_adj], hardness);
+                        t->propose_update_content(t, tc_ROCK);
+                        t->propose_update_hardness(t, hardness);
                         
                         // update the pass bitmap
                         pass_bitmap |= (1 << k);
@@ -529,12 +546,12 @@ static void diffuse_dungeon(dungeon_t* d) {
         // commit the tile updates for this pass
         for(i = 0; i < DUNGEON_HEIGHT; i++) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
-                tile_t* tile = d->tiles[i][j];
+                tile_t* t = d->tiles[i][j];
                 // changes are different than the content, so we hit a point
-                if(tile->content != tile->changes->content) {
+                if(t->content != t->changes->content) {
                     points_hit++;
                 }
-                tileAPI.commit_updates(tile);
+                t->commit_updates(t);
             }
         }
     }
@@ -564,12 +581,12 @@ static void smooth_dungeon(dungeon_t* d) {
                 sum += d->tiles[y][x]->rock_hardness;
                 tiles_hit++;
             }
-            tileAPI.propose_update_hardness(d->tiles[i][j], sum / tiles_hit);
+            d->tiles[i][j]->propose_update_hardness(d->tiles[i][j], sum / tiles_hit);
         }
     }
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            tileAPI.commit_updates(d->tiles[i][j]);
+            d->tiles[i][j]->commit_updates(d->tiles[i][j]);
         }
     }
     
@@ -584,17 +601,22 @@ static void smooth_dungeon(dungeon_t* d) {
 static void border_dungeon(dungeon_t* d) {
     logger.t("Bordering Dungeon...");
     int i, j;
+    tile_t* t;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         if(i == 0 || i == DUNGEON_HEIGHT - 1) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
-                tileAPI.update_content(d->tiles[i][j], tc_BORDER);
-                tileAPI.update_hardness(d->tiles[i][j], ROCK_MAX);
+                t = d->tiles[i][j];
+                t->update_content(t, tc_BORDER);
+                t->update_hardness(t, ROCK_MAX);
             }
         } else {
-            tileAPI.update_content(d->tiles[i][0], tc_BORDER);
-            tileAPI.update_hardness(d->tiles[i][0], ROCK_MAX);
-            tileAPI.update_content(d->tiles[i][DUNGEON_WIDTH - 1], tc_BORDER);
-            tileAPI.update_hardness(d->tiles[i][DUNGEON_WIDTH - 1], ROCK_MAX);
+            t = d->tiles[i][0];
+            t->update_content(t, tc_BORDER);
+            t->update_hardness(t, ROCK_MAX);
+            
+            t = d->tiles[i][DUNGEON_WIDTH - 1];
+            t->update_content(t, tc_BORDER);
+            t->update_hardness(t, ROCK_MAX);
         }
     }
     
@@ -623,20 +645,16 @@ static void add_rooms(dungeon_t* d) {
     for(i = 0; i < d->room_size; i++) {
         for(j = d->rooms[i]->location->y; j < d->rooms[i]->location->y + d->rooms[i]->height; j++) {
             for(k = d->rooms[i]->location->x; k < d->rooms[i]->location->x + d->rooms[i]->width; k++) {
-                tileAPI.update_content(d->tiles[j][k], tc_ROOM);
+                d->tiles[j][k]->update_content(d->tiles[j][k], tc_ROOM);
             }
         }
     }
 }
 
 dungeon_namespace const dungeonAPI = {
-    construct,
-    destruct,
-    generate,
-    update_path_maps,
-    print,
-    load,
-    save,
+    construct_impl,
+    destruct_impl,
+    generate_impl,
     set_player_pos,
     get_player_pos
 };

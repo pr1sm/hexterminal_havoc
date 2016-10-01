@@ -111,9 +111,9 @@ static void update_tiles(graph_t* g, dungeon_t* d, int tunnel) {
         point_t p = index_to_point(v->index);
         tile_t* t = d->tiles[p.y][p.x];
         if(tunnel) {
-            tileAPI.update_dist_tunnel(t, v->dist);
+            t->update_dist_tunnel(t, v->dist);
         } else {
-            tileAPI.update_dist(t, v->dist);
+            t->update_dist(t, v->dist);
         }
     }
 }

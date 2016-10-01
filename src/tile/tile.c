@@ -25,79 +25,103 @@
 #define PATH_CHAR '#'
 #define PC_CHAR '@'
 
+// Public Functions
+static void update_hardness_impl(tile_t* tile, uint8_t value);
+static void update_content_impl(tile_t* tile, tile_content value);
+static void update_dist_impl(tile_t* tile, uint8_t value);
+static void update_dist_tunnel_impl(tile_t* tile, uint8_t value);
+static void propose_update_hardness_impl(tile_t* tile, uint8_t value);
+static void propose_update_content_impl(tile_t* tile, tile_content value);
+static void propose_update_dist_impl(tile_t* tile, uint8_t value);
+static void propose_update_dist_tunnel_impl(tile_t* tile, uint8_t value);
+static void commit_updates_impl(tile_t* tile);
+static int are_changes_proposed_impl(tile_t* tile);
+static char char_for_content_impl(tile_t* tile, int mode);
 
-static tile_t* construct(uint8_t x, uint8_t y) {
+static tile_t* construct_impl(uint8_t x, uint8_t y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
     point_t* location = pointAPI.construct(x, y);
     t->location = location;
     t->content = tc_UNSET;
     t->rock_hardness = 0;
     t->changes = (tile_t*)calloc(1, sizeof(tile_t));
-    tileAPI.update_dist(t, 255);
-    tileAPI.update_dist_tunnel(t, 255);
+    t->update_hardness = update_hardness_impl;
+    t->update_content = update_content_impl;
+    t->update_dist = update_dist_impl;
+    t->update_dist_tunnel = update_dist_tunnel_impl;
+    t->propose_update_hardness = propose_update_hardness_impl;
+    t->propose_update_content = propose_update_content_impl;
+    t->propose_update_dist = propose_update_dist_impl;
+    t->propose_update_dist_tunnel = propose_update_dist_tunnel_impl;
+    t->commit_updates = commit_updates_impl;
+    t->are_changes_proposed = are_changes_proposed_impl;
+    t->char_for_content = char_for_content_impl;
+    
+    t->update_dist(t, 255);
+    t->update_dist_tunnel(t, 255);
     return t;
 }
 
-static void destruct(tile_t* tile) {
+static void destruct_impl(tile_t* tile) {
     free(tile->changes);
     free(tile->location);
     free(tile);
 }
 
-static void update_hardness(tile_t* tile, uint8_t value) {
+static void update_hardness_impl(tile_t* tile, uint8_t value) {
     tile->rock_hardness = value;
     tile->changes->rock_hardness = value;
 }
 
-static void update_content(tile_t* tile, tile_content value) {
+static void update_content_impl(tile_t* tile, tile_content value) {
     tile->content = value;
     tile->changes->content = value;
 }
 
-static void update_dist(tile_t* tile, uint8_t value) {
+static void update_dist_impl(tile_t* tile, uint8_t value) {
     tile->dist = value;
     tile->changes->dist = value;
 }
 
-static void update_dist_tunnel(tile_t* tile, uint8_t value) {
+static void update_dist_tunnel_impl(tile_t* tile, uint8_t value) {
     tile->dist_tunnel = value;
     tile->changes->dist_tunnel = value;
 }
 
-static void propose_update_hardness(tile_t* tile, uint8_t value) {
+static void propose_update_hardness_impl(tile_t* tile, uint8_t value) {
     tile->changes->rock_hardness = value;
 }
 
-static void propose_update_content(tile_t* tile, tile_content value) {
+static void propose_update_content_impl(tile_t* tile, tile_content value) {
     tile->changes->content = value;
 }
 
-static void propose_update_dist(tile_t* tile, uint8_t value) {
+static void propose_update_dist_impl(tile_t* tile, uint8_t value) {
     tile->changes->dist = value;
 }
 
-static void propose_update_dist_tunnel(tile_t* tile, uint8_t value) {
+static void propose_update_dist_tunnel_impl(tile_t* tile, uint8_t value) {
     tile->changes->dist_tunnel = value;
 }
 
-static void commit_updates(tile_t* tile) {
+static void commit_updates_impl(tile_t* tile) {
     tile->rock_hardness = tile->changes->rock_hardness;
     tile->content       = tile->changes->content;
     tile->dist          = tile->changes->dist;
     tile->dist_tunnel   = tile->changes->dist_tunnel;
 }
 
-static int are_changes_proposed(tile_t* tile) {
+static int are_changes_proposed_impl(tile_t* tile) {
     return (tile->rock_hardness != tile->changes->rock_hardness) ||
            (tile->content != tile->changes->content) ||
            (tile->dist != tile->changes->dist) ||
            (tile->dist_tunnel != tile->changes->dist_tunnel);
 }
 
-static char char_for_content(tile_t* tile, int mode) {
+static char char_for_content_impl(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
         point_t* player_pos = dungeonAPI.get_player_pos();
-        if(pointAPI.distance(tile->location, player_pos) == 0) {
+        if(player_pos->distance(tile->location, player_pos) == 0) {
             return PC_CHAR;
         }
         return tile->content == tc_BORDER ? BORDER_CHAR :
@@ -113,44 +137,33 @@ static char char_for_content(tile_t* tile, int mode) {
         } else if(val < 62) {
             return val - 36 + 'A';
         } else {
-            return tileAPI.char_for_content(tile, PM_DUNGEON);
+            return tile->char_for_content(tile, PM_DUNGEON);
         }
     }
     return DEFAULT_CHAR;
 }
 
-static void import_tile(tile_t* tile, unsigned char value, int room) {
-    tileAPI.propose_update_hardness(tile, value);
+static void import_tile_impl(tile_t* tile, unsigned char value, int room) {
+    tile->propose_update_hardness(tile, value);
     if(value == 255) {
-        tileAPI.propose_update_content(tile, tc_BORDER);
+        tile->propose_update_content(tile, tc_BORDER);
     } else if(value == 0) {
-        tileAPI.propose_update_content(tile, tc_PATH);
+        tile->propose_update_content(tile, tc_PATH);
     } else {
-        tileAPI.propose_update_content(tile, tc_ROCK);
+        tile->propose_update_content(tile, tc_ROCK);
     }
     
     if(room) {
-        tileAPI.propose_update_content(tile, tc_ROOM);
+        tile->propose_update_content(tile, tc_ROOM);
     }
-    tileAPI.propose_update_dist(tile, 255);
-    tileAPI.propose_update_dist_tunnel(tile, 255);
+    tile->propose_update_dist(tile, 255);
+    tile->propose_update_dist_tunnel(tile, 255);
     
-    tileAPI.commit_updates(tile);
+    tile->commit_updates(tile);
 }
 
 tile_namespace const tileAPI = {
-    construct,
-    destruct,
-    update_hardness,
-    update_content,
-    update_dist,
-    update_dist_tunnel,
-    propose_update_hardness,
-    propose_update_content,
-    propose_update_dist,
-    propose_update_dist_tunnel,
-    commit_updates,
-    are_changes_proposed,
-    char_for_content,
-    import_tile
+    construct_impl,
+    destruct_impl,
+    import_tile_impl
 };
