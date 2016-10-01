@@ -117,7 +117,7 @@ static void print_impl(dungeon_t* d, int mode) {
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            char c = tileAPI.char_for_content(d->tiles[i][j], mode);
+            char c = d->tiles[i][j]->char_for_content(d->tiles[i][j], mode);
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", d->tiles[i][j]->location->x, d->tiles[i][j]->location->y, d->tiles[i][j]->content);
             }
@@ -443,7 +443,7 @@ static void update_path_hardnesses(dungeon_t* d) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             t = d->tiles[i][j];
             if(t->content == tc_ROOM || t->content == tc_PATH) {
-                tileAPI.update_hardness(t, 0);
+                t->update_hardness(t, 0);
             }
         }
     }
@@ -478,8 +478,9 @@ static void accent_dungeon(dungeon_t* d) {
             do {
                 pos = rand() % (DUNGEON_WIDTH * DUNGEON_HEIGHT);
             } while(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH]->content != tc_UNSET);
-            tileAPI.update_hardness(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH], hardnesses[i]);
-            tileAPI.update_content(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH], tc_ROCK);
+            tile_t* t = d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH];
+            t->update_hardness(t, hardnesses[i]);
+            t->update_content(t, tc_ROCK);
         }
     }
     
@@ -516,8 +517,9 @@ static void diffuse_dungeon(dungeon_t* d) {
                         continue;
                     }
                     // Check if the tile has already been set or has had changes proposed
-                    if(d->tiles[y_adj][x_adj]->content != tc_UNSET ||
-                       tileAPI.are_changes_proposed(d->tiles[y_adj][x_adj])) {
+                    tile_t* t = d->tiles[y_adj][x_adj];
+                    if(t->content != tc_UNSET ||
+                       t->are_changes_proposed(t)) {
                         continue;
                     }
                     
@@ -528,8 +530,8 @@ static void diffuse_dungeon(dungeon_t* d) {
                        (k == 6 && pass_bitmap >= 12) ||
                        (k == 7 && pass_bitmap >= 9)) {
                         // propose the new changes to the tile
-                        tileAPI.propose_update_content(d->tiles[y_adj][x_adj], tc_ROCK);
-                        tileAPI.propose_update_hardness(d->tiles[y_adj][x_adj], hardness);
+                        t->propose_update_content(t, tc_ROCK);
+                        t->propose_update_hardness(t, hardness);
                         
                         // update the pass bitmap
                         pass_bitmap |= (1 << k);
@@ -545,7 +547,7 @@ static void diffuse_dungeon(dungeon_t* d) {
                 if(tile->content != tile->changes->content) {
                     points_hit++;
                 }
-                tileAPI.commit_updates(tile);
+                tile->commit_updates(tile);
             }
         }
     }
@@ -575,12 +577,12 @@ static void smooth_dungeon(dungeon_t* d) {
                 sum += d->tiles[y][x]->rock_hardness;
                 tiles_hit++;
             }
-            tileAPI.propose_update_hardness(d->tiles[i][j], sum / tiles_hit);
+            d->tiles[i][j]->propose_update_hardness(d->tiles[i][j], sum / tiles_hit);
         }
     }
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            tileAPI.commit_updates(d->tiles[i][j]);
+            d->tiles[i][j]->commit_updates(d->tiles[i][j]);
         }
     }
     
@@ -595,17 +597,22 @@ static void smooth_dungeon(dungeon_t* d) {
 static void border_dungeon(dungeon_t* d) {
     logger.t("Bordering Dungeon...");
     int i, j;
+    tile_t* t;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         if(i == 0 || i == DUNGEON_HEIGHT - 1) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
-                tileAPI.update_content(d->tiles[i][j], tc_BORDER);
-                tileAPI.update_hardness(d->tiles[i][j], ROCK_MAX);
+                t = d->tiles[i][j];
+                t->update_content(t, tc_BORDER);
+                t->update_hardness(t, ROCK_MAX);
             }
         } else {
-            tileAPI.update_content(d->tiles[i][0], tc_BORDER);
-            tileAPI.update_hardness(d->tiles[i][0], ROCK_MAX);
-            tileAPI.update_content(d->tiles[i][DUNGEON_WIDTH - 1], tc_BORDER);
-            tileAPI.update_hardness(d->tiles[i][DUNGEON_WIDTH - 1], ROCK_MAX);
+            t = d->tiles[i][0];
+            t->update_content(t, tc_BORDER);
+            t->update_hardness(t, ROCK_MAX);
+            
+            t = d->tiles[i][DUNGEON_WIDTH - 1];
+            t->update_content(t, tc_BORDER);
+            t->update_hardness(t, ROCK_MAX);
         }
     }
     
@@ -634,7 +641,7 @@ static void add_rooms(dungeon_t* d) {
     for(i = 0; i < d->room_size; i++) {
         for(j = d->rooms[i]->location->y; j < d->rooms[i]->location->y + d->rooms[i]->height; j++) {
             for(k = d->rooms[i]->location->x; k < d->rooms[i]->location->x + d->rooms[i]->width; k++) {
-                tileAPI.update_content(d->tiles[j][k], tc_ROOM);
+                d->tiles[j][k]->update_content(d->tiles[j][k], tc_ROOM);
             }
         }
     }

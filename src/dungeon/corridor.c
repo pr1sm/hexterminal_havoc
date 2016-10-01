@@ -112,7 +112,7 @@ static void place_path(graph_t* g, dungeon_t* d, point_t* b) {
         
         tile_t* tile = d->tiles[p.y][p.x];
         if(tile->content == tc_ROCK) {
-            tileAPI.update_content(tile, tc_PATH);
+            tile->update_content(tile, tc_PATH);
         } else if(tile->content == tc_ROOM) {
             check_room_intercept(d, &p);
         }
