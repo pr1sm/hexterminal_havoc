@@ -21,5 +21,4 @@ typedef struct corridor_namespace {
 } corridor_namespace;
 extern corridor_namespace const corridorAPI;
 
-
 #endif /* corridor_h */
