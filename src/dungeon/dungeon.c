@@ -229,7 +229,8 @@ static void save_impl(dungeon_t* d) {
     fwrite(hardness_map, sizeof(uint8_t), DUNGEON_WIDTH*DUNGEON_HEIGHT, f);
     
     for(i = 0; i < d->room_size; i++) {
-        roomAPI.export_room(d->rooms[i], room_data);
+        room_t* r = d->rooms[i];
+        r->export_room(r, room_data);
         fwrite(room_data, sizeof(uint8_t), 4, f);
     }
     
@@ -310,7 +311,7 @@ static void place_rooms(dungeon_t* d) {
         overlap_valid = 1;
         for(i = 0; i < d->room_size; i++) {
             for(j = 0; j < i; j++) {
-                if(roomAPI.is_overlap(d->rooms[i], d->rooms[j])) {
+                if(d->rooms[i]->is_overlap(d->rooms[i], d->rooms[j])) {
                     overlap_valid = 0;
                     break;
                 }
@@ -357,7 +358,7 @@ static void place_rooms(dungeon_t* d) {
                  new_room->height);
         overlap_valid = 1;
         for(i = 0; i < d->room_size; i++) {
-            if(roomAPI.is_overlap(new_room, d->rooms[i])) {
+            if(new_room->is_overlap(new_room, d->rooms[i])) {
                 overlap_valid = 0;
                 break;
             }

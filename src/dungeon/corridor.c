@@ -38,8 +38,9 @@ static void check_room_intercept(dungeon_t* d, point_t* point) {
     
     int i;
     for(i = 0; i < d->room_size; i++) {
-        if(roomAPI.contains(d->rooms[i], point) && !d->rooms[i]->connected) {
-            d->rooms[i]->connected = 1;
+        room_t* r = d->rooms[i];
+        if(r->contains(r, point) && !r->connected) {
+            r->connected = 1;
             logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
             return;
         }
