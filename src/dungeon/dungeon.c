@@ -101,22 +101,6 @@ static void update_path_maps(dungeon_t* d) {
     pathfinderAPI.destruct(g);
 }
 
-static void check_room_intercept(dungeon_t* d, point_t* point) {
-    if(d->room_size < 0) {
-        logger.w("Check room called before rooms have been generated!");
-        return;
-    }
-    
-    int i;
-    for(i = 0; i < d->room_size; i++) {
-        if(roomAPI.contains(d->rooms[i], point) && !d->rooms[i]->connected) {
-            d->rooms[i]->connected = 1;
-            logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
-            return;
-        }
-    }
-}
-
 static void print(dungeon_t* d, int mode) {
     logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
@@ -650,7 +634,6 @@ dungeon_namespace const dungeonAPI = {
     destruct,
     generate,
     update_path_maps,
-    check_room_intercept,
     print,
     load,
     save,

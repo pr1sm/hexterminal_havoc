@@ -30,6 +30,22 @@ static point_t index_to_point(int index) {
     return p;
 }
 
+static void check_room_intercept(dungeon_t* d, point_t* point) {
+    if(d->room_size < 0) {
+        logger.w("Check room called before rooms have been generated!");
+        return;
+    }
+    
+    int i;
+    for(i = 0; i < d->room_size; i++) {
+        if(roomAPI.contains(d->rooms[i], point) && !d->rooms[i]->connected) {
+            d->rooms[i]->connected = 1;
+            logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
+            return;
+        }
+    }
+}
+
 static graph_t* construct(dungeon_t* d, int invert) {
     logger.d("Constructing Graph for pathfinding...");
     graph_t* g = calloc(1, sizeof(graph_t));
@@ -98,13 +114,12 @@ static void place_path(graph_t* g, dungeon_t* d, point_t* b) {
         if(tile->content == tc_ROCK) {
             tileAPI.update_content(tile, tc_PATH);
         } else if(tile->content == tc_ROOM) {
-            dungeonAPI.check_room_intercept(d, &p);
+            check_room_intercept(d, &p);
         }
         v = g->vertices[v->prev];
         if(v == NULL) break;
     }
 }
-
 
 corridor_namespace const corridorAPI = {
     construct,
