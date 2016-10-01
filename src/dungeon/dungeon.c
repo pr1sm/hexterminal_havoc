@@ -203,6 +203,7 @@ static void save_impl(dungeon_t* d) {
     int version = 0;
     int size = (d->room_size*4) + 1694;
     int i, j;
+    room_t* r;
     uint8_t room_data[4];
     char* semantic = "RLG327";
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
@@ -229,7 +230,7 @@ static void save_impl(dungeon_t* d) {
     fwrite(hardness_map, sizeof(uint8_t), DUNGEON_WIDTH*DUNGEON_HEIGHT, f);
     
     for(i = 0; i < d->room_size; i++) {
-        room_t* r = d->rooms[i];
+        r = d->rooms[i];
         r->export_room(r, room_data);
         fwrite(room_data, sizeof(uint8_t), 4, f);
     }
@@ -471,6 +472,7 @@ static void write_dungeon_pgm(dungeon_t* d, const char* file_name, int zone) {
 static void accent_dungeon(dungeon_t* d) {
     logger.t("Spiking Dungeon Out...");
     int i, j;
+    tile_t* t;
     int hardnesses[] = {ROCK_HARD, ROCK_MED, ROCK_SOFT};
     
     for(i = 0; i < 3; i++) {
@@ -479,7 +481,7 @@ static void accent_dungeon(dungeon_t* d) {
             do {
                 pos = rand() % (DUNGEON_WIDTH * DUNGEON_HEIGHT);
             } while(d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH]->content != tc_UNSET);
-            tile_t* t = d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH];
+            t = d->tiles[pos / DUNGEON_WIDTH][pos % DUNGEON_WIDTH];
             t->update_hardness(t, hardnesses[i]);
             t->update_content(t, tc_ROCK);
         }
@@ -501,6 +503,7 @@ static void diffuse_dungeon(dungeon_t* d) {
     int hardness;
     int x_coords[] = {0, 1, 0, -1, 1, 1, -1, -1};
     int y_coords[] = {-1, 0, 1, 0, -1, 1, 1, -1};
+    tile_t* t;
     while(points_hit < (DUNGEON_WIDTH * DUNGEON_HEIGHT)) {
         for(i = 0; i < DUNGEON_HEIGHT; i++) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
@@ -518,7 +521,7 @@ static void diffuse_dungeon(dungeon_t* d) {
                         continue;
                     }
                     // Check if the tile has already been set or has had changes proposed
-                    tile_t* t = d->tiles[y_adj][x_adj];
+                    t = d->tiles[y_adj][x_adj];
                     if(t->content != tc_UNSET ||
                        t->are_changes_proposed(t)) {
                         continue;
@@ -543,12 +546,12 @@ static void diffuse_dungeon(dungeon_t* d) {
         // commit the tile updates for this pass
         for(i = 0; i < DUNGEON_HEIGHT; i++) {
             for(j = 0; j < DUNGEON_WIDTH; j++) {
-                tile_t* tile = d->tiles[i][j];
+                tile_t* t = d->tiles[i][j];
                 // changes are different than the content, so we hit a point
-                if(tile->content != tile->changes->content) {
+                if(t->content != t->changes->content) {
                     points_hit++;
                 }
-                tile->commit_updates(tile);
+                t->commit_updates(t);
             }
         }
     }
