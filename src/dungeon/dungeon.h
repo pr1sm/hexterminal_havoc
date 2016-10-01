@@ -25,16 +25,16 @@ typedef struct dungeon_t {
     tile_t*** tiles;
     room_t**  rooms;
     int       room_size;
+    void (*update_path_maps)(struct dungeon_t* d);
+    void (*print)(struct dungeon_t* d, int mode);
+    void (*load)(struct dungeon_t* d);
+    void (*save)(struct dungeon_t* d);
 } dungeon_t;
 
 typedef struct dungeon_namespace {
     dungeon_t* (*const construct)();
     void (*const destruct)(dungeon_t* d);
     void (*const generate)(dungeon_t* d);
-    void (*const update_path_maps)(dungeon_t* d);
-    void (*const print)(dungeon_t* d, int mode);
-    void (*const load)(dungeon_t* d);
-    void (*const save)(dungeon_t* d);
     // should be moved to playerAPI:
     void (*const set_player_pos)(dungeon_t* d, point_t* p);
     point_t* (*const get_player_pos)();

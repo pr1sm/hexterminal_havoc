@@ -32,21 +32,21 @@ int main(int argc, char * argv[]) {
     dungeon_t* d = dungeonAPI.construct();
     
     if(LOAD_DUNGEON) {
-        dungeonAPI.load(d);
+        d->load(d);
     } else {
         dungeonAPI.generate(d);
     }
     
-    dungeonAPI.update_path_maps(d);
+    d->update_path_maps(d);
     
-    dungeonAPI.print(d, PM_DUNGEON);
+    d->print(d, PM_DUNGEON);
     
-    dungeonAPI.print(d, PM_ROOM_PATH_MAP);
+    d->print(d, PM_ROOM_PATH_MAP);
     
-    dungeonAPI.print(d, PM_TUNN_PATH_MAP);
+    d->print(d, PM_TUNN_PATH_MAP);
     
     if(SAVE_DUNGEON) {
-        dungeonAPI.save(d);
+        d->save(d);
     }
     
     dungeonAPI.destruct(d);

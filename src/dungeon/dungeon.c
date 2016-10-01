@@ -23,8 +23,14 @@
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
-// Array of tiles for the dungeon
-// size will be 21 rows x 80 cols
+// Public Functions
+
+static void update_path_maps_impl(dungeon_t* d);
+static void print_impl(dungeon_t* d, int mode);
+static void load_impl(dungeon_t* d);
+static void save_impl(dungeon_t* d);
+
+// Private Functions
 
 static point_t* player_pos;
 static void accent_dungeon(dungeon_t* d);
@@ -46,7 +52,7 @@ static void d_log_room(room_t* r) {
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
-static dungeon_t* construct() {
+static dungeon_t* construct_impl() {
     logger.i("Constructing Dungeon...");
     int i, j;
     srand((unsigned)time(NULL));
@@ -61,11 +67,16 @@ static dungeon_t* construct() {
             d->tiles[i][j] = tileAPI.construct(j, i);
         }
     }
+    
+    d->update_path_maps = update_path_maps_impl;
+    d->print = print_impl;
+    d->load = load_impl;
+    d->save = save_impl;
     logger.i("Dungeon Constructed");
     return d;
 }
 
-static void destruct(dungeon_t* d) {
+static void destruct_impl(dungeon_t* d) {
     logger.i("Destructing Dungeon...");
     int i, j;
     for(i = 0; i < d->room_size; i++) {
@@ -83,7 +94,7 @@ static void destruct(dungeon_t* d) {
     logger.i("Dungeon Destructed");
 }
 
-static void generate(dungeon_t* d) {
+static void generate_impl(dungeon_t* d) {
     generate_terrain(d);
     place_rooms(d);
     pathfind(d);
@@ -91,7 +102,7 @@ static void generate(dungeon_t* d) {
     dungeonAPI.set_player_pos(d, NULL);
 }
 
-static void update_path_maps(dungeon_t* d) {
+static void update_path_maps_impl(dungeon_t* d) {
     point_t* p = dungeonAPI.get_player_pos();
     graph_t* g = pathfinderAPI.construct(d, 0);
     pathfinderAPI.generate_pathmap(g, d, p, 0);
@@ -101,7 +112,7 @@ static void update_path_maps(dungeon_t* d) {
     pathfinderAPI.destruct(g);
 }
 
-static void print(dungeon_t* d, int mode) {
+static void print_impl(dungeon_t* d, int mode) {
     logger.i("Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -118,7 +129,7 @@ static void print(dungeon_t* d, int mode) {
     logger.i("Dungeon Printed");
 }
 
-static void load(dungeon_t* d) {
+static void load_impl(dungeon_t* d) {
     logger.i("Loading Dungeon...");
     FILE* f;
     int version;
@@ -186,7 +197,7 @@ static void load(dungeon_t* d) {
     fclose(f);
 }
 
-static void save(dungeon_t* d) {
+static void save_impl(dungeon_t* d) {
     logger.i("Saving Dungeon...");
     FILE* f;
     int version = 0;
@@ -630,13 +641,9 @@ static void add_rooms(dungeon_t* d) {
 }
 
 dungeon_namespace const dungeonAPI = {
-    construct,
-    destruct,
-    generate,
-    update_path_maps,
-    print,
-    load,
-    save,
+    construct_impl,
+    destruct_impl,
+    generate_impl,
     set_player_pos,
     get_player_pos
 };
