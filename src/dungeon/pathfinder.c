@@ -35,9 +35,9 @@ static int hardness_to_weight(int hardness) {
         logger.w("Shouldn't convert hardness 255 to weight! defaulting to INT_MAX");
         return INT_MAX;
     }
-    return hardness == 0 ? 1 :
-           hardness < 85 ? 1 :
-           hardness < 171 ? 2 : 3;
+    return hardness == 0        ? 1 :
+           hardness < ROCK_MED  ? 1 :
+           hardness < ROCK_HARD ? 2 : 3;
 }
 
 static graph_t* construct(dungeon_t* d, int tunnel) {
