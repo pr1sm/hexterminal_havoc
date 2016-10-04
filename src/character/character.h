@@ -39,6 +39,7 @@ struct character_t {
 typedef struct character_namespace {
     character_t* (*const construct)(character_type type, point_t* spawn);
     void         (*const destruct)(character_t* c);
+    character_t* (*const get_pc)();
 } character_namespace;
 extern character_namespace const characterAPI;
 

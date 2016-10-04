@@ -20,6 +20,7 @@
 #include "../room/room.h"
 #include "../logger/logger.h"
 #include "../env/env.h"
+#include "../character/character.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
@@ -32,7 +33,7 @@ static void save_impl(dungeon_t* d);
 
 // Private Functions
 
-static point_t* player_pos;
+static void place_player(dungeon_t* d);
 static void accent_dungeon(dungeon_t* d);
 static void diffuse_dungeon(dungeon_t* d);
 static void smooth_dungeon(dungeon_t* d);
@@ -99,11 +100,11 @@ static void generate_impl(dungeon_t* d) {
     place_rooms(d);
     pathfind(d);
     update_path_hardnesses(d);
-    dungeonAPI.set_player_pos(d, NULL);
+    place_player(d);
 }
 
 static void update_path_maps_impl(dungeon_t* d) {
-    point_t* p = dungeonAPI.get_player_pos();
+    point_t* p = characterAPI.get_pc()->position;
     graph_t* g = pathfinderAPI.construct(d, 0);
     pathfinderAPI.generate_pathmap(g, d, p, 0);
     pathfinderAPI.destruct(g);
@@ -189,7 +190,7 @@ static void load_impl(dungeon_t* d) {
             }
         }
     }
-    dungeonAPI.set_player_pos(d, NULL);
+    place_player(d);
     
     logger.i("Dungeon Loaded");
     free(semantic);
@@ -251,26 +252,19 @@ point_t* rand_point_impl(dungeon_t* d) {
     return d->tiles[r->location->y+k][r->location->x+j]->location;
 }
 
-static void set_player_pos(dungeon_t* d, point_t* p) {
-    // TODO: Check error bounds
-    if(p == NULL) {
-        // Generate random point or use starting values
-        if(X_START < 80 && Y_START < 80) {
-            player_pos = d->tiles[Y_START][X_START]->location;
-        } else {
-            int i = rand() % d->room_size;
-            room_t* r = d->rooms[i];
-            int j = rand() % r->width;
-            int k = rand() % r->height;
-            player_pos = d->tiles[r->location->y+k][r->location->x+j]->location;
-        }
+static void place_player(dungeon_t* d) {
+    // TODO: check error bounds
+    // Generate random point or use starting values
+    character_t* pc = characterAPI.get_pc();
+    if(X_START < 80 && Y_START < 80) {
+        pc->set_position(pc, d->tiles[Y_START][X_START]->location);
     } else {
-        player_pos = p;
+        int i = rand() % d->room_size;
+        room_t* r = d->rooms[i];
+        int j = rand() % r->width;
+        int k = rand() % r->height;
+        pc->set_position(pc, d->tiles[r->location->y+k][r->location->x+j]->location);
     }
-}
-
-static point_t* get_player_pos() {
-    return player_pos;
 }
 
 static void generate_terrain(dungeon_t* d) {
@@ -665,7 +659,5 @@ dungeon_namespace const dungeonAPI = {
     construct_impl,
     destruct_impl,
     generate_impl,
-    rand_point_impl,
-    set_player_pos,
-    get_player_pos
+    rand_point_impl
 };
