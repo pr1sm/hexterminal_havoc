@@ -241,6 +241,16 @@ static void save_impl(dungeon_t* d) {
     fclose(f);
 }
 
+point_t* rand_point_impl(dungeon_t* d) {
+    int i, j, k;
+    room_t* r;
+    i = rand() % d->room_size;
+    r = d->rooms[i];
+    j = rand() % r->width;
+    k = rand() % r->height;
+    return d->tiles[r->location->y+k][r->location->x+j]->location;
+}
+
 static void set_player_pos(dungeon_t* d, point_t* p) {
     // TODO: Check error bounds
     if(p == NULL) {
@@ -655,6 +665,7 @@ dungeon_namespace const dungeonAPI = {
     construct_impl,
     destruct_impl,
     generate_impl,
+    rand_point_impl,
     set_player_pos,
     get_player_pos
 };

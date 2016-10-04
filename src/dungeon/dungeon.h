@@ -35,6 +35,7 @@ typedef struct dungeon_namespace {
     dungeon_t* (*const construct)();
     void (*const destruct)(dungeon_t* d);
     void (*const generate)(dungeon_t* d);
+    point_t* (*const rand_point)(dungeon_t* d);
     // should be moved to playerAPI:
     void (*const set_player_pos)(dungeon_t* d, point_t* p);
     point_t* (*const get_player_pos)();
