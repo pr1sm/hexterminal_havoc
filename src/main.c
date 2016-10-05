@@ -17,6 +17,7 @@
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
 #include "tile/tile.h"
+#include "character/character_store.h"
 
 int main(int argc, char * argv[]) {
     
@@ -29,7 +30,7 @@ int main(int argc, char * argv[]) {
         logger.set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
     }
     
-    dungeon_t* d = dungeonAPI.construct();
+    dungeon_t* d = dungeonAPI.get_dungeon();
     
     if(LOAD_DUNGEON) {
         d->load(d);
@@ -38,6 +39,8 @@ int main(int argc, char * argv[]) {
     }
     
     d->update_path_maps(d);
+    
+    characterStoreAPI.setup();
     
     d->print(d, PM_DUNGEON);
     
@@ -48,6 +51,8 @@ int main(int argc, char * argv[]) {
     if(SAVE_DUNGEON) {
         d->save(d);
     }
+    
+    characterStoreAPI.teardown();
     
     dungeonAPI.destruct(d);
     envAPI.cleanup();

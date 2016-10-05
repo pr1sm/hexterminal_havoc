@@ -14,6 +14,7 @@
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
 #include "../character/character.h"
+#include "../character/character_store.h"
 
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '
@@ -121,9 +122,9 @@ static int are_changes_proposed_impl(tile_t* tile) {
 
 static char char_for_content_impl(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
-        point_t* player_pos = characterAPI.get_pc()->position;
-        if(player_pos->distance(tile->location, player_pos) == 0) {
-            return PC_CHAR;
+        int npc_idx = characterStoreAPI.contains_npc(tile->location);
+        if(npc_idx != -1) {
+            return characterStoreAPI.get_char_for_npc_at_index(npc_idx);
         }
         return tile->content == tc_BORDER ? BORDER_CHAR :
         tile->content == tc_ROCK   ? ROCK_CHAR   :

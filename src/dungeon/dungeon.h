@@ -32,6 +32,7 @@ typedef struct dungeon_t {
 } dungeon_t;
 
 typedef struct dungeon_namespace {
+    dungeon_t* (*const get_dungeon)();
     dungeon_t* (*const construct)();
     void (*const destruct)(dungeon_t* d);
     void (*const generate)(dungeon_t* d);

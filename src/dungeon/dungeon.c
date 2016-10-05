@@ -24,6 +24,9 @@
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
+// Private variables
+static dungeon_t* _base_dungeon = NULL;
+
 // Public Functions
 
 static void update_path_maps_impl(dungeon_t* d);
@@ -51,6 +54,13 @@ static void d_log_room(room_t* r) {
         printf("Room: x: %2d, y: %2d, w: %2d, h: %2d\n", r->location->x, r->location->y, r->width, r->height);
     }
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
+}
+
+static dungeon_t* get_dungeon_impl() {
+    if(_base_dungeon == NULL) {
+        _base_dungeon = dungeonAPI.construct();
+    }
+    return _base_dungeon;
 }
 
 static dungeon_t* construct_impl() {
@@ -656,6 +666,7 @@ static void add_rooms(dungeon_t* d) {
 }
 
 dungeon_namespace const dungeonAPI = {
+    get_dungeon_impl,
     construct_impl,
     destruct_impl,
     generate_impl,

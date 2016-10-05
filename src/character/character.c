@@ -21,7 +21,7 @@ static character_t* gPLAYER_CHARACTER = NULL;
 static character_t* construct_impl(character_type type, point_t* p) {
     character_t* c = calloc(1, sizeof(character_t));
     point_t* pos;
-    
+    c->type = type;
     if(type == PC) {
         c->speed = 10;
         c->attrs = 0;
@@ -64,6 +64,16 @@ static character_t* get_pc_impl() {
     return gPLAYER_CHARACTER;
 }
 
+static char char_for_npc_type_impl(character_t* self) {
+    if(self->type == PC) {
+        return '@';
+    }
+    if(self->attrs < 10) {
+        return '0'+self->attrs;
+    }
+    return 'a'+self->attrs-10;
+}
+
 static void set_position_impl(character_t* self, point_t* p) {
     set_point_impl(self->position, p);
 }
@@ -88,5 +98,6 @@ static void set_point_impl(point_t* c, point_t* p) {
 const character_namespace characterAPI = {
     construct_impl,
     destruct_impl,
-    get_pc_impl
+    get_pc_impl,
+    char_for_npc_type_impl
 };
