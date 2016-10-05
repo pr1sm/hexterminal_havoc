@@ -12,12 +12,14 @@
 #include <time.h>
 #include <errno.h>
 #include <limits.h>
+#include <unistd.h>
 
 #include "env/env.h"
 #include "dungeon/dungeon.h"
 #include "logger/logger.h"
 #include "tile/tile.h"
 #include "character/character_store.h"
+#include "events/event_queue.h"
 
 int main(int argc, char * argv[]) {
     
@@ -44,12 +46,18 @@ int main(int argc, char * argv[]) {
     
     d->print(d, PM_DUNGEON);
     
-    d->print(d, PM_ROOM_PATH_MAP);
-    
-    d->print(d, PM_TUNN_PATH_MAP);
+//    d->print(d, PM_ROOM_PATH_MAP);
+//    
+//    d->print(d, PM_TUNN_PATH_MAP);
     
     if(SAVE_DUNGEON) {
         d->save(d);
+    }
+    
+    while(!temp_is_finished()) {
+        eventQueueAPI.perform_event();
+        d->print(d, PM_DUNGEON);
+        usleep(500000);
     }
     
     characterStoreAPI.teardown();

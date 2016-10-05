@@ -25,9 +25,9 @@ static int point_to_index(point_t* p) {
     return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
 }
 
-static point_t index_to_point(int index) {
-    point_t p = {(index % (DUNGEON_WIDTH-2))+1, (index / (DUNGEON_WIDTH-2))+1};
-    return p;
+static void index_to_point(int index, point_t* p) {
+    p->x = (index % (DUNGEON_WIDTH-2))+1;
+    p->y = (index / (DUNGEON_WIDTH-2))+1;
 }
 
 static int hardness_to_weight(int hardness) {
@@ -108,7 +108,8 @@ static void update_tiles(graph_t* g, dungeon_t* d, int tunnel) {
         if(v == NULL) {
             continue;
         }
-        point_t p = index_to_point(v->index);
+        point_t p;
+        index_to_point(v->index, &p);
         tile_t* t = d->tiles[p.y][p.x];
         if(tunnel) {
             t->update_dist_tunnel(t, v->dist);

@@ -12,6 +12,10 @@
 #include "character.h"
 #include "../point/point.h"
 
+// Temp for player movement!
+void temp_handle_player_move();
+int  temp_is_finished();
+
 typedef struct character_store_namespace {
     void (*const setup)();
     void (*const teardown)();

@@ -14,6 +14,9 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
+// Temp for player movement!
+#include "../character/character_store.h"
+
 static void perform_impl(event_t* e);
 
 static event_t* construct_impl(character_t* c, event_action_t action) {
@@ -38,6 +41,10 @@ static void destruct_impl(event_t* e) {
 static void perform_impl(event_t* e) {
     // Perform action!
     // Add new event to queue if needed
+    character_t* c = e->controller;
+    if(c->type == PC) {
+        temp_handle_player_move();
+    }
 }
 
 event_namespace const eventAPI = {

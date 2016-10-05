@@ -37,7 +37,7 @@ static void add_event_impl(character_t* c, event_action_t action) {
 }
 
 static void perform_event_impl() {
-    if(heapAPI.is_empty) {
+    if(heapAPI.is_empty(_event_queue)) {
         logger.t("perform event called, but there are no events in the event queue!");
         return;
     }
