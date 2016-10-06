@@ -79,6 +79,9 @@ static dungeon_t* construct_impl() {
         }
     }
     
+    d->tunnel_map = NULL;
+    d->non_tunnel_map = NULL;
+    
     d->update_path_maps = update_path_maps_impl;
     d->print = print_impl;
     d->load = load_impl;
@@ -94,6 +97,10 @@ static void destruct_impl(dungeon_t* d) {
         roomAPI.destruct(d->rooms[i]);
     }
     free(d->rooms);
+    
+    pathfinderAPI.destruct(d->non_tunnel_map);
+    pathfinderAPI.destruct(d->tunnel_map);
+    
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             tileAPI.destruct(d->tiles[i][j]);
@@ -115,12 +122,15 @@ static void generate_impl(dungeon_t* d) {
 
 static void update_path_maps_impl(dungeon_t* d) {
     point_t* p = characterAPI.get_pc()->position;
-    graph_t* g = pathfinderAPI.construct(d, 0);
-    pathfinderAPI.generate_pathmap(g, d, p, 0);
-    pathfinderAPI.destruct(g);
-    g = pathfinderAPI.construct(d, 1);
-    pathfinderAPI.generate_pathmap(g, d, p, 1);
-    pathfinderAPI.destruct(g);
+    if(d->tunnel_map == NULL) {
+        d->tunnel_map = pathfinderAPI.construct(d, 1);
+    }
+    if(d->non_tunnel_map == NULL) {
+        d->non_tunnel_map = pathfinderAPI.construct(d, 0);
+    }
+    
+    pathfinderAPI.generate_pathmap(d->non_tunnel_map, d, p, 0);
+    pathfinderAPI.generate_pathmap(d->tunnel_map, d, p, 1);
 }
 
 static void print_impl(dungeon_t* d, int mode) {

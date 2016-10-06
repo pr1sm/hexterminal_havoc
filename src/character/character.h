@@ -32,6 +32,7 @@ struct character_t {
     uint8_t attrs;
     uint8_t speed;
     uint8_t turn_count;
+    uint8_t is_dead;
     void (*set_position)(character_t* c, point_t* p);
     void (*set_destination)(character_t* c, point_t* p);
 };

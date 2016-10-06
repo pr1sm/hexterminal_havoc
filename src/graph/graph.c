@@ -89,6 +89,26 @@ static void add_edge(graph_t* g, point_t* src, point_t* dest, int weight) {
     g->edge_count++;
 }
 
+static path_node_t* add_path_node(point_t* p) {
+    if(p == NULL) {
+        logger.w("Tried to create path node with NULL point! Returning NULL");
+        return NULL;
+    }
+    path_node_t* pn = calloc(1, sizeof(path_node_t));
+    point_t* curr = pointAPI.construct(p->x, p->y);
+    pn->curr = curr;
+    pn->next = NULL;
+    return pn;
+}
+
+static void destruct_path(path_node_t* pn) {
+    free(pn->curr);
+    if(pn->next != NULL) {
+        graphAPI.destruct_path(pn->next);
+    }
+    free(pn);
+}
+
 static int compare_vertices(const void* a, const void* b) {
     const vertex_t* a_v = (const vertex_t*)a;
     const vertex_t* b_v = (const vertex_t*)b;
@@ -99,5 +119,7 @@ graph_namespace const graphAPI = {
     add_vertex,
     add_edge,
     free_vertex,
-    compare_vertices
+    compare_vertices,
+    add_path_node,
+    destruct_path
 };

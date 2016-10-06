@@ -44,6 +44,8 @@ static void perform_impl(event_t* e) {
     character_t* c = e->controller;
     if(c->type == PC) {
         temp_handle_player_move();
+    } else {
+        temp_handle_npc_turn(c);
     }
 }
 

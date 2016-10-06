@@ -15,6 +15,7 @@
 // Temp for player movement!
 void temp_handle_player_move();
 int  temp_is_finished();
+void temp_handle_npc_turn(character_t* c);
 
 typedef struct character_store_namespace {
     void (*const setup)();

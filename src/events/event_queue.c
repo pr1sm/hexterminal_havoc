@@ -36,16 +36,27 @@ static void add_event_impl(character_t* c, event_action_t action) {
     heapAPI.insert(_event_queue, e);
 }
 
-static void perform_event_impl() {
+static int perform_event_impl() {
     if(heapAPI.is_empty(_event_queue)) {
         logger.t("perform event called, but there are no events in the event queue!");
-        return;
+        return 0;
     }
     event_t* e = heapAPI.remove(_event_queue);
+    EVENT_TIME = e->event_count;
     
     e->perform(e);
     
     eventAPI.destruct(e);
+    
+    // check if anything else should be moved
+    e = heapAPI.peek(_event_queue);
+    while(e->event_count == EVENT_TIME) {
+        e = heapAPI.remove(_event_queue);
+        e->perform(e);
+        eventAPI.destruct(e);
+        e = heapAPI.peek(_event_queue);
+    }
+    return 1;
 }
 
 event_queue_namespace const eventQueueAPI = {

@@ -34,11 +34,20 @@ typedef struct {
     int (*point_to_index)(point_t* p);
 } graph_t;
 
+// Path structs
+typedef struct path_node_t path_node_t;
+struct path_node_t {
+    point_t* curr;
+    path_node_t* next;
+};
+
 typedef struct graph_namespace {
     void (*const add_vertex)(graph_t* g, point_t* p);
     void (*const add_edge)(graph_t* g, point_t* src, point_t* dest, int weight);
     void (*const free_vertex)(vertex_t* v);
     int  (*const compare_vertices)(const void* a, const void* b);
+    path_node_t* (*const add_path_node)(point_t* p);
+    void (*const destruct_path)(path_node_t* pn);
 } graph_namespace;
 extern graph_namespace const graphAPI;
 

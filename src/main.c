@@ -53,11 +53,19 @@ int main(int argc, char * argv[]) {
     if(SAVE_DUNGEON) {
         d->save(d);
     }
-    
-    while(!temp_is_finished()) {
-        eventQueueAPI.perform_event();
+    int next_turn = 1;
+    int win_status = temp_is_finished();
+    while(!win_status && next_turn) {
+        next_turn = eventQueueAPI.perform_event();
+        win_status = temp_is_finished();
         d->print(d, PM_DUNGEON);
-        usleep(500000);
+        usleep(250000);
+    }
+    
+    if(win_status == 1) {
+        printf("YOU LOSE!\n");
+    } else {
+        printf("BY SHEER LUCK, YOU WON!\n");
     }
     
     characterStoreAPI.teardown();
