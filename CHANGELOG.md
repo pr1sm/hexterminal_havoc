@@ -4,7 +4,23 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.03] - 2016-8-21
+## [1.04] - 2016-10-4
+
+### Added
+- Event queue to perform different npc and player events
+- Player AI to control player in dungeon (temporary!)
+- NPC AI to have monsters chase the player
+- More Logging!
+- bresenhams algorithm for line of sight checking
+
+### Changed
+- Major refactors towards a more object oriented style
+- Change functions to have funtion pointers in structs instead of separate API (when applicable)
+
+### Fixed
+- Various bug fixes
+
+## [1.03] - 2016-9-21
 
 ### Added
 - Player Marker on the dungeon (gets randomly spawned on dungeon load or generate)
