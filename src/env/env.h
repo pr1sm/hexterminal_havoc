@@ -17,6 +17,7 @@ typedef unsigned char uint8_t;
 extern int DEBUG_MODE;
 extern int LOAD_DUNGEON;
 extern int SAVE_DUNGEON;
+extern int NUM_MONSTERS;
 extern char* HOME;
 extern char* LOAD_FILE;
 extern char* SAVE_FILE;

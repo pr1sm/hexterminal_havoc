@@ -60,8 +60,7 @@ static void print_char(character_t* npc) {
 }
 
 static void setup_impl() {
-    // TODO: change to get by CLI
-    int nummon = 6;
+    int nummon = NUM_MONSTERS;
     int i;
     dungeon_t* d = dungeonAPI.get_dungeon();
     _characters_size = nummon + 1; // num of monsters + pc
