@@ -40,7 +40,7 @@ typedef struct dungeon_namespace {
     dungeon_t* (*const construct)();
     void (*const destruct)(dungeon_t* d);
     void (*const generate)(dungeon_t* d);
-    point_t* (*const rand_point)(dungeon_t* d);
+    void (*const rand_point)(dungeon_t* d, point_t* p);
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
 

@@ -14,7 +14,6 @@
 
 static void set_position_impl(character_t* self, point_t* p);
 static void set_destination_impl(character_t* self, point_t* p);
-static void set_point_impl(point_t* c, point_t* p);
 
 static character_t* gPLAYER_CHARACTER = NULL;
 
@@ -75,23 +74,28 @@ static char char_for_npc_type_impl(character_t* self) {
 }
 
 static void set_position_impl(character_t* self, point_t* p) {
-    set_point_impl(self->position, p);
-}
-
-static void set_destination_impl(character_t* self, point_t* p) {
-    set_point_impl(self->destination, p);
-}
-
-static void set_point_impl(point_t* c, point_t* p) {
     if(p == NULL) {
         logger.w("NULL point passed into set_point! returning without changing!");
         return;
     }
-    if(c == NULL) {
-        c = pointAPI.construct(p->x, p->y);
+    if(self->position == NULL) {
+        self->position = pointAPI.construct(p->x, p->y);
     } else {
-        c->x = p->x;
-        c->y = p->y;
+        self->position->x = p->x;
+        self->position->y = p->y;
+    }
+}
+
+static void set_destination_impl(character_t* self, point_t* p) {
+    if(p == NULL) {
+        logger.w("NULL point passed into set_point! returning without changing!");
+        return;
+    }
+    if(self->destination == NULL) {
+        self->destination = pointAPI.construct(p->x, p->y);
+    } else {
+        self->destination->x = p->x;
+        self->destination->y = p->y;
     }
 }
 

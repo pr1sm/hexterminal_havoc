@@ -33,6 +33,7 @@ static void update_path_maps_impl(dungeon_t* d);
 static void print_impl(dungeon_t* d, int mode);
 static void load_impl(dungeon_t* d);
 static void save_impl(dungeon_t* d);
+static void rand_point_impl(dungeon_t* d, point_t* p);
 
 // Private Functions
 
@@ -262,14 +263,17 @@ static void save_impl(dungeon_t* d) {
     fclose(f);
 }
 
-point_t* rand_point_impl(dungeon_t* d) {
+static void rand_point_impl(dungeon_t* d, point_t* p) {
     int i, j, k;
     room_t* r;
+    point_t* tile_loc;
     i = rand() % d->room_size;
     r = d->rooms[i];
     j = rand() % r->width;
     k = rand() % r->height;
-    return d->tiles[r->location->y+k][r->location->x+j]->location;
+    tile_loc = d->tiles[r->location->y+k][r->location->x+j]->location;
+    p->x = tile_loc->x;
+    p->y = tile_loc->y;
 }
 
 static void place_player(dungeon_t* d) {

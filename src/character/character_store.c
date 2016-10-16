@@ -70,9 +70,9 @@ static void setup_impl() {
     point_t* pc_pos = _characters[0]->position;
     temp_setup_player_movement();
     for(i = 1; i < _characters_size; i++) {
-        point_t* spawn;
+        point_t* spawn = pointAPI.construct(0, 0);
         do {
-            spawn = dungeonAPI.rand_point(d);
+            dungeonAPI.rand_point(d, spawn);
         } while(spawn->distance(spawn, pc_pos) == 0);
         
         character_t* npc = characterAPI.construct(NPC, spawn);
@@ -103,6 +103,7 @@ static void setup_impl() {
         eventQueueAPI.add_event(npc, MOVE);
         _characters[i] = npc;
         
+        free(spawn);
         print_char(npc);
     }
 }
@@ -141,15 +142,15 @@ static void temp_setup_player_movement() {
     if(player_path == NULL) {
         player_path = pathfinderAPI.construct(dungeonAPI.get_dungeon(), 0);
     }
-    point_t* rand_dest = dungeonAPI.rand_point(dungeonAPI.get_dungeon());
-    characterAPI.get_pc()->destination = rand_dest;
-    // TODO: Fix this!
-//    characterAPI.get_pc()->set_destination(characterAPI.get_pc(), rand_dest);
+    point_t rand_dest;
+    character_t* pc = characterAPI.get_pc();
+    dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &rand_dest);
+    pc->set_destination(pc, &rand_dest);
     logger.i("Setting player path from (%2d, %2d) to (%2d, %2d)",
              characterAPI.get_pc()->position->x,
              characterAPI.get_pc()->position->y,
-             rand_dest->x,
-             rand_dest->y);
+             rand_dest.x,
+             rand_dest.y);
     dijkstraAPI.dijkstra(player_path, characterAPI.get_pc()->destination, characterAPI.get_pc()->position);
     eventQueueAPI.add_event(characterAPI.get_pc(), MOVE);
 }
@@ -230,6 +231,9 @@ void temp_handle_npc_turn(character_t* c) {
     if(c->type == PC) {
         return;
     }
+    if(c->is_dead) {
+        return;
+    }
     int behave_erratically = rand() & 1;
     int dungeon_updated = 0;
     path_node_t* los_path = temp_has_los_to_pc(c->position);
@@ -308,7 +312,9 @@ void temp_handle_npc_turn(character_t* c) {
             // use path maps
             if(c->destination == NULL || c->destination->distance(c->destination, c->position) == 0) {
                 // pick new point to go to
-                c->destination = dungeonAPI.rand_point(d);
+                point_t rand_dest;
+                dungeonAPI.rand_point(d, &rand_dest);
+                c->set_destination(c, &rand_dest);
             }
             // choose correct map and use dijkstras
             graph_t* map = (c->attrs & TUNNL_VAL) ? d->tunnel_map : d->non_tunnel_map;
@@ -361,8 +367,9 @@ void temp_handle_npc_turn(character_t* c) {
                 // next tile is rock and npc is non-tunneler, nothing can be done
             } else {
                 // no los, pick a random point to go to
-                point_t* p = dungeonAPI.rand_point(d);
-                path_node_t* new_path = dijkstraAPI.bresenham(p, c->position);
+                point_t p;
+                dungeonAPI.rand_point(d, &p);
+                path_node_t* new_path = dijkstraAPI.bresenham(&p, c->position);
                 if(new_path != NULL) {
                     point_t* next_pos = new_path->next->curr;
                     tile_t* next_tile = d->tiles[next_pos->y][next_pos->x];
