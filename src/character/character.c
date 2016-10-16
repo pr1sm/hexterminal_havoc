@@ -50,6 +50,10 @@ static character_t* construct_impl(character_type type, point_t* p) {
     return c;
 }
 
+static character_t* construct_npc_impl(point_t* p) {
+    return construct_impl(NPC, p);
+}
+
 static void destruct_impl(character_t* c) {
     free(c->position);
     free(c->destination);
@@ -65,7 +69,7 @@ static character_t* get_pc_impl() {
         } else {
             dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
         }
-        gPLAYER_CHARACTER = characterAPI.construct(PC, &spawn);
+        gPLAYER_CHARACTER = construct_impl(PC, &spawn);
     }
     return gPLAYER_CHARACTER;
 }
@@ -107,7 +111,7 @@ static void set_destination_impl(character_t* self, point_t* p) {
 }
 
 const character_namespace characterAPI = {
-    construct_impl,
+    construct_npc_impl,
     destruct_impl,
     get_pc_impl,
     char_for_npc_type_impl

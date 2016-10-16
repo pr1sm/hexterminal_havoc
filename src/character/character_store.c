@@ -75,7 +75,7 @@ static void setup_impl() {
             dungeonAPI.rand_point(d, spawn);
         } while(spawn->distance(spawn, pc_pos) == 0);
         
-        character_t* npc = characterAPI.construct(NPC, spawn);
+        character_t* npc = characterAPI.construct_npc(spawn);
         
         // TODO: Setup destination point
         
