@@ -11,6 +11,7 @@
 #include "character.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
+#include "../dungeon/dungeon.h"
 
 static void set_position_impl(character_t* self, point_t* p);
 static void set_destination_impl(character_t* self, point_t* p);
@@ -57,8 +58,14 @@ static void destruct_impl(character_t* c) {
 
 static character_t* get_pc_impl() {
     if(gPLAYER_CHARACTER == NULL) {
-        point_t p = {1, 1};
-        gPLAYER_CHARACTER = characterAPI.construct(PC, &p);
+        point_t spawn;
+        if(X_START < 80 && Y_START < 21) {
+            spawn.x = X_START;
+            spawn.y = Y_START;
+        } else {
+            dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
+        }
+        gPLAYER_CHARACTER = characterAPI.construct(PC, &spawn);
     }
     return gPLAYER_CHARACTER;
 }

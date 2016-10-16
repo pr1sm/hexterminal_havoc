@@ -37,7 +37,6 @@ static void rand_point_impl(dungeon_t* d, point_t* p);
 
 // Private Functions
 
-static void place_player(dungeon_t* d);
 static void accent_dungeon(dungeon_t* d);
 static void diffuse_dungeon(dungeon_t* d);
 static void smooth_dungeon(dungeon_t* d);
@@ -118,7 +117,6 @@ static void generate_impl(dungeon_t* d) {
     place_rooms(d);
     pathfind(d);
     update_path_hardnesses(d);
-    place_player(d);
 }
 
 static void update_path_maps_impl(dungeon_t* d) {
@@ -211,7 +209,6 @@ static void load_impl(dungeon_t* d) {
             }
         }
     }
-    place_player(d);
     
     logger.i("Dungeon Loaded");
     free(semantic);
@@ -274,21 +271,6 @@ static void rand_point_impl(dungeon_t* d, point_t* p) {
     tile_loc = d->tiles[r->location->y+k][r->location->x+j]->location;
     p->x = tile_loc->x;
     p->y = tile_loc->y;
-}
-
-static void place_player(dungeon_t* d) {
-    // TODO: check error bounds
-    // Generate random point or use starting values
-    character_t* pc = characterAPI.get_pc();
-    if(X_START < 80 && Y_START < 80) {
-        pc->set_position(pc, d->tiles[Y_START][X_START]->location);
-    } else {
-        int i = rand() % d->room_size;
-        room_t* r = d->rooms[i];
-        int j = rand() % r->width;
-        int k = rand() % r->height;
-        pc->set_position(pc, d->tiles[r->location->y+k][r->location->x+j]->location);
-    }
 }
 
 static void generate_terrain(dungeon_t* d) {
