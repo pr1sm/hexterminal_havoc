@@ -329,13 +329,11 @@ void temp_handle_npc_turn(character_t* c) {
                     if(new_hardness == 0) {
                         // tile is now a path, move immediately
                         tile->update_content(tile, tc_PATH);
-                        c->position->x = tile->location->x;
-                        c->position->y = tile->location->y;
+                        c->set_position(c, tile->location);
                     }
                 } else {
                     // move to position
-                    c->position->x = tile->location->x;
-                    c->position->y = tile->location->y;
+                    c->set_position(c, tile->location);
                 }
             }
         } else {
@@ -346,8 +344,7 @@ void temp_handle_npc_turn(character_t* c) {
                 tile_t* next_tile = d->tiles[next_pos->y][next_pos->x];
                 if(next_tile->content != tc_ROCK) {
                     // next tile is a room/path, move to that position
-                    c->position->x = next_tile->location->x;
-                    c->position->y = next_tile->location->y;
+                    c->set_position(c, next_tile->location);
                 } else if(c->attrs & TUNNL_VAL) {
                     // next tile is rock and npc is a tunneler, tunnel to that position
                     uint8_t new_hardness = next_tile->rock_hardness - 85 > 0 ? next_tile->rock_hardness - 85 : 0;
@@ -356,8 +353,7 @@ void temp_handle_npc_turn(character_t* c) {
                     if(new_hardness == 0) {
                         // tile is now a path, move immediately
                         next_tile->update_content(next_tile, tc_PATH);
-                        c->position->x = next_tile->location->x;
-                        c->position->y = next_tile->location->y;
+                        c->set_position(c, next_tile->location);
                     }
                 }
                 // next tile is rock and npc is non-tunneler, nothing can be done
@@ -371,8 +367,7 @@ void temp_handle_npc_turn(character_t* c) {
                     tile_t* next_tile = d->tiles[next_pos->y][next_pos->x];
                     if(next_tile->content != tc_ROCK) {
                         // next tile is a room/path, move to that position
-                        c->position->x = next_tile->location->x;
-                        c->position->y = next_tile->location->y;
+                        c->set_position(c, next_tile->location);
                     } else if(c->attrs & TUNNL_VAL) {
                         // next tile is rock and npc is a tunneler, tunnel to that position
                         uint8_t new_hardness = next_tile->rock_hardness - 85 > 0 ? next_tile->rock_hardness - 85 : 0;
@@ -381,8 +376,7 @@ void temp_handle_npc_turn(character_t* c) {
                         if(new_hardness == 0) {
                             // tile is now a path, move immediately
                             next_tile->update_content(next_tile, tc_PATH);
-                            c->position->x = next_tile->location->x;
-                            c->position->y = next_tile->location->y;
+                            c->set_position(c, next_tile->location);
                         }
                     }
                     // next tile is rock and npc is non-tunneler, nothing can be done
