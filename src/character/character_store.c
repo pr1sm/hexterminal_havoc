@@ -93,7 +93,7 @@ static void teardown_impl() {
     int i;
     for(i = 0; i < _characters_size; i++) {
         if(_characters[i] != NULL) {
-            free(_characters[i]);
+            characterAPI.destruct(_characters[i]);
         }
     }
     free(_characters);
@@ -207,7 +207,7 @@ int temp_is_finished() {
     if(win_count >= _characters_count-1) {
         return 2;
     }
-    return (pc_pos->distance(pc_pos, characterAPI.get_pc()->destination) == 0);
+    return 0;
 }
 
 path_node_t* temp_has_los_to_pc(point_t* p) {
@@ -247,28 +247,18 @@ void temp_handle_npc_turn(character_t* c) {
     // Setup destination
     point_t* pc_pos = characterAPI.get_pc()->position;
     if(c->attrs & TELEP_VAL) {
-        if(c->destination == NULL) {
-            c->destination = pointAPI.construct(pc_pos->x, pc_pos->y);
-        } else {
-            c->destination->x = pc_pos->x;
-            c->destination->y = pc_pos->y;
-        }
+        c->set_destination(c, pc_pos);
     } else {
         // Check line of sight
         if(los_path != NULL) {
             // path found, update destination in all cases
-            if(c->destination == NULL) {
-                c->destination = pointAPI.construct(pc_pos->x, pc_pos->y);
-            } else {
-                c->destination->x = pc_pos->x;
-                c->destination->y = pc_pos->y;
-            }
+            c->set_destination(c, pc_pos);
         } else if(!(c->attrs & INTEL_VAL)) {
             // npc is not intelligent -- destruct destination and set it to NULL
-            if(c->destination != NULL) {
+            if(c->destination != NULL && (c->destination->distance(c->destination, pc_pos) == 0)) {
                 pointAPI.destruct(c->destination);
+                c->destination = NULL;
             }
-            c->destination = NULL;
         }
     }
     
