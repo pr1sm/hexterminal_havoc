@@ -32,6 +32,8 @@ static graph_t* player_path = NULL;
 static void temp_setup_player_movement();
 path_node_t* temp_has_los_to_pc(point_t* p);
 
+static void setup_npc(character_t* npc);
+
 static void print_char(character_t* npc) {
     if(DEBUG_MODE) {
         printf("NPC: spawn: (%2d, %2d) ",
@@ -77,29 +79,8 @@ static void setup_impl() {
         
         character_t* npc = characterAPI.construct_npc(spawn);
         
-        // TODO: Setup destination point
+        setup_npc(npc);
         
-        // telepathic npcs get the pc position
-        if(npc->attrs & TELEP_VAL) {
-            if(npc->destination == NULL) {
-                npc->destination = pointAPI.construct(pc_pos->x, pc_pos->y);
-            } else {
-                npc->destination->x = pc_pos->x;
-                npc->destination->y = pc_pos->y;
-            }
-        } else {
-            // check los on other npcs
-            path_node_t* los_path = temp_has_los_to_pc(spawn);
-            if(los_path != NULL) {
-                if(npc->destination == NULL) {
-                    npc->destination = pointAPI.construct(pc_pos->x, pc_pos->y);
-                } else {
-                    npc->destination->x = pc_pos->x;
-                    npc->destination->y = pc_pos->y;
-                }
-                graphAPI.destruct_path(los_path);
-            }
-        }
         eventQueueAPI.add_event(npc, MOVE);
         _characters[i] = npc;
         
@@ -134,6 +115,31 @@ static int contains_npc_impl(point_t* p) {
 
 static char get_char_for_npc_at_index_impl(int i) {
     return characterAPI.char_for_npc_type(_characters[i]);
+}
+
+static void setup_npc(character_t* npc) {
+    point_t* pc_pos = _characters[0]->position;
+    // telepathic npcs get the pc position
+    if(npc->attrs & TELEP_VAL) {
+        if(npc->destination == NULL) {
+            npc->destination = pointAPI.construct(pc_pos->x, pc_pos->y);
+        } else {
+            npc->destination->x = pc_pos->x;
+            npc->destination->y = pc_pos->y;
+        }
+    } else {
+        // check los on other npcs
+        path_node_t* los_path = temp_has_los_to_pc(npc->position);
+        if(los_path != NULL) {
+            if(npc->destination == NULL) {
+                npc->destination = pointAPI.construct(pc_pos->x, pc_pos->y);
+            } else {
+                npc->destination->x = pc_pos->x;
+                npc->destination->y = pc_pos->y;
+            }
+            graphAPI.destruct_path(los_path);
+        }
+    }
 }
 
 
