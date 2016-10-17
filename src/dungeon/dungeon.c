@@ -20,8 +20,12 @@
 #include "../room/room.h"
 #include "../logger/logger.h"
 #include "../env/env.h"
+#include "../character/character.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
+
+// Private variables
+static dungeon_t* _base_dungeon = NULL;
 
 // Public Functions
 
@@ -29,10 +33,10 @@ static void update_path_maps_impl(dungeon_t* d);
 static void print_impl(dungeon_t* d, int mode);
 static void load_impl(dungeon_t* d);
 static void save_impl(dungeon_t* d);
+static void rand_point_impl(dungeon_t* d, point_t* p);
 
 // Private Functions
 
-static point_t* player_pos;
 static void accent_dungeon(dungeon_t* d);
 static void diffuse_dungeon(dungeon_t* d);
 static void smooth_dungeon(dungeon_t* d);
@@ -52,6 +56,13 @@ static void d_log_room(room_t* r) {
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);
 }
 
+static dungeon_t* get_dungeon_impl() {
+    if(_base_dungeon == NULL) {
+        _base_dungeon = dungeonAPI.construct();
+    }
+    return _base_dungeon;
+}
+
 static dungeon_t* construct_impl() {
     logger.i("Constructing Dungeon...");
     int i, j;
@@ -68,6 +79,9 @@ static dungeon_t* construct_impl() {
         }
     }
     
+    d->tunnel_map = NULL;
+    d->non_tunnel_map = NULL;
+    
     d->update_path_maps = update_path_maps_impl;
     d->print = print_impl;
     d->load = load_impl;
@@ -83,6 +97,10 @@ static void destruct_impl(dungeon_t* d) {
         roomAPI.destruct(d->rooms[i]);
     }
     free(d->rooms);
+    
+    pathfinderAPI.destruct(d->non_tunnel_map);
+    pathfinderAPI.destruct(d->tunnel_map);
+    
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             tileAPI.destruct(d->tiles[i][j]);
@@ -99,17 +117,19 @@ static void generate_impl(dungeon_t* d) {
     place_rooms(d);
     pathfind(d);
     update_path_hardnesses(d);
-    dungeonAPI.set_player_pos(d, NULL);
 }
 
 static void update_path_maps_impl(dungeon_t* d) {
-    point_t* p = dungeonAPI.get_player_pos();
-    graph_t* g = pathfinderAPI.construct(d, 0);
-    pathfinderAPI.generate_pathmap(g, d, p, 0);
-    pathfinderAPI.destruct(g);
-    g = pathfinderAPI.construct(d, 1);
-    pathfinderAPI.generate_pathmap(g, d, p, 1);
-    pathfinderAPI.destruct(g);
+    point_t* p = characterAPI.get_pc()->position;
+    if(d->tunnel_map == NULL) {
+        d->tunnel_map = pathfinderAPI.construct(d, 1);
+    }
+    if(d->non_tunnel_map == NULL) {
+        d->non_tunnel_map = pathfinderAPI.construct(d, 0);
+    }
+    
+    pathfinderAPI.generate_pathmap(d->non_tunnel_map, d, p, 0);
+    pathfinderAPI.generate_pathmap(d->tunnel_map, d, p, 1);
 }
 
 static void print_impl(dungeon_t* d, int mode) {
@@ -189,7 +209,6 @@ static void load_impl(dungeon_t* d) {
             }
         }
     }
-    dungeonAPI.set_player_pos(d, NULL);
     
     logger.i("Dungeon Loaded");
     free(semantic);
@@ -241,26 +260,17 @@ static void save_impl(dungeon_t* d) {
     fclose(f);
 }
 
-static void set_player_pos(dungeon_t* d, point_t* p) {
-    // TODO: Check error bounds
-    if(p == NULL) {
-        // Generate random point or use starting values
-        if(X_START < 80 && Y_START < 80) {
-            player_pos = d->tiles[Y_START][X_START]->location;
-        } else {
-            int i = rand() % d->room_size;
-            room_t* r = d->rooms[i];
-            int j = rand() % r->width;
-            int k = rand() % r->height;
-            player_pos = d->tiles[r->location->y+k][r->location->x+j]->location;
-        }
-    } else {
-        player_pos = p;
-    }
-}
-
-static point_t* get_player_pos() {
-    return player_pos;
+static void rand_point_impl(dungeon_t* d, point_t* p) {
+    int i, j, k;
+    room_t* r;
+    point_t* tile_loc;
+    i = rand() % d->room_size;
+    r = d->rooms[i];
+    j = rand() % r->width;
+    k = rand() % r->height;
+    tile_loc = d->tiles[r->location->y+k][r->location->x+j]->location;
+    p->x = tile_loc->x;
+    p->y = tile_loc->y;
 }
 
 static void generate_terrain(dungeon_t* d) {
@@ -652,9 +662,9 @@ static void add_rooms(dungeon_t* d) {
 }
 
 dungeon_namespace const dungeonAPI = {
+    get_dungeon_impl,
     construct_impl,
     destruct_impl,
     generate_impl,
-    set_player_pos,
-    get_player_pos
+    rand_point_impl
 };

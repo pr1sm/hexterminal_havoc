@@ -20,6 +20,7 @@
 int DEBUG_MODE = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
+int NUM_MONSTERS = 6; // default is 6
 uint8_t X_START = 255;
 uint8_t Y_START = 255;
 char* HOME = "";
@@ -31,6 +32,7 @@ static int is_number(char* str);
 static char* help_text = "Usage: hexterm_havoc [options]\n\n"
                          "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
                          "-h,       --help        | Print this help message.\n"
+                         "-m,       --nummon=<val>| Set the number of monsters in the dungeon\n"
                          "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
                          "                        |   name <name> (in save directory).\n"
                          "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
@@ -78,6 +80,7 @@ static void parse_args(int argc, char** argv) {
         static struct option long_options[] = {
             {"load", optional_argument, 0, 'l'},
             {"save", optional_argument, 0, 's'},
+            {"nummon", required_argument, 0, 'm'},
             {"help", no_argument, 0, 'h'},
             {"xpos", required_argument, 0, 'x'},
             {"ypos", required_argument, 0, 'y'},
@@ -85,7 +88,7 @@ static void parse_args(int argc, char** argv) {
         };
         
         int option_index = 0;
-        flag = getopt_long(argc, argv, "hx:y:s::l::", long_options, &option_index);
+        flag = getopt_long(argc, argv, "hm:x:y:s::l::", long_options, &option_index);
         
         if(flag == -1) {
             break;
@@ -121,6 +124,16 @@ static void parse_args(int argc, char** argv) {
                 }
                 strcat(SAVE_FILE, (optarg && *optarg) ? optarg : "dungeon");
                 logger.i("Save File Set: %s", SAVE_FILE);
+                break;
+                
+            case 'm':
+                num = is_number(optarg);
+                if(num <= 1 || num > 50) {
+                    logger.w("nummon is out of bounds! Must be in range [1, 50]");
+                    fprintf(stderr, "Error: num monsters must be in range [1, 20]");
+                    envAPI.exit_gracefully();
+                }
+                NUM_MONSTERS = num;
                 break;
                 
             case 'l':

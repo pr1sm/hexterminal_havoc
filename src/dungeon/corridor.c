@@ -16,19 +16,9 @@
 #include "../tile/tile.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
+#include "../util/util.h"
 
 static void place_path(graph_t* g, dungeon_t* d, point_t* b);
-
-static int point_to_index(point_t* p) {
-    // since outer rows and cols aren't being used
-    // subtract one from both so the index starts at 0
-    return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
-}
-
-static point_t index_to_point(int index) {
-    point_t p = {(index % (DUNGEON_WIDTH-2))+1, (index / (DUNGEON_WIDTH-2))+1};
-    return p;
-}
 
 static void check_room_intercept(dungeon_t* d, point_t* point) {
     if(d->room_size < 0) {
@@ -110,7 +100,7 @@ static void place_path(graph_t* g, dungeon_t* d, point_t* b) {
         exit(1);
     }
     for(n = 1; v->dist; n++) {
-        p = index_to_point(v->index);
+        index_to_point(v->index, &p);
         
         tile = d->tiles[p.y][p.x];
         if(tile->content == tc_ROCK) {

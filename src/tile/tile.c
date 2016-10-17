@@ -13,6 +13,8 @@
 #include "../env/env.h"
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
+#include "../character/character.h"
+#include "../character/character_store.h"
 
 #define BORDER_CHAR_DEBUG '%'
 #define BORDER_CHAR_NORM ' '
@@ -35,8 +37,9 @@ static void propose_update_content_impl(tile_t* tile, tile_content value);
 static void propose_update_dist_impl(tile_t* tile, uint8_t value);
 static void propose_update_dist_tunnel_impl(tile_t* tile, uint8_t value);
 static void commit_updates_impl(tile_t* tile);
-static int are_changes_proposed_impl(tile_t* tile);
+static int  are_changes_proposed_impl(tile_t* tile);
 static char char_for_content_impl(tile_t* tile, int mode);
+static uint8_t npc_tunnel_impl(tile_t* t);
 
 static tile_t* construct_impl(uint8_t x, uint8_t y) {
     tile_t* t = (tile_t*)malloc(sizeof(tile_t));
@@ -56,6 +59,7 @@ static tile_t* construct_impl(uint8_t x, uint8_t y) {
     t->commit_updates = commit_updates_impl;
     t->are_changes_proposed = are_changes_proposed_impl;
     t->char_for_content = char_for_content_impl;
+    t->npc_tunnel = npc_tunnel_impl;
     
     t->update_dist(t, 255);
     t->update_dist_tunnel(t, 255);
@@ -120,9 +124,9 @@ static int are_changes_proposed_impl(tile_t* tile) {
 
 static char char_for_content_impl(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
-        point_t* player_pos = dungeonAPI.get_player_pos();
-        if(player_pos->distance(tile->location, player_pos) == 0) {
-            return PC_CHAR;
+        int npc_idx = characterStoreAPI.contains_npc(tile->location);
+        if(npc_idx != -1) {
+            return characterStoreAPI.get_char_for_npc_at_index(npc_idx);
         }
         return tile->content == tc_BORDER ? BORDER_CHAR :
         tile->content == tc_ROCK   ? ROCK_CHAR   :
@@ -160,6 +164,12 @@ static void import_tile_impl(tile_t* tile, unsigned char value, int room) {
     tile->propose_update_dist_tunnel(tile, 255);
     
     tile->commit_updates(tile);
+}
+
+static uint8_t npc_tunnel_impl(tile_t* t) {
+    uint8_t new_hardness = t->rock_hardness - 85 > 0 ? t->rock_hardness - 85 : 0;
+    t->update_hardness(t, new_hardness);
+    return new_hardness;
 }
 
 tile_namespace const tileAPI = {
