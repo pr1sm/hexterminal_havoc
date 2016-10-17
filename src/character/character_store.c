@@ -84,7 +84,7 @@ static void setup_impl() {
 
 static void teardown_impl() {
     int i;
-    for(i = 0; i < _characters_size; i++) {
+    for(i = 0; i < _characters_count; i++) {
         if(_characters[i] != NULL) {
             characterAPI.destruct(_characters[i]);
         }

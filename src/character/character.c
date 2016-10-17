@@ -58,8 +58,12 @@ static character_t* construct_npc_impl(point_t* p) {
 }
 
 static void destruct_impl(character_t* c) {
-    free(c->position);
-    free(c->destination);
+    if(c->position != NULL) {
+        free(c->position);
+    }
+    if(c->destination != NULL) {
+        free(c->destination);
+    }
     free(c);
 }
 
