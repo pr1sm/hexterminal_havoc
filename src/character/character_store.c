@@ -142,20 +142,37 @@ static void setup_npc(character_t* npc) {
 static int is_finished_impl() {
     int i;
     point_t* pc_pos = characterAPI.get_pc()->position;
+    // only 1 character left (pc) so pc has won
+    if(_characters_count == 1) {
+        return 2;
+    }
     // check all npcs that ARE NOT the pc for collision
-    int win_count = 0;
     for(i = 1; i < _characters_count; i++) {
-        if(_characters[i]->is_dead) {
-            win_count++;
-        }
         if(pc_pos->distance(pc_pos, _characters[i]->position) == 0 && !_characters[i]->is_dead) {
             return 1;
         }
     }
-    if(win_count >= _characters_count-1) {
-        return 2;
-    }
     return 0;
+}
+
+static void npc_cleanup_impl() {
+    int i;
+    int j;
+    int old_count = _characters_count;
+    // check if NPCs are dead and shift others over
+    for(i = 1; i < _characters_count; i++) {
+        character_t* npc = _characters[i];
+        if(npc->is_dead) {
+            // shift over other npcs and destruct this one
+            characterAPI.destruct(npc);
+            for(j = i; j < _characters_count-1; j++) {
+                _characters[j] = _characters[j+1];
+            }
+            i--;
+            _characters_count--;
+        }
+    }
+    logger.d("NPC cleanup: %d ~> %d", old_count, _characters_count);
 }
 
 character_store_namespace const characterStoreAPI = {
@@ -164,5 +181,6 @@ character_store_namespace const characterStoreAPI = {
     contains_npc_impl,
     get_char_for_npc_at_index_impl,
     get_characters_impl,
-    is_finished_impl
+    is_finished_impl,
+    npc_cleanup_impl
 };

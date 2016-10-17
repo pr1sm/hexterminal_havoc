@@ -20,6 +20,8 @@
 
 static graph_t* player_path = NULL;
 
+static void get_random_dir(character_t* c, point_t* new_pos);
+
 void setup_pc_movement() {
     if(player_path == NULL) {
         player_path = pathfinderAPI.construct(dungeonAPI.get_dungeon(), 0);
@@ -87,33 +89,19 @@ void handle_npc_move(character_t* c) {
     }
     
     dungeon_t* d = dungeonAPI.get_dungeon();
+    
     // Turn Logic
     if((c->attrs & ERATC_VAL) && behave_erratically) {
-        int is_valid = 0;
         // Do random move
         tile_t* tile = NULL;
-        do {
-            int random_dir = rand() % 8;
-            // convert direction to coordinate offset
-            int y_off = (random_dir < 3) ? -1 : (random_dir > 3 && random_dir < 7) ? 1 : 0;
-            int x_off = (random_dir < 1) ? -1 : (random_dir > 1 && random_dir < 6) ? 1 : 0;
-            y_off += c->position->y;
-            x_off += c->position->x;
-            if(x_off > 1 && x_off < DUNGEON_WIDTH-1 && y_off > 1 && y_off < DUNGEON_HEIGHT-1) {
-                tile = d->tiles[y_off][x_off];
-                if((c->attrs & TUNNL_VAL) || tile->content != tc_ROCK) {
-                    is_valid = 1;
-                }
-            } else {
-                is_valid = 0;
-            }
-        } while (!is_valid);
+        point_t random_dir;
+        get_random_dir(c, &random_dir);
+        tile = d->tiles[random_dir.y][random_dir.x];
         
         // Move to random position
         if((c->attrs & TUNNL_VAL) && tile->content == tc_ROCK) {
             // Tunnel to position
-            uint8_t new_hardness = tile->rock_hardness - 85 > 0 ? tile->rock_hardness - 85 : 0;
-            tile->update_hardness(tile, new_hardness);
+            uint8_t new_hardness = tile->npc_tunnel(tile);
             dungeon_updated = 1;
             if(new_hardness == 0) {
                 // tile is now a path, move immediately
@@ -145,8 +133,7 @@ void handle_npc_move(character_t* c) {
                 tile_t* tile = d->tiles[next.y][next.x];
                 if((c->attrs & TUNNL_VAL) && tile->content == tc_ROCK) {
                     // Tunnel to position
-                    uint8_t new_hardness = tile->rock_hardness - 85 > 0 ? tile->rock_hardness - 85 : 0;
-                    tile->update_hardness(tile, new_hardness);
+                    uint8_t new_hardness = tile->npc_tunnel(tile);
                     dungeon_updated = 1;
                     if(new_hardness == 0) {
                         // tile is now a path, move immediately
@@ -160,7 +147,7 @@ void handle_npc_move(character_t* c) {
             }
         } else {
             // use LOS path
-            if(los_path != NULL) {
+            if(los_path != NULL && los_path->next != NULL) {
                 // use next path in los_path;
                 point_t* next_pos = los_path->next->curr;
                 tile_t* next_tile = d->tiles[next_pos->y][next_pos->x];
@@ -169,8 +156,7 @@ void handle_npc_move(character_t* c) {
                     c->set_position(c, next_tile->location);
                 } else if(c->attrs & TUNNL_VAL) {
                     // next tile is rock and npc is a tunneler, tunnel to that position
-                    uint8_t new_hardness = next_tile->rock_hardness - 85 > 0 ? next_tile->rock_hardness - 85 : 0;
-                    next_tile->update_hardness(next_tile, new_hardness);
+                    uint8_t new_hardness = next_tile->npc_tunnel(next_tile);
                     dungeon_updated = 1;
                     if(new_hardness == 0) {
                         // tile is now a path, move immediately
@@ -192,8 +178,7 @@ void handle_npc_move(character_t* c) {
                         c->set_position(c, next_tile->location);
                     } else if(c->attrs & TUNNL_VAL) {
                         // next tile is rock and npc is a tunneler, tunnel to that position
-                        uint8_t new_hardness = next_tile->rock_hardness - 85 > 0 ? next_tile->rock_hardness - 85 : 0;
-                        next_tile->update_hardness(next_tile, new_hardness);
+                        uint8_t new_hardness = next_tile->npc_tunnel(next_tile);
                         dungeon_updated = 1;
                         if(new_hardness == 0) {
                             // tile is now a path, move immediately
@@ -220,7 +205,10 @@ void handle_npc_move(character_t* c) {
 }
 
 path_node_t* los_to_pc(point_t* p) {
-    // TODO: VALIDATE INPUTS
+    if(p == NULL) {
+        logger.w("los_to_pc called with NULL p, returning NULL!");
+        return NULL;
+    }
     point_t* pc_pos = characterAPI.get_pc()->position;
     path_node_t* path = dijkstraAPI.bresenham(pc_pos, p);
     path_node_t* temp = path;
@@ -240,4 +228,32 @@ path_node_t* los_to_pc(point_t* p) {
         graphAPI.destruct_path(path);
         return NULL;
     }
+}
+
+static void get_random_dir(character_t* c, point_t* new_pos) {
+    dungeon_t* d = dungeonAPI.get_dungeon();
+    tile_t* tile;
+    int is_valid = 0;
+    int new_x = c->position->x;
+    int new_y = c->position->y;
+    do {
+        int random_dir = rand() % 8;
+        // convert direction to coordinate offset
+        int y_off = (random_dir < 3) ? -1 : (random_dir > 3 && random_dir < 7) ? 1 : 0;
+        int x_off = (random_dir < 1) ? -1 : (random_dir > 1 && random_dir < 6) ? 1 : 0;
+        y_off += c->position->y;
+        x_off += c->position->x;
+        if(x_off > 1 && x_off < DUNGEON_WIDTH-1 && y_off > 1 && y_off < DUNGEON_HEIGHT-1) {
+            tile = d->tiles[y_off][x_off];
+            if((c->attrs & TUNNL_VAL) || tile->content != tc_ROCK) {
+                is_valid = 1;
+                new_x = x_off;
+                new_y = y_off;
+            }
+        } else {
+            is_valid = 0;
+        }
+    } while (!is_valid);
+    new_pos->x = new_x;
+    new_pos->y = new_y;
 }

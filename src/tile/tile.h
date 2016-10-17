@@ -42,6 +42,7 @@ struct tile_t {
     void    (*commit_updates)(tile_t* tile);
     int     (*are_changes_proposed)(tile_t* tile);
     char    (*char_for_content)(tile_t* tile, int mode);
+    uint8_t (*npc_tunnel)(tile_t* tile);
 };
 
 typedef struct {

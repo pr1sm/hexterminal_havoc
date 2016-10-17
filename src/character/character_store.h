@@ -21,6 +21,7 @@ typedef struct character_store_namespace {
     char (*const get_char_for_npc_at_index)(int i);
     character_t** (*const get_characters)();
     int  (*const is_finished)();
+    void (*const npc_cleanup)();
 } character_store_namespace;
 extern character_store_namespace const characterStoreAPI;
 

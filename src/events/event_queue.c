@@ -10,6 +10,7 @@
 
 #include "event_queue.h"
 #include "../character/character.h"
+#include "../character/character_store.h"
 #include "../heap/heap.h"
 #include "../logger/logger.h"
 
@@ -48,6 +49,7 @@ static int perform_event_impl() {
         c->perform(c);
         c = heapAPI.peek(_event_queue);
     }
+    characterStoreAPI.npc_cleanup();
     return 1;
 }
 
