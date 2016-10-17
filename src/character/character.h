@@ -29,12 +29,14 @@ struct character_t {
     character_type type;
     point_t* position;
     point_t* destination;
+    int event_count;
     uint8_t attrs;
     uint8_t speed;
     uint8_t turn_count;
     uint8_t is_dead;
     void (*set_position)(character_t* c, point_t* p);
     void (*set_destination)(character_t* c, point_t* p);
+    void (*perform)(character_t* c);
 };
 
 typedef struct character_namespace {

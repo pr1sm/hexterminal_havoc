@@ -34,7 +34,7 @@ void setup_pc_movement() {
              rand_dest.x,
              rand_dest.y);
     dijkstraAPI.dijkstra(player_path, characterAPI.get_pc()->destination, characterAPI.get_pc()->position);
-    eventQueueAPI.add_event(characterAPI.get_pc(), MOVE);
+    eventQueueAPI.add_event(characterAPI.get_pc());
 }
 
 void handle_pc_move() {
@@ -53,7 +53,7 @@ void handle_pc_move() {
     if(pc->position->distance(pc->position, pc->destination) == 0) {
         setup_pc_movement();
     } else {
-        eventQueueAPI.add_event(pc, MOVE);
+        eventQueueAPI.add_event(pc);
     }
 }
 
@@ -184,7 +184,7 @@ void handle_npc_move(character_t* c) {
                 point_t p;
                 dungeonAPI.rand_point(d, &p);
                 path_node_t* new_path = dijkstraAPI.bresenham(&p, c->position);
-                if(new_path != NULL) {
+                if(new_path != NULL && new_path->next != NULL) {
                     point_t* next_pos = new_path->next->curr;
                     tile_t* next_tile = d->tiles[next_pos->y][next_pos->x];
                     if(next_tile->content != tc_ROCK) {
@@ -216,7 +216,7 @@ void handle_npc_move(character_t* c) {
         d->update_path_maps(d);
     }
     
-    eventQueueAPI.add_event(c, MOVE);
+    eventQueueAPI.add_event(c);
 }
 
 path_node_t* los_to_pc(point_t* p) {

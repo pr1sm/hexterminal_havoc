@@ -44,11 +44,12 @@ int main(int argc, char * argv[]) {
     
     characterStoreAPI.setup();
     
-    d->print(d, PM_DUNGEON);
+    if(DEBUG_MODE) {
+        d->print(d, PM_ROOM_PATH_MAP);
+        d->print(d, PM_TUNN_PATH_MAP);
+    }
     
-//    d->print(d, PM_ROOM_PATH_MAP);
-//    
-//    d->print(d, PM_TUNN_PATH_MAP);
+    d->print(d, PM_DUNGEON);
     
     if(SAVE_DUNGEON) {
         d->save(d);

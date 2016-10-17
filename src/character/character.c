@@ -9,12 +9,14 @@
 #include <stdlib.h>
 
 #include "character.h"
+#include "ai.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
 static void set_position_impl(character_t* self, point_t* p);
 static void set_destination_impl(character_t* self, point_t* p);
+static void perform_impl(character_t* c);
 
 static character_t* gPLAYER_CHARACTER = NULL;
 
@@ -47,6 +49,7 @@ static character_t* construct_impl(character_type type, point_t* p) {
     
     c->set_position = set_position_impl;
     c->set_destination = set_destination_impl;
+    c->perform = perform_impl;
     return c;
 }
 
@@ -107,6 +110,14 @@ static void set_destination_impl(character_t* self, point_t* p) {
     } else {
         self->destination->x = p->x;
         self->destination->y = p->y;
+    }
+}
+
+static void perform_impl(character_t* c) {
+    if(c->type == PC) {
+        handle_pc_move();
+    } else {
+        handle_npc_move(c);
     }
 }
 

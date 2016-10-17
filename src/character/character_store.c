@@ -74,7 +74,7 @@ static void setup_impl() {
         
         setup_npc(npc);
         
-        eventQueueAPI.add_event(npc, MOVE);
+        eventQueueAPI.add_event(npc);
         _characters[i] = npc;
         
         free(spawn);
