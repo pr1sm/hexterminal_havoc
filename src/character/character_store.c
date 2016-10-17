@@ -168,6 +168,7 @@ static void npc_cleanup_impl() {
             for(j = i; j < _characters_count-1; j++) {
                 _characters[j] = _characters[j+1];
             }
+            _characters[_characters_count-1] = NULL;
             i--;
             _characters_count--;
         }

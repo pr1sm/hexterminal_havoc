@@ -201,7 +201,9 @@ void handle_npc_move(character_t* c) {
         d->update_path_maps(d);
     }
     
-    eventQueueAPI.add_event(c);
+    if(!c->is_dead) {
+        eventQueueAPI.add_event(c);
+    }
 }
 
 path_node_t* los_to_pc(point_t* p) {
