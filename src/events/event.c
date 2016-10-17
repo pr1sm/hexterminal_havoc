@@ -14,6 +14,8 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
+#include "../character/ai.h"
+
 // Temp for player movement!
 #include "../character/character_store.h"
 
@@ -43,9 +45,9 @@ static void perform_impl(event_t* e) {
     // Add new event to queue if needed
     character_t* c = e->controller;
     if(c->type == PC) {
-        temp_handle_player_move();
+        handle_pc_move();
     } else {
-        temp_handle_npc_turn(c);
+        handle_npc_move(c);
     }
 }
 

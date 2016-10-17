@@ -54,10 +54,10 @@ int main(int argc, char * argv[]) {
         d->save(d);
     }
     int next_turn = 1;
-    int win_status = temp_is_finished();
+    int win_status = characterStoreAPI.is_finished();
     while(!win_status && next_turn) {
         next_turn = eventQueueAPI.perform_event();
-        win_status = temp_is_finished();
+        win_status = characterStoreAPI.is_finished();
         d->print(d, PM_DUNGEON);
         usleep(250000);
     }

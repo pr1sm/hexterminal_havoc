@@ -12,16 +12,15 @@
 #include "character.h"
 #include "../point/point.h"
 
-// Temp for player movement!
-void temp_handle_player_move();
-int  temp_is_finished();
-void temp_handle_npc_turn(character_t* c);
+extern int CHARACTER_COUNT;
 
 typedef struct character_store_namespace {
     void (*const setup)();
     void (*const teardown)();
     int  (*const contains_npc)(point_t* p);
     char (*const get_char_for_npc_at_index)(int i);
+    character_t** (*const get_characters)();
+    int  (*const is_finished)();
 } character_store_namespace;
 extern character_store_namespace const characterStoreAPI;
 
