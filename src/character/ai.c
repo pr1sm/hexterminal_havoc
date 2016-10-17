@@ -1,5 +1,5 @@
 //
-//  pc_ai.c
+//  ai.c
 //  cs_327
 //
 //  Created by Srinivas Dhanwada on 10/16/16.
