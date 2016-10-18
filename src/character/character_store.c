@@ -19,12 +19,14 @@
 #include "../env/env.h"
 
 static character_t** _characters = NULL;
+static character_id_t* _alive_characters = NULL;
 static int _characters_size = 0;
 static int _characters_count = 0;
 
 int CHARACTER_COUNT = 0;
 
 static void setup_npc(character_t* npc);
+static character_t* npc_for_id(character_id_t id);
 
 static void print_char(character_t* npc) {
     if(DEBUG_MODE) {
@@ -61,21 +63,25 @@ static void setup_impl() {
     _characters = (character_t**) calloc(_characters_size, sizeof(*_characters));
     _characters_count = _characters_size;
     CHARACTER_COUNT = _characters_count;
+    _alive_characters = (character_id_t*) calloc(_characters_count, sizeof(*_alive_characters));
     _characters[0] = characterAPI.get_pc();
+    _alive_characters[0] = _characters[0]->id;
     point_t* pc_pos = _characters[0]->position;
     setup_pc_movement();
     for(i = 1; i < _characters_size; i++) {
         point_t* spawn = pointAPI.construct(0, 0);
         do {
             dungeonAPI.rand_point(d, spawn);
-        } while(spawn->distance(spawn, pc_pos) == 0);
+        } while(spawn->distance(spawn, pc_pos) <= 9); // have a radius of 3 blocks
         
         character_t* npc = characterAPI.construct_npc(spawn);
+        npc->id = i;
         
         setup_npc(npc);
         
         eventQueueAPI.add_event(npc);
         _characters[i] = npc;
+        _alive_characters[i] = npc->id;
         
         free(spawn);
         print_char(npc);
@@ -84,7 +90,7 @@ static void setup_impl() {
 
 static void teardown_impl() {
     int i;
-    for(i = 0; i < _characters_count; i++) {
+    for(i = 0; i < _characters_size; i++) {
         if(_characters[i] != NULL) {
             characterAPI.destruct(_characters[i]);
         }
@@ -147,7 +153,7 @@ static int is_finished_impl() {
         return 2;
     }
     // check all npcs that ARE NOT the pc for collision
-    for(i = 1; i < _characters_count; i++) {
+    for(i = 1; i < _characters_size; i++) {
         if(pc_pos->distance(pc_pos, _characters[i]->position) == 0 && !_characters[i]->is_dead) {
             return 1;
         }
@@ -161,19 +167,26 @@ static void npc_cleanup_impl() {
     int old_count = _characters_count;
     // check if NPCs are dead and shift others over
     for(i = 1; i < _characters_count; i++) {
-        character_t* npc = _characters[i];
+        character_t* npc = npc_for_id(_alive_characters[i]);
         if(npc->is_dead) {
-            // shift over other npcs and destruct this one
-            characterAPI.destruct(npc);
+            // shift over other npcs
             for(j = i; j < _characters_count-1; j++) {
-                _characters[j] = _characters[j+1];
+                _alive_characters[j] = _alive_characters[j+1];
             }
-            _characters[_characters_count-1] = NULL;
-            i--;
             _characters_count--;
         }
     }
     logger.d("NPC cleanup: %d ~> %d", old_count, _characters_count);
+}
+
+static character_t* npc_for_id(character_id_t id) {
+    int i;
+    for(i = 0; i < _characters_size; i++) {
+        if(id == _characters[i]->id) {
+            return _characters[i];
+        }
+    }
+    return NULL;
 }
 
 character_store_namespace const characterStoreAPI = {

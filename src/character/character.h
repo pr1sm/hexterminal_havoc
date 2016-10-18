@@ -24,8 +24,11 @@ typedef enum character_type {
     NONE, PC, NPC
 } character_type;
 
+typedef int character_id_t;
+
 typedef struct character_t character_t;
 struct character_t {
+    character_id_t id;
     character_type type;
     point_t* position;
     point_t* destination;

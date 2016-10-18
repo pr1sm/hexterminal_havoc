@@ -77,6 +77,7 @@ static character_t* get_pc_impl() {
             dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
         }
         gPLAYER_CHARACTER = construct_impl(PC, &spawn);
+        gPLAYER_CHARACTER->id = 0;
     }
     return gPLAYER_CHARACTER;
 }
