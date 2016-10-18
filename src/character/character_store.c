@@ -17,6 +17,7 @@
 #include "../point/point.h"
 #include "../events/event_queue.h"
 #include "../env/env.h"
+#include "../dungeon/pathfinder.h"
 
 static character_t** _characters = NULL;
 static character_id_t* _alive_characters = NULL;
@@ -96,6 +97,8 @@ static void teardown_impl() {
         }
     }
     free(_characters);
+    free(_alive_characters);
+    pathfinderAPI.destruct(_PLAYER_PATH);
 }
 
 static int contains_npc_impl(point_t* p) {

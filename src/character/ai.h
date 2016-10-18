@@ -13,6 +13,8 @@
 #include "../graph/graph.h"
 #include "../point/point.h"
 
+extern graph_t* _PLAYER_PATH;
+
 void setup_pc_movement();
 void handle_pc_move();
 

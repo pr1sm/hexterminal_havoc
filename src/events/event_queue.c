@@ -53,7 +53,12 @@ static int perform_event_impl() {
     return 1;
 }
 
+static void teardown_impl() {
+    heapAPI.destruct(_event_queue);
+}
+
 event_queue_namespace const eventQueueAPI = {
     add_event_impl,
-    perform_event_impl
+    perform_event_impl,
+    teardown_impl
 };

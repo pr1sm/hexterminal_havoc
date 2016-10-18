@@ -70,6 +70,7 @@ int main(int argc, char * argv[]) {
     }
     
     characterStoreAPI.teardown();
+    eventQueueAPI.teardown();
     
     dungeonAPI.destruct(d);
     envAPI.cleanup();

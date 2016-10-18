@@ -18,13 +18,13 @@
 #include "../dijkstra/dijkstra.h"
 #include "../util/util.h"
 
-static graph_t* player_path = NULL;
+graph_t* _PLAYER_PATH = NULL;
 
 static void get_random_dir(character_t* c, point_t* new_pos);
 
 void setup_pc_movement() {
-    if(player_path == NULL) {
-        player_path = pathfinderAPI.construct(dungeonAPI.get_dungeon(), 0);
+    if(_PLAYER_PATH == NULL) {
+        _PLAYER_PATH = pathfinderAPI.construct(dungeonAPI.get_dungeon(), 0);
     }
     point_t rand_dest;
     character_t* pc = characterAPI.get_pc();
@@ -35,14 +35,14 @@ void setup_pc_movement() {
              characterAPI.get_pc()->position->y,
              rand_dest.x,
              rand_dest.y);
-    dijkstraAPI.dijkstra(player_path, characterAPI.get_pc()->destination, characterAPI.get_pc()->position);
+    dijkstraAPI.dijkstra(_PLAYER_PATH, characterAPI.get_pc()->destination, characterAPI.get_pc()->position);
     eventQueueAPI.add_event(characterAPI.get_pc());
 }
 
 void handle_pc_move() {
     character_t** characters = characterStoreAPI.get_characters();
     character_t* pc = characterAPI.get_pc();
-    vertex_t* v = player_path->vertices[point_to_index(pc->position)];
+    vertex_t* v = _PLAYER_PATH->vertices[point_to_index(pc->position)];
     point_t next;
     index_to_point(v->prev, &next);
     pc->set_position(pc, &next);
