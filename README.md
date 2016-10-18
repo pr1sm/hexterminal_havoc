@@ -44,6 +44,28 @@ Usage: hexterm_havoc [options]
 
 ## Assignments
 
+### Assignment 1.04 - Player Character and Monsters
+
+For this assignment, we had to implement the Monster AI as well as implement
+a temporary player AI so we could watch the monsters chase the player.  My 
+implementation of this consisted of creating a new data type to hold the 
+character information.  I found that much of the information between the pc
+and the npcs were the same, so they are all in the same data type.  This allowed
+me to use a priority queue for my event system.  The event system uses events
+as the input and returns the event that should be run first based on the characters
+speed.  I also implemented bresenhams line pathing algorithm to check line of
+sight between the monsters and the player.  This was used to check if the 
+destination of the monster should be set to the player (player is in line of sight)
+or another random point in the dungeon.  This of course was also affected by the 
+monsters inert attributes and modifiers such as telepathy overrode this los check.
+I also performed a major refactor of my codebase to move to a more object oriented
+style.  Many of the functions were move to be function pointers in the data type
+itself rather than an API function.  I did this because it made more sense to me
+when reading the code that the struct should be calling the function rather than
+another API struct that holds all the function names.  I also fixed some outstanding
+bugs and tweaks from previous assignments that I had put in a backlog.  This seemed
+appropriate since I did a major refactor of the code base. 
+
 ### Assignment 1.03 - Path Finding
 
 For this assignment, we were tasked with generating maps for path finding.

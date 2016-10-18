@@ -11,11 +11,12 @@
 
 #include "../graph/graph.h"
 #include "../point/point.h"
+#include "dungeon.h"
 
 typedef struct pathfinder_namespace {
-    graph_t* (*const construct)(int tunnel);
+    graph_t* (*const construct)(dungeon_t* d, int tunnel);
     void     (*const destruct)(graph_t* g);
-    void     (*const generate_pathmap)(graph_t* g, point_t* start, int tunnel);
+    void     (*const generate_pathmap)(graph_t* g, dungeon_t* d, point_t* start, int tunnel);
 } pathfinder_namespace;
 extern pathfinder_namespace const pathfinderAPI;
 

@@ -8,12 +8,14 @@
 
 #include <stdlib.h>
 #include <limits.h>
+#include <math.h>
 
 #include "dijkstra.h"
 #include "../graph/graph.h"
 #include "../heap/heap.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
+#include "../dungeon/dungeon.h"
 
 static graph_t* construct(int invert) {
     graph_t* g = calloc(1, sizeof(graph_t));
@@ -32,6 +34,40 @@ static void destruct(graph_t* g) {
     }
     free(g->vertices);
     free(g);
+}
+
+static path_node_t* bresenham(point_t* a, point_t* b) {
+    point_t end = {a->x, a->y};
+    point_t start = {b->x, b->y};
+    int dx = abs(end.x - start.x);
+    int sx = start.x < end.x ? 1 : -1;
+    int dy = abs(end.y - start.y);
+    int sy = start.y < end.y ? 1 : -1;
+    int err = (dx < dy ? dx : dy)/2;
+    int e2;
+    path_node_t* head = graphAPI.add_path_node(&start);
+    path_node_t* temp = head;
+    while(1) {
+        if(start.x < 1 || start.x > DUNGEON_WIDTH-2 || start.y < 1 || start.y > DUNGEON_WIDTH-2) {
+            // invalid state!
+            graphAPI.destruct_path(head);
+            return NULL;
+        }
+        if(start.x == end.x && start.y == end.y) break;
+        e2 = err;
+        if(e2 > -dx) {
+            err -= dy;
+            start.x += sx;
+        }
+        if(e2 < dy) {
+            err += dx;
+            start.y += sy;
+        }
+        temp->next = graphAPI.add_path_node(&start);
+        temp = temp->next;
+    }
+    
+    return head;
 }
 
 static void dijkstra(graph_t* g, point_t* a, point_t* b) {
@@ -74,5 +110,6 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
 dijkstra_namespace const dijkstraAPI = {
     construct,
     destruct,
-    dijkstra
-} ;
+    dijkstra,
+    bresenham
+};

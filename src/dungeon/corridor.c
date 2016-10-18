@@ -16,21 +16,28 @@
 #include "../tile/tile.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
+#include "../util/util.h"
 
-static void place_path(graph_t* g, point_t* b);
+static void place_path(graph_t* g, dungeon_t* d, point_t* b);
 
-static int point_to_index(point_t* p) {
-    // since outer rows and cols aren't being used
-    // subtract one from both so the index starts at 0
-    return ((p->y - 1) * (DUNGEON_WIDTH-2)) + (p->x - 1);
+static void check_room_intercept(dungeon_t* d, point_t* point) {
+    if(d->room_size < 0) {
+        logger.w("Check room called before rooms have been generated!");
+        return;
+    }
+    room_t* r;
+    int i;
+    for(i = 0; i < d->room_size; i++) {
+        r = d->rooms[i];
+        if(r->contains(r, point) && !r->connected) {
+            r->connected = 1;
+            logger.t("Point (%d, %d) connects room %d", point->x, point->y, i);
+            return;
+        }
+    }
 }
 
-static point_t index_to_point(int index) {
-    point_t p = {(index % (DUNGEON_WIDTH-2))+1, (index / (DUNGEON_WIDTH-2))+1};
-    return p;
-}
-
-static graph_t* construct(int invert) {
+static graph_t* construct(dungeon_t* d, int invert) {
     logger.d("Constructing Graph for pathfinding...");
     graph_t* g = calloc(1, sizeof(graph_t));
     g->point_to_index = point_to_index;
@@ -42,7 +49,7 @@ static graph_t* construct(int invert) {
     
     for(i = 1; i < DUNGEON_HEIGHT - 1; i++) {
         for(j = 1; j < DUNGEON_WIDTH - 1; j++) {
-            tile_t* t = _dungeon_array[i][j];
+            tile_t* t = d->tiles[i][j];
             for(k = 0; k < 4; k++) {
                 // check if we are in range
                 y = i + coord_adj[k];
@@ -50,7 +57,7 @@ static graph_t* construct(int invert) {
                 if(x < 1 || x >= DUNGEON_WIDTH - 1 || y < 1 || y >= DUNGEON_HEIGHT - 1) {
                     continue;
                 }
-                tile_t* dest = _dungeon_array[y][x];
+                tile_t* dest = d->tiles[y][x];
                 
                 int weight = invert ? ROCK_MAX-dest->rock_hardness : dest->rock_hardness;
                 graphAPI.add_edge(g, t->location, dest->location, weight);
@@ -77,14 +84,15 @@ static void destruct(graph_t* g) {
     logger.d("Graph for pathfinding destructed");
 }
 
-static void pathfind(graph_t* g, point_t* start, point_t* end) {
+static void pathfind(graph_t* g, dungeon_t* d, point_t* start, point_t* end) {
     dijkstraAPI.dijkstra(g, start, end);
-    place_path(g, end);
+    place_path(g, d, end);
 }
 
-static void place_path(graph_t* g, point_t* b) {
+static void place_path(graph_t* g, dungeon_t* d, point_t* b) {
     int n;
     vertex_t* v;
+    tile_t* tile;
     point_t p;
     v = g->vertices[point_to_index(b)];
     if(v->dist == INT_MAX) {
@@ -92,19 +100,18 @@ static void place_path(graph_t* g, point_t* b) {
         exit(1);
     }
     for(n = 1; v->dist; n++) {
-        p = index_to_point(v->index);
+        index_to_point(v->index, &p);
         
-        tile_t* tile = _dungeon_array[p.y][p.x];
+        tile = d->tiles[p.y][p.x];
         if(tile->content == tc_ROCK) {
-            tileAPI.update_content(tile, tc_PATH);
+            tile->update_content(tile, tc_PATH);
         } else if(tile->content == tc_ROOM) {
-            dungeonAPI.check_room_intercept(&p);
+            check_room_intercept(d, &p);
         }
         v = g->vertices[v->prev];
         if(v == NULL) break;
     }
 }
-
 
 corridor_namespace const corridorAPI = {
     construct,
