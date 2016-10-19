@@ -68,11 +68,7 @@ int main(int argc, char * argv[]) {
     } else {
         printf("BY SHEER LUCK, YOU WON!\n");
     }
-    
-    characterStoreAPI.teardown();
-    eventQueueAPI.teardown();
-    
-    dungeonAPI.destruct(d);
+
     envAPI.cleanup();
     
     return 0;

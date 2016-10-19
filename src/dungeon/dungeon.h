@@ -31,6 +31,7 @@ struct dungeon_t {
     graph_t* non_tunnel_map;
     void (*update_path_maps)(dungeon_t* d);
     void (*print)(dungeon_t* d, int mode);
+    void (*printn)(dungeon_t* d, int mode);
     void (*load)(dungeon_t* d);
     void (*save)(dungeon_t* d);
 };

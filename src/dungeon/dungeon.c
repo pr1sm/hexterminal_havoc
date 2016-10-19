@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <ncurses.h>
 
 #include "dungeon.h"
 #include "corridor.h"
@@ -31,6 +32,7 @@ static dungeon_t* _base_dungeon = NULL;
 
 static void update_path_maps_impl(dungeon_t* d);
 static void print_impl(dungeon_t* d, int mode);
+static void printn_impl(dungeon_t* d, int mode);
 static void load_impl(dungeon_t* d);
 static void save_impl(dungeon_t* d);
 static void rand_point_impl(dungeon_t* d, point_t* p);
@@ -46,6 +48,7 @@ static void add_rooms(dungeon_t* d);
 static void write_dungeon_pgm(dungeon_t* d, const char* file_name, int zone);
 static void generate_terrain(dungeon_t* d);
 static void place_rooms(dungeon_t* d);
+static void place_staircases(dungeon_t* d);
 static void pathfind(dungeon_t* d);
 static void update_path_hardnesses(dungeon_t* d);
 
@@ -84,6 +87,7 @@ static dungeon_t* construct_impl() {
     
     d->update_path_maps = update_path_maps_impl;
     d->print = print_impl;
+    d->printn = printn_impl;
     d->load = load_impl;
     d->save = save_impl;
     logger.i("Dungeon Constructed");
@@ -115,6 +119,7 @@ static void destruct_impl(dungeon_t* d) {
 static void generate_impl(dungeon_t* d) {
     generate_terrain(d);
     place_rooms(d);
+    place_staircases(d);
     pathfind(d);
     update_path_hardnesses(d);
 }
@@ -133,7 +138,28 @@ static void update_path_maps_impl(dungeon_t* d) {
 }
 
 static void print_impl(dungeon_t* d, int mode) {
+    int i, j;
     logger.i("Printing Dungeon mode: %d...", mode);
+    if(NCURSES_MODE) {
+        d->printn(d, mode);
+    } else {
+        for(i = 0; i < DUNGEON_HEIGHT; i++) {
+            for(j = 0; j < DUNGEON_WIDTH; j++) {
+                char c = d->tiles[i][j]->char_for_content(d->tiles[i][j], mode);
+                if(c == '?') {
+                    logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", d->tiles[i][j]->location->x, d->tiles[i][j]->location->y, d->tiles[i][j]->content);
+                }
+                printf("%c", c);
+            }
+            printf("\n");
+        }
+        printf("\n");
+    }
+    logger.i("Dungeon Printed");
+}
+
+static void printn_impl(dungeon_t* d, int mode) {
+    logger.i("NCURSES: Printing Dungeon mode: %d...", mode);
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
@@ -141,11 +167,10 @@ static void print_impl(dungeon_t* d, int mode) {
             if(c == '?') {
                 logger.e("Bad Tile Found @ (%2d, %2d) with content: %d", d->tiles[i][j]->location->x, d->tiles[i][j]->location->y, d->tiles[i][j]->content);
             }
-            printf("%c", c);
+            mvaddch(i+1, j, c);
         }
-        printf("\n");
     }
-    printf("\n");
+    refresh();
     logger.i("Dungeon Printed");
 }
 
@@ -209,6 +234,8 @@ static void load_impl(dungeon_t* d) {
             }
         }
     }
+    
+    place_staircases(d);
     
     logger.i("Dungeon Loaded");
     free(semantic);
@@ -402,6 +429,28 @@ static void place_rooms(dungeon_t* d) {
     }
     
     logger.i("Rooms Placed in Dungeon");
+}
+
+static void place_staircases(dungeon_t* d) {
+    logger.i("Placing staircases");
+    
+    point_t* up = pointAPI.construct(0, 0);
+    rand_point_impl(d, up);
+    tile_t* upstairs = d->tiles[up->y][up->x];
+    upstairs->update_content(upstairs, tc_UPSTR);
+    
+    point_t* down = pointAPI.construct(0, 0);
+    do {
+        rand_point_impl(d, down);
+    } while(up->distance(up, down) == 0);
+    
+    tile_t* downstairs = d->tiles[down->y][down->x];
+    downstairs->update_content(downstairs, tc_DNSTR);
+    
+    pointAPI.destruct(up);
+    pointAPI.destruct(down);
+    
+    logger.i("Staircases placed in dungeon");
 }
 
 static void pathfind(dungeon_t* d) {

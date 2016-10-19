@@ -13,11 +13,16 @@
 #include <getopt.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <ncurses.h>
 
 #include "env.h"
 #include "../logger/logger.h"
+#include "../character/character_store.h"
+#include "../dungeon/dungeon.h"
+#include "../events/event_queue.h"
 
 int DEBUG_MODE = 0;
+int NCURSES_MODE = 1;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
 int NUM_MONSTERS = 6; // default is 6
@@ -59,6 +64,13 @@ static void setup_environment() {
     
     if(DEBUG_MODE) {
         logger.i("%%%% RUNNING IN DEBUG MODE %%%%");
+    }
+    
+    if(NCURSES_MODE) {
+        logger.i("%%%% SETTING UP NCURSES %%%%");
+        initscr();
+        mvprintw(0, 0, "DEBUG MODE");
+        refresh();
     }
     
     logger.i("%%%% ENVIRONMENT SET %%%%");
@@ -202,6 +214,14 @@ static void cleanup() {
     }
     if(LOAD_FILE) {
         free(LOAD_FILE);
+    }
+    
+    characterStoreAPI.teardown();
+    eventQueueAPI.teardown();
+    dungeonAPI.destruct(dungeonAPI.get_dungeon());
+    
+    if(NCURSES_MODE) {
+        endwin();
     }
 }
 
