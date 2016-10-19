@@ -160,6 +160,7 @@ static void print_impl(dungeon_t* d, int mode) {
 
 static void printn_impl(dungeon_t* d, int mode) {
     logger.i("NCURSES: Printing Dungeon mode: %d...", mode);
+    clear();
     int i, j;
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {

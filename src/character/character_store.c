@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <ncurses.h>
 
 #include "character_store.h"
 #include "character.h"
@@ -191,6 +193,54 @@ static void npc_cleanup_impl() {
     logger.d("NPC cleanup: %d ~> %d", old_count, _characters_count);
 }
 
+void start_monster_list_impl() {
+    char** monster_list;
+    int i;
+    int xdiff;
+    int ydiff;
+    int print_start = 0;
+    int print_end = _characters_count < print_start+20 ? _characters_count : print_start+20;
+    int next_cmd = 0;
+    point_t* pc_pos = characterAPI.get_pc()->position;
+    monster_list = (char**) calloc(_characters_count, sizeof(*monster_list));
+    for(i = 0; i < _characters_count; i++) {
+        character_t* npc = npc_for_id(_alive_characters[i]);
+        if(npc != NULL) {
+            monster_list[i] = (char*) calloc(30, sizeof(**monster_list));
+            xdiff = pc_pos->x - npc->position->x;
+            ydiff = pc_pos->y - npc->position->y;
+            sprintf(monster_list[i], "%2d. %c, %2d %s and %2d %s",
+                    i+1,
+                    characterAPI.char_for_npc_type(npc),
+                    abs(ydiff),
+                    ydiff > 0 ? "north" : "south",
+                    abs(xdiff),
+                    xdiff > 0 ? "west" : "east");
+        }
+    }
+    
+    do {
+        clear();
+        mvprintw(1, 1, "Monster List (%d/%d)", print_end-print_start, _characters_count);
+        for(i = 0; i < print_end - print_start; i++) {
+            mvprintw(i+2, 1, monster_list[i+print_start]);
+        }
+        refresh();
+        next_cmd = getch();
+        if(print_start > 0 && next_cmd == PC_ML_SCRL_UP) {
+            print_start--;
+        } else if(print_start < _characters_count-20 && next_cmd == PC_ML_SCRL_DOWN) {
+            print_start++;
+        }
+        print_end = _characters_count < print_start+20 ? _characters_count : print_start+20;
+    } while(next_cmd != PC_ML_CLOSE);
+    
+    for(i = 0; i < _characters_count; i++) {
+        free(monster_list[i]);
+    }
+    free(monster_list);
+}
+
 static character_t* npc_for_id(character_id_t id) {
     int i;
     for(i = 0; i < _characters_size; i++) {
@@ -208,5 +258,6 @@ character_store_namespace const characterStoreAPI = {
     get_char_for_npc_at_index_impl,
     get_characters_impl,
     is_finished_impl,
-    npc_cleanup_impl
+    npc_cleanup_impl,
+    start_monster_list_impl
 };

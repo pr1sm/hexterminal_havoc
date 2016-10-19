@@ -29,6 +29,7 @@ void handle_control_move() {
     refresh();
     int is_valid = 0;
     do {
+        move = mv_NONE;
         dest->x = pc->position->x;
         dest->y = pc->position->y;
         int ch = getch();
@@ -83,6 +84,11 @@ void handle_control_move() {
                 move = mv_RS;
                 break;
                 
+            case PC_MONSTER_LIST:
+                move = mv_ML;
+                is_valid = 1;
+                break;
+                
             default:
                 mvprintw(0, 0, "INVALID COMMAND: %3d                     ", ch);
                 refresh();
@@ -112,9 +118,18 @@ void handle_control_move() {
                 refresh();
             }
         }
+        if(move == mv_ML) {
+            characterStoreAPI.start_monster_list();
+            dungeonAPI.get_dungeon()->print(dungeonAPI.get_dungeon(), PM_DUNGEON);
+            mvprintw(0, 0, "ENTER COMMAND:                          ");
+            refresh();
+            is_valid = 0;
+        }
     } while(!is_valid);
     
-    if(move != mv_RS) {
+    if(move == mv_ML) {
+        characterStoreAPI.start_monster_list();
+    } else if(move != mv_RS) {
         // move pc
         pc->position->x = dest->x;
         pc->position->y = dest->y;
