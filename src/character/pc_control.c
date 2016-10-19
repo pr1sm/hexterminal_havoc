@@ -25,7 +25,7 @@ void handle_control_move() {
     pc_move_t move = mv_NONE;
     point_t* dest = pointAPI.construct(pc->position->x, pc->position->y);
     int i;
-    mvprintw(0, 0, "ENTER COMMAND: ");
+    mvprintw(0, 0, "ENTER COMMAND:                          ");
     refresh();
     int is_valid = 0;
     do {
@@ -84,6 +84,8 @@ void handle_control_move() {
                 break;
                 
             default:
+                mvprintw(0, 0, "INVALID COMMAND: %3d                     ", ch);
+                refresh();
                 break;
         }
         
@@ -104,11 +106,11 @@ void handle_control_move() {
             } else if(d->tiles[dest->y][dest->x]->content != tc_ROCK) {
                 is_valid = 1;
             }
-        }
-        
-        if(!is_valid) {
-            mvprintw(0, 0, "INVALID COMMAND: %3d", ch);
-            refresh();
+            
+            if(!is_valid) {
+                mvprintw(0, 0, "Whoops! You can't move there, try again", ch);
+                refresh();
+            }
         }
     } while(!is_valid);
     
@@ -118,7 +120,7 @@ void handle_control_move() {
         pc->position->y = dest->y;
         
         // check for collision
-        for(i = 1; i < CHARACTER_COUNT; i++) {
+        for(i = 0; i < CHARACTER_COUNT; i++) {
             if(pc->position->distance(pc->position, characters[i]->position) == 0) {
                 characters[i]->is_dead = 1;
             }

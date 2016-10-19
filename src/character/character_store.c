@@ -61,20 +61,18 @@ static void setup_impl() {
     int nummon = NUM_MONSTERS;
     int i;
     dungeon_t* d = dungeonAPI.get_dungeon();
-    _characters_size = nummon + 1; // num of monsters + pc
+    _characters_size = nummon; // num of monsters
     _characters = (character_t**) calloc(_characters_size, sizeof(*_characters));
     _characters_count = _characters_size;
     CHARACTER_COUNT = _characters_count;
     _alive_characters = (character_id_t*) calloc(_characters_count, sizeof(*_alive_characters));
-    _characters[0] = characterAPI.get_pc();
-    _alive_characters[0] = _characters[0]->id;
-    point_t* pc_pos = _characters[0]->position;
+    point_t* pc_pos = characterAPI.get_pc()->position;
     if(PC_AI_MODE) {
         setup_pc_movement();
     } else {
         setup_control_movement();
     }
-    for(i = 1; i < _characters_size; i++) {
+    for(i = 0; i < _characters_size; i++) {
         point_t* spawn = pointAPI.construct(0, 0);
         do {
             dungeonAPI.rand_point(d, spawn);
@@ -101,6 +99,7 @@ static void teardown_impl() {
             characterAPI.destruct(_characters[i]);
         }
     }
+    characterAPI.destruct(characterAPI.get_pc());
     free(_characters);
     free(_alive_characters);
     if(_PLAYER_PATH != NULL) {
@@ -111,19 +110,22 @@ static void teardown_impl() {
 static int contains_npc_impl(point_t* p) {
     int i;
     // check npcs first, then player
-    for(i = 1; i < _characters_count; i++) {
+    for(i = 0; i < _characters_count; i++) {
         if(p->distance(p, _characters[i]->position) == 0 && !_characters[i]->is_dead) {
-            return i;
+            return i+1;
         }
     }
-    if(p->distance(p, _characters[0]->position) == 0) {
+    if(p->distance(p, characterAPI.get_pc()->position) == 0) {
         return 0;
     }
     return -1;
 }
 
 static char get_char_for_npc_at_index_impl(int i) {
-    return characterAPI.char_for_npc_type(_characters[i]);
+    if(i == 0) {
+        return characterAPI.char_for_npc_type(characterAPI.get_pc());
+    }
+    return characterAPI.char_for_npc_type(_characters[i-1]);
 }
 
 static character_t** get_characters_impl() {
@@ -131,7 +133,7 @@ static character_t** get_characters_impl() {
 }
 
 static void setup_npc(character_t* npc) {
-    point_t* pc_pos = _characters[0]->position;
+    point_t* pc_pos = characterAPI.get_pc()->position;
     // telepathic npcs get the pc position
     if(npc->attrs & TELEP_VAL) {
         if(npc->destination == NULL) {
@@ -159,11 +161,11 @@ static int is_finished_impl() {
     int i;
     point_t* pc_pos = characterAPI.get_pc()->position;
     // only 1 character left (pc) so pc has won
-    if(_characters_count == 1) {
+    if(_characters_count == 0) {
         return 2;
     }
     // check all npcs that ARE NOT the pc for collision
-    for(i = 1; i < _characters_size; i++) {
+    for(i = 0; i < _characters_size; i++) {
         if(pc_pos->distance(pc_pos, _characters[i]->position) == 0 && !_characters[i]->is_dead) {
             return 1;
         }
@@ -176,7 +178,7 @@ static void npc_cleanup_impl() {
     int j;
     int old_count = _characters_count;
     // check if NPCs are dead and shift others over
-    for(i = 1; i < _characters_count; i++) {
+    for(i = 0; i < _characters_count; i++) {
         character_t* npc = npc_for_id(_alive_characters[i]);
         if(npc->is_dead) {
             // shift over other npcs
