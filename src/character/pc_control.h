@@ -35,6 +35,10 @@
 #define PC_ML_SCRL_DOWN 258
 #define PC_ML_CLOSE      27
 
+typedef enum pc_move_t {
+    mv_NONE, mv_UL, mv_UP, mv_UR, mv_LT, mv_RT, mv_DL, mv_DN, mv_DR, mv_RS, mv_UPSTR, mv_DNSTR, mv_ML, mv_ML_UP, mv_ML_DN, mv_ML_CL
+} pc_move_t;
+
 void setup_control_movement();
 void handle_control_move();
 
