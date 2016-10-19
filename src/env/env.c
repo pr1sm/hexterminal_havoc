@@ -21,13 +21,14 @@
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
 
-int DEBUG_MODE = 0;
+int DEBUG_MODE   = 0;
 int NCURSES_MODE = 1;
+int PC_AI_MODE   = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
 int NUM_MONSTERS = 6; // default is 6
-uint8_t X_START = 255;
-uint8_t Y_START = 255;
+uint8_t X_START  = 255;
+uint8_t Y_START  = 255;
 char* HOME = "";
 char* LOAD_FILE;
 char* SAVE_FILE;

@@ -12,6 +12,7 @@
 #include "character_store.h"
 #include "character.h"
 #include "ai.h"
+#include "pc_control.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
@@ -68,7 +69,11 @@ static void setup_impl() {
     _characters[0] = characterAPI.get_pc();
     _alive_characters[0] = _characters[0]->id;
     point_t* pc_pos = _characters[0]->position;
-    setup_pc_movement();
+    if(PC_AI_MODE) {
+        setup_pc_movement();
+    } else {
+        setup_control_movement();
+    }
     for(i = 1; i < _characters_size; i++) {
         point_t* spawn = pointAPI.construct(0, 0);
         do {
