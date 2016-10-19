@@ -18,6 +18,10 @@ CC = gcc
 #  -ggdb ~> add gdb debugging information to the binary
 DFLAGS = -ggdb -pg
 
+#  linker flags:
+#  -lncurses ~> link the ncurses library to the binary
+LDFLAGS = -lncurses
+
 #  Attach a version number to each build
 VERSION := $(shell git describe --tags --abbrev=0 2>/dev/null)
 
@@ -59,7 +63,7 @@ all: ${TARGET}
 #  Target build based on objects
 $(TARGET): $(OBJECTS)
 	@$(ECHO) Linking $@...
-	@$(CC) $(CFLAGS) -o $@ $^
+	@$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 #  Clean instruction
 clean: 
