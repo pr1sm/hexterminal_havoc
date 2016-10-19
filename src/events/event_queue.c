@@ -50,6 +50,9 @@ static int perform_event_impl() {
         c = heapAPI.peek(_event_queue);
     }
     characterStoreAPI.npc_cleanup();
+    if(QUIT_FLAG == 1) {
+        return 0;
+    }
     return 1;
 }
 

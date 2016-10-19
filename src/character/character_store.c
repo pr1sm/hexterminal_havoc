@@ -31,7 +31,7 @@ static void setup_npc(character_t* npc);
 static character_t* npc_for_id(character_id_t id);
 
 static void print_char(character_t* npc) {
-    if(DEBUG_MODE) {
+    if(DEBUG_MODE && !NCURSES_MODE) {
         printf("NPC: spawn: (%2d, %2d) ",
                npc->position->x,
                npc->position->y);
@@ -103,7 +103,9 @@ static void teardown_impl() {
     }
     free(_characters);
     free(_alive_characters);
-    pathfinderAPI.destruct(_PLAYER_PATH);
+    if(_PLAYER_PATH != NULL) {
+        pathfinderAPI.destruct(_PLAYER_PATH);
+    }
 }
 
 static int contains_npc_impl(point_t* p) {

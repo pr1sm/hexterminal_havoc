@@ -20,6 +20,7 @@ extern int PC_AI_MODE;
 extern int LOAD_DUNGEON;
 extern int SAVE_DUNGEON;
 extern int NUM_MONSTERS;
+extern int QUIT_FLAG;
 extern char* HOME;
 extern char* LOAD_FILE;
 extern char* SAVE_FILE;

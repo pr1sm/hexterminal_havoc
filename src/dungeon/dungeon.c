@@ -53,7 +53,7 @@ static void pathfind(dungeon_t* d);
 static void update_path_hardnesses(dungeon_t* d);
 
 static void d_log_room(room_t* r) {
-    if(DEBUG_MODE) {
+    if(DEBUG_MODE && !NCURSES_MODE) {
         printf("Room: x: %2d, y: %2d, w: %2d, h: %2d\n", r->location->x, r->location->y, r->width, r->height);
     }
     logger.d("Room: x: %2d, y: %2d, w: %2d, h: %2d", r->location->x, r->location->y, r->width, r->height);

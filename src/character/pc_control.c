@@ -6,6 +6,8 @@
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
+#include <ncurses.h>
+
 #include "pc_control.h"
 #include "character_store.h"
 #include "../events/event_queue.h"
@@ -19,6 +21,24 @@ void setup_control_movement() {
 void handle_control_move() {
 //    character_t** characters = characterStoreAPI.get_characters();
     character_t* pc = characterAPI.get_pc();
-    // IMPLEMENT
+    
+    mvprintw(0, 0, "ENTER COMMAND: ");
+    int is_valid = 0;
+    do {
+        int ch = getch();
+        switch (ch) {
+            case PC_QUIT:
+                QUIT_FLAG = 1;
+                is_valid = 1;
+                break;
+                
+            default:
+                mvprintw(0, 0, "INVALID COMMAND: %3d", ch);
+                refresh();
+                break;
+        }
+    } while(!is_valid);
+    
+    
     eventQueueAPI.add_event(pc);
 }

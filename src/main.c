@@ -22,6 +22,19 @@
 #include "events/event_queue.h"
 
 int main(int argc, char * argv[]) {
+
+#ifdef DEBUG // Xcode terminal debugging with ncurses
+    int argi;
+    for (argi = 1; argi < argc; argi++)
+    {
+        if (strcmp(argv[argi], "--debug-in-terminal") == 0)
+        {
+            printf("Debugging in terminal enabled\n");
+            getchar(); // Without this call debugging will be skipped
+            break;
+        }
+    }
+#endif // DEBUG
     
     envAPI.setup_environment();
     envAPI.parse_args(argc, argv);
@@ -62,14 +75,16 @@ int main(int argc, char * argv[]) {
         d->print(d, PM_DUNGEON);
         usleep(250000);
     }
+
+    envAPI.cleanup();
     
     if(win_status == 1) {
         printf("YOU LOSE!\n");
-    } else {
+    } else if(win_status == 2) {
         printf("BY SHEER LUCK, YOU WON!\n");
+    } else {
+        printf("YOU QUIT\n");
     }
-
-    envAPI.cleanup();
     
     return 0;
 }

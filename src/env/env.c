@@ -27,6 +27,7 @@ int PC_AI_MODE   = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
 int NUM_MONSTERS = 6; // default is 6
+int QUIT_FLAG    = 0;
 uint8_t X_START  = 255;
 uint8_t Y_START  = 255;
 char* HOME = "";
@@ -70,6 +71,10 @@ static void setup_environment() {
     if(NCURSES_MODE) {
         logger.i("%%%% SETTING UP NCURSES %%%%");
         initscr();
+        noecho();
+        cbreak();
+        set_escdelay(50);
+        keypad(stdscr, TRUE);
         mvprintw(0, 0, "DEBUG MODE");
         refresh();
     }
