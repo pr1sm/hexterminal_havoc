@@ -50,6 +50,9 @@ static int perform_event_impl() {
         c = heapAPI.peek(_event_queue);
     }
     characterStoreAPI.npc_cleanup();
+    if(QUIT_FLAG == 1) {
+        return 0;
+    }
     return 1;
 }
 
@@ -57,8 +60,15 @@ static void teardown_impl() {
     heapAPI.destruct(_event_queue);
 }
 
+static void move_floors_impl() {
+    heapAPI.destruct(_event_queue);
+    _event_queue = NULL;
+    EVENT_TIME = 0;
+}
+
 event_queue_namespace const eventQueueAPI = {
     add_event_impl,
     perform_event_impl,
-    teardown_impl
+    teardown_impl,
+    move_floors_impl
 };

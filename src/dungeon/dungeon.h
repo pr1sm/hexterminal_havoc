@@ -31,6 +31,7 @@ struct dungeon_t {
     graph_t* non_tunnel_map;
     void (*update_path_maps)(dungeon_t* d);
     void (*print)(dungeon_t* d, int mode);
+    void (*printn)(dungeon_t* d, int mode);
     void (*load)(dungeon_t* d);
     void (*save)(dungeon_t* d);
 };
@@ -38,6 +39,7 @@ struct dungeon_t {
 typedef struct dungeon_namespace {
     dungeon_t* (*const get_dungeon)();
     dungeon_t* (*const construct)();
+    dungeon_t* (*const move_floors)();
     void (*const destruct)(dungeon_t* d);
     void (*const generate)(dungeon_t* d);
     void (*const rand_point)(dungeon_t* d, point_t* p);

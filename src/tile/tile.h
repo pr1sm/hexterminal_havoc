@@ -17,7 +17,7 @@
 #define PM_TUNN_PATH_MAP 2
 
 typedef enum {
-    tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM, tc_PATH
+    tc_UNSET, tc_BORDER, tc_ROCK, tc_ROOM, tc_PATH, tc_UPSTR, tc_DNSTR
 } tile_content;
 
 typedef struct tile_t tile_t;

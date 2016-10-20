@@ -10,6 +10,7 @@
 
 #include "character.h"
 #include "ai.h"
+#include "pc_control.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
@@ -120,7 +121,11 @@ static void set_destination_impl(character_t* self, point_t* p) {
 
 static void perform_impl(character_t* c) {
     if(c->type == PC) {
-        handle_pc_move();
+        if(PC_AI_MODE) {
+            handle_pc_move();
+        } else {
+            handle_control_move();
+        }
     } else {
         handle_npc_move(c);
     }

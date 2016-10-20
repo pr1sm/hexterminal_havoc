@@ -13,16 +13,24 @@
 #include <getopt.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <ncurses.h>
 
 #include "env.h"
 #include "../logger/logger.h"
+#include "../character/character_store.h"
+#include "../dungeon/dungeon.h"
+#include "../events/event_queue.h"
 
-int DEBUG_MODE = 0;
+int DEBUG_MODE   = 0;
+int NCURSES_MODE = 1;
+int PC_AI_MODE   = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
 int NUM_MONSTERS = 6; // default is 6
-uint8_t X_START = 255;
-uint8_t Y_START = 255;
+int QUIT_FLAG    = 0;
+int STAIR_FLAG   = 0;
+uint8_t X_START  = 255;
+uint8_t Y_START  = 255;
 char* HOME = "";
 char* LOAD_FILE;
 char* SAVE_FILE;
@@ -59,6 +67,17 @@ static void setup_environment() {
     
     if(DEBUG_MODE) {
         logger.i("%%%% RUNNING IN DEBUG MODE %%%%");
+    }
+    
+    if(NCURSES_MODE) {
+        logger.i("%%%% SETTING UP NCURSES %%%%");
+        initscr();
+        noecho();
+        cbreak();
+        set_escdelay(50);
+        keypad(stdscr, TRUE);
+        mvprintw(0, 0, "DEBUG MODE");
+        refresh();
     }
     
     logger.i("%%%% ENVIRONMENT SET %%%%");
@@ -203,6 +222,21 @@ static void cleanup() {
     if(LOAD_FILE) {
         free(LOAD_FILE);
     }
+    
+    characterStoreAPI.teardown();
+    eventQueueAPI.teardown();
+    dungeonAPI.destruct(dungeonAPI.get_dungeon());
+    
+    if(NCURSES_MODE) {
+        endwin();
+    }
+}
+
+static void move_floors_impl() {
+    eventQueueAPI.move_floors();
+    dungeonAPI.move_floors();
+    characterStoreAPI.move_floors();
+    STAIR_FLAG = 0; // reset flag
 }
 
 static int is_number(char* str) {
@@ -214,5 +248,6 @@ const env_namespace envAPI = {
     parse_args,
     setup_environment,
     exit_gracefully,
-    cleanup
+    cleanup,
+    move_floors_impl
 };

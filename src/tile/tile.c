@@ -26,6 +26,8 @@
 #define ROOM_CHAR '.'
 #define PATH_CHAR '#'
 #define PC_CHAR '@'
+#define UPSTR_CHAR '<'
+#define DNSTR_CHAR '>'
 
 // Public Functions
 static void update_hardness_impl(tile_t* tile, uint8_t value);
@@ -129,9 +131,11 @@ static char char_for_content_impl(tile_t* tile, int mode) {
             return characterStoreAPI.get_char_for_npc_at_index(npc_idx);
         }
         return tile->content == tc_BORDER ? BORDER_CHAR :
-        tile->content == tc_ROCK   ? ROCK_CHAR   :
-        tile->content == tc_ROOM   ? ROOM_CHAR   :
-        tile->content == tc_PATH   ? PATH_CHAR   : DEFAULT_CHAR ;
+               tile->content == tc_ROCK   ? ROCK_CHAR   :
+               tile->content == tc_ROOM   ? ROOM_CHAR   :
+               tile->content == tc_PATH   ? PATH_CHAR   :
+               tile->content == tc_UPSTR  ? UPSTR_CHAR  :
+               tile->content == tc_DNSTR  ? DNSTR_CHAR  : DEFAULT_CHAR ;
     } else if(mode == PM_ROOM_PATH_MAP || mode == PM_TUNN_PATH_MAP) {
         uint8_t val = (mode == 1 ? tile->dist : tile->dist_tunnel);
         if(val < 10) {
