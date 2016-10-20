@@ -119,7 +119,7 @@ void handle_control_move() {
             if(!is_valid) {
                 mvprintw(0, 0, "Whoops! You can't go down without stairs!");
             }
-        } else if(!is_valid && move != NONE) {
+        } else if(!is_valid && move != mv_NONE) {
             if(move == mv_UL || move == mv_UP || move == mv_UR) {
                 dest->y -= 1;
             } else if(move == mv_DL || move == mv_DN || move == mv_DR) {
