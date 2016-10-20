@@ -25,7 +25,7 @@ void handle_control_move() {
     pc_move_t move = mv_NONE;
     point_t* dest = pointAPI.construct(pc->position->x, pc->position->y);
     int i;
-    mvprintw(0, 0, "ENTER COMMAND:                          ");
+    mvprintw(0, 0, "ENTER COMMAND:                                ");
     refresh();
     int is_valid = 0;
     do {
@@ -89,13 +89,37 @@ void handle_control_move() {
                 is_valid = 1;
                 break;
                 
+            case PC_DOWNSTAIRS:
+                move = mv_DNSTR;
+                break;
+                
+            case PC_UPSTAIRS:
+                move = mv_UPSTR;
+                break;
+                
             default:
-                mvprintw(0, 0, "INVALID COMMAND: %3d                     ", ch);
+                mvprintw(0, 0, "INVALID COMMAND: %3d                            ", ch);
                 refresh();
                 break;
         }
         
-        if(!is_valid && move != NONE) {
+        if(!is_valid && move == mv_UPSTR) {
+            if(d->tiles[pc->position->y][pc->position->x]->content == tc_UPSTR) {
+                is_valid = 1;
+            }
+            
+            if(!is_valid) {
+                mvprintw(0, 0, "Whoops! You can't go up without stairs!");
+            }
+        } else if(!is_valid && move == mv_DNSTR) {
+            if(d->tiles[pc->position->y][pc->position->x]->content == tc_DNSTR) {
+                is_valid = 1;
+            }
+            
+            if(!is_valid) {
+                mvprintw(0, 0, "Whoops! You can't go down without stairs!");
+            }
+        } else if(!is_valid && move != NONE) {
             if(move == mv_UL || move == mv_UP || move == mv_UR) {
                 dest->y -= 1;
             } else if(move == mv_DL || move == mv_DN || move == mv_DR) {
@@ -114,7 +138,7 @@ void handle_control_move() {
             }
             
             if(!is_valid) {
-                mvprintw(0, 0, "Whoops! You can't move there, try again", ch);
+                mvprintw(0, 0, "Whoops! You can't move there, try again");
                 refresh();
             }
         }
@@ -128,8 +152,17 @@ void handle_control_move() {
     } while(!is_valid);
     
     if(move == mv_ML) {
+        logger.i("Starting monster list...");
         characterStoreAPI.start_monster_list();
+        logger.i("Ending monster list");
+    } else if(move == mv_UPSTR) {
+        logger.i("Moving upstairs");
+        STAIR_FLAG = 1; // move upstairs
+    } else if(move == mv_DNSTR) {
+        logger.i("Moving downstairs");
+        STAIR_FLAG = 2; // move downstairs
     } else if(move != mv_RS) {
+        logger.i("Moving to point (%2d, %2d)", dest->x, dest->y);
         // move pc
         pc->position->x = dest->x;
         pc->position->y = dest->y;
@@ -140,6 +173,8 @@ void handle_control_move() {
                 characters[i]->is_dead = 1;
             }
         }
+    } else if(move == mv_RS) {
+        logger.i("Resting 1 turn");
     }
     
     pointAPI.destruct(dest);

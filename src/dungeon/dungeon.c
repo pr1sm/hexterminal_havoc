@@ -113,7 +113,37 @@ static void destruct_impl(dungeon_t* d) {
     }
     free(d->tiles);
     free(d);
+    if(d == _base_dungeon) {
+        _base_dungeon = NULL;
+    }
     logger.i("Dungeon Destructed");
+}
+
+static dungeon_t* move_floors_impl() {
+    int i, j;
+    int pc_placed = 0;
+    character_t* pc = characterAPI.get_pc();
+    destruct_impl(_base_dungeon);
+    _base_dungeon = dungeonAPI.construct();
+    dungeonAPI.generate(_base_dungeon);
+    for(i = 0; i < DUNGEON_HEIGHT; i++) {
+        for(j = 0; j < DUNGEON_WIDTH; j++) {
+            if(STAIR_FLAG == 2 && _base_dungeon->tiles[i][j]->content == tc_DNSTR) {
+                pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
+                pc_placed = 1;
+                break;
+            } else if(STAIR_FLAG == 1 && _base_dungeon->tiles[i][j]->content == tc_UPSTR) {
+                pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
+                pc_placed = 1;
+                break;
+            }
+        }
+        if(pc_placed) {
+            break;
+        }
+    }
+    _base_dungeon->update_path_maps(_base_dungeon);
+    return _base_dungeon;
 }
 
 static void generate_impl(dungeon_t* d) {
@@ -714,6 +744,7 @@ static void add_rooms(dungeon_t* d) {
 dungeon_namespace const dungeonAPI = {
     get_dungeon_impl,
     construct_impl,
+    move_floors_impl,
     destruct_impl,
     generate_impl,
     rand_point_impl

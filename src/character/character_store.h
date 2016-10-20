@@ -23,6 +23,7 @@ typedef struct character_store_namespace {
     int  (*const is_finished)();
     void (*const npc_cleanup)();
     void (*const start_monster_list)();
+    void (*const move_floors)();
 } character_store_namespace;
 extern character_store_namespace const characterStoreAPI;
 

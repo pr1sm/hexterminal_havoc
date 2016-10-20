@@ -21,6 +21,7 @@ extern int LOAD_DUNGEON;
 extern int SAVE_DUNGEON;
 extern int NUM_MONSTERS;
 extern int QUIT_FLAG;
+extern int STAIR_FLAG;
 extern char* HOME;
 extern char* LOAD_FILE;
 extern char* SAVE_FILE;
@@ -32,6 +33,7 @@ typedef struct env_namespace {
     void (*const setup_environment)();
     void (*const exit_gracefully)();
     void (*const cleanup)();
+    void (*const move_floors)();
 } env_namespace;
 extern const env_namespace envAPI;
 

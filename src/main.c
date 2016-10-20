@@ -64,16 +64,21 @@ int main(int argc, char * argv[]) {
     
     d->print(d, PM_DUNGEON);
     
-    if(SAVE_DUNGEON) {
-        d->save(d);
-    }
     int next_turn = 1;
     int win_status = characterStoreAPI.is_finished();
     while(!win_status && next_turn) {
         next_turn = eventQueueAPI.perform_event();
+        if(STAIR_FLAG == 1 || STAIR_FLAG == 2) {
+            envAPI.move_floors();
+            d = dungeonAPI.get_dungeon();
+        }
         win_status = characterStoreAPI.is_finished();
         d->print(d, PM_DUNGEON);
         usleep(250000);
+    }
+    
+    if(SAVE_DUNGEON) {
+        d->save(d);
     }
 
     envAPI.cleanup();

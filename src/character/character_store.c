@@ -241,6 +241,22 @@ void start_monster_list_impl() {
     free(monster_list);
 }
 
+static void move_floors_impl() {
+    int i;
+    for(i = 0; i < _characters_size; i++) {
+        if(_characters[i] != NULL) {
+            characterAPI.destruct(_characters[i]);
+        }
+    }
+    free(_characters);
+    free(_alive_characters);
+    if(_PLAYER_PATH != NULL) {
+        pathfinderAPI.destruct(_PLAYER_PATH);
+    }
+    
+    characterStoreAPI.setup();
+}
+
 static character_t* npc_for_id(character_id_t id) {
     int i;
     for(i = 0; i < _characters_size; i++) {
@@ -259,5 +275,6 @@ character_store_namespace const characterStoreAPI = {
     get_characters_impl,
     is_finished_impl,
     npc_cleanup_impl,
-    start_monster_list_impl
+    start_monster_list_impl,
+    move_floors_impl
 };
