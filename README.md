@@ -36,6 +36,7 @@ Usage: hexterm_havoc [options]
 
 -l<name>, --load=<name> | Load dungeon with name <name> (in save directory).
 -h,       --help        | Print this help message.
+-m,       --nummon=<val>| Set the number of monsters in the dungeon
 -s<name>, --save=<name> | Save the dungeon after loading/generating it with
                         |   name <name> (in save directory).
 -x<val> , --xpos <val>  | Start the player at a specified x coord
@@ -43,6 +44,43 @@ Usage: hexterm_havoc [options]
 ```
 
 ## Assignments
+
+### Assignment 1.05 - User Interface with Ncurses
+
+For this assignment, we had to implement a user interface for the player and
+use ncurses as the default rendering for our dungeon.  The move the ncurses 
+was very simple for me since there were only a couple of places I printed the
+dungeon out.  A global enviroment flag was added to support any changes that 
+needed to be made based on the presence of ncurses or not.  I also added an
+option to turn on the player AI I used in assignment 1.04, or use the user
+interface I implemented in this assignment.  Both of these flags currently do
+not have a runtime configuration setting, so recompilation is necessary to change
+these settings, however that will be address in later assignments.  
+
+The implementation of the character control was also very simple since similar
+steps were required for the pc AI.  The only change was that I asked ncurses to 
+get the input of the key during the pc's move.  I kept in the sleep timer 
+between moves because I like the feeling of the monsters moving one step at a time
+versus having them move 2 steps automatically.  In my opionion this added an 
+immersion into the game because the monsters moved on their own in between the pause
+for the pc control.  
+
+The implementation of the monster list was also simple and is done within on 
+function so the list of monsters is only allocated once and all the control
+for that screen is done separately in that function.  Once the close button is
+pressed, control is then returned to the move function for the pc control, which
+prompts the user for their next pc move.  The function also cleans up itself,
+so it can be called over and over again without leaking memory
+
+The staircases generation and implementation was slightly harder since there 
+was a fair amount of cleanup necessary to do this.  The overall approach was
+to free all the memory with the dungeon and the npcs and generate a new dungeon
+and characters, placing the pc at the correct location where the stairs were.  
+When the pc moves downstairs, they are placed at the spot where the stairs upward
+is generated.  Similarly when they move upstairs, they are placed at the stairs 
+going downward.  I had all the functions necessary to cleanup all my data structures
+and reallocate them, I just had to create a function that did both in the correct 
+order and call that at the right time.  
 
 ### Assignment 1.04 - Player Character and Monsters
 

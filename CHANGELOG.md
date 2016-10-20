@@ -4,6 +4,22 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.05] - 2016-10-19
+
+### Added
+- ncurses support (on by default)
+- player control (pc ai is still available, but recompilation is necessary to turn it on)
+- monster list that shows monster and position relative to player
+- staircases and movement between dungeon floors
+
+### Changed
+- Refactors to cleanup code at the end of the program (all cleanup is housed in one function)
+- character array now only holds npcs (pc is separate)
+
+### Fixed
+- small bug fixes
+- fixed memory leak due to player ai and character variable
+
 ## [1.04] - 2016-10-4
 
 ### Added
