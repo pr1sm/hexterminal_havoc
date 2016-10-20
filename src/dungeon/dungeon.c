@@ -128,11 +128,11 @@ static dungeon_t* move_floors_impl() {
     dungeonAPI.generate(_base_dungeon);
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
-            if(STAIR_FLAG == 2 && _base_dungeon->tiles[i][j]->content == tc_DNSTR) {
+            if(STAIR_FLAG == 1 && _base_dungeon->tiles[i][j]->content == tc_DNSTR) { // pc went upstairs, so it should be placed on the down stairs
                 pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
                 pc_placed = 1;
                 break;
-            } else if(STAIR_FLAG == 1 && _base_dungeon->tiles[i][j]->content == tc_UPSTR) {
+            } else if(STAIR_FLAG == 2 && _base_dungeon->tiles[i][j]->content == tc_UPSTR) { // pc went downstairs, so it should be placed on the up stairs
                 pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
                 pc_placed = 1;
                 break;
