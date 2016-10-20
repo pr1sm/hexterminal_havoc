@@ -39,6 +39,7 @@ struct dungeon_t {
 typedef struct dungeon_namespace {
     dungeon_t* (*const get_dungeon)();
     dungeon_t* (*const construct)();
+    dungeon_t* (*const move_floors)();
     void (*const destruct)(dungeon_t* d);
     void (*const generate)(dungeon_t* d);
     void (*const rand_point)(dungeon_t* d, point_t* p);

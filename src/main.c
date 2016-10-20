@@ -22,6 +22,19 @@
 #include "events/event_queue.h"
 
 int main(int argc, char * argv[]) {
+
+#ifdef DEBUG // Xcode terminal debugging with ncurses
+    int argi;
+    for (argi = 1; argi < argc; argi++)
+    {
+        if (strcmp(argv[argi], "--debug-in-terminal") == 0)
+        {
+            printf("Debugging in terminal enabled\n");
+            getchar(); // Without this call debugging will be skipped
+            break;
+        }
+    }
+#endif // DEBUG
     
     envAPI.setup_environment();
     envAPI.parse_args(argc, argv);
@@ -51,25 +64,32 @@ int main(int argc, char * argv[]) {
     
     d->print(d, PM_DUNGEON);
     
-    if(SAVE_DUNGEON) {
-        d->save(d);
-    }
     int next_turn = 1;
     int win_status = characterStoreAPI.is_finished();
     while(!win_status && next_turn) {
         next_turn = eventQueueAPI.perform_event();
+        if(STAIR_FLAG == 1 || STAIR_FLAG == 2) {
+            envAPI.move_floors();
+            d = dungeonAPI.get_dungeon();
+        }
         win_status = characterStoreAPI.is_finished();
         d->print(d, PM_DUNGEON);
         usleep(250000);
     }
     
-    if(win_status == 1) {
-        printf("YOU LOSE!\n");
-    } else {
-        printf("BY SHEER LUCK, YOU WON!\n");
+    if(SAVE_DUNGEON) {
+        d->save(d);
     }
 
     envAPI.cleanup();
+    
+    if(win_status == 1) {
+        printf("YOU LOSE!\n");
+    } else if(win_status == 2) {
+        printf("BY SHEER LUCK, YOU WON!\n");
+    } else {
+        printf("YOU QUIT\n");
+    }
     
     return 0;
 }

@@ -19,6 +19,7 @@ typedef struct event_queue_namespace {
     void (*const add_event)(character_t* c);
     int  (*const perform_event)();
     void (*const teardown)();
+    void (*const move_floors)();
 } event_queue_namespace;
 extern event_queue_namespace const eventQueueAPI;
 

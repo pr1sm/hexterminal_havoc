@@ -8,10 +8,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <ncurses.h>
 
 #include "character_store.h"
 #include "character.h"
 #include "ai.h"
+#include "pc_control.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
@@ -30,7 +33,7 @@ static void setup_npc(character_t* npc);
 static character_t* npc_for_id(character_id_t id);
 
 static void print_char(character_t* npc) {
-    if(DEBUG_MODE) {
+    if(DEBUG_MODE && !NCURSES_MODE) {
         printf("NPC: spawn: (%2d, %2d) ",
                npc->position->x,
                npc->position->y);
@@ -60,16 +63,18 @@ static void setup_impl() {
     int nummon = NUM_MONSTERS;
     int i;
     dungeon_t* d = dungeonAPI.get_dungeon();
-    _characters_size = nummon + 1; // num of monsters + pc
+    _characters_size = nummon; // num of monsters
     _characters = (character_t**) calloc(_characters_size, sizeof(*_characters));
     _characters_count = _characters_size;
     CHARACTER_COUNT = _characters_count;
     _alive_characters = (character_id_t*) calloc(_characters_count, sizeof(*_alive_characters));
-    _characters[0] = characterAPI.get_pc();
-    _alive_characters[0] = _characters[0]->id;
-    point_t* pc_pos = _characters[0]->position;
-    setup_pc_movement();
-    for(i = 1; i < _characters_size; i++) {
+    point_t* pc_pos = characterAPI.get_pc()->position;
+    if(PC_AI_MODE) {
+        setup_pc_movement();
+    } else {
+        setup_control_movement();
+    }
+    for(i = 0; i < _characters_size; i++) {
         point_t* spawn = pointAPI.construct(0, 0);
         do {
             dungeonAPI.rand_point(d, spawn);
@@ -96,27 +101,33 @@ static void teardown_impl() {
             characterAPI.destruct(_characters[i]);
         }
     }
+    characterAPI.destruct(characterAPI.get_pc());
     free(_characters);
     free(_alive_characters);
-    pathfinderAPI.destruct(_PLAYER_PATH);
+    if(_PLAYER_PATH != NULL) {
+        pathfinderAPI.destruct(_PLAYER_PATH);
+    }
 }
 
 static int contains_npc_impl(point_t* p) {
     int i;
     // check npcs first, then player
-    for(i = 1; i < _characters_count; i++) {
+    for(i = 0; i < _characters_count; i++) {
         if(p->distance(p, _characters[i]->position) == 0 && !_characters[i]->is_dead) {
-            return i;
+            return i+1;
         }
     }
-    if(p->distance(p, _characters[0]->position) == 0) {
+    if(p->distance(p, characterAPI.get_pc()->position) == 0) {
         return 0;
     }
     return -1;
 }
 
 static char get_char_for_npc_at_index_impl(int i) {
-    return characterAPI.char_for_npc_type(_characters[i]);
+    if(i == 0) {
+        return characterAPI.char_for_npc_type(characterAPI.get_pc());
+    }
+    return characterAPI.char_for_npc_type(_characters[i-1]);
 }
 
 static character_t** get_characters_impl() {
@@ -124,7 +135,7 @@ static character_t** get_characters_impl() {
 }
 
 static void setup_npc(character_t* npc) {
-    point_t* pc_pos = _characters[0]->position;
+    point_t* pc_pos = characterAPI.get_pc()->position;
     // telepathic npcs get the pc position
     if(npc->attrs & TELEP_VAL) {
         if(npc->destination == NULL) {
@@ -152,11 +163,11 @@ static int is_finished_impl() {
     int i;
     point_t* pc_pos = characterAPI.get_pc()->position;
     // only 1 character left (pc) so pc has won
-    if(_characters_count == 1) {
+    if(_characters_count == 0) {
         return 2;
     }
     // check all npcs that ARE NOT the pc for collision
-    for(i = 1; i < _characters_size; i++) {
+    for(i = 0; i < _characters_size; i++) {
         if(pc_pos->distance(pc_pos, _characters[i]->position) == 0 && !_characters[i]->is_dead) {
             return 1;
         }
@@ -169,7 +180,7 @@ static void npc_cleanup_impl() {
     int j;
     int old_count = _characters_count;
     // check if NPCs are dead and shift others over
-    for(i = 1; i < _characters_count; i++) {
+    for(i = 0; i < _characters_count; i++) {
         character_t* npc = npc_for_id(_alive_characters[i]);
         if(npc->is_dead) {
             // shift over other npcs
@@ -180,6 +191,70 @@ static void npc_cleanup_impl() {
         }
     }
     logger.d("NPC cleanup: %d ~> %d", old_count, _characters_count);
+}
+
+void start_monster_list_impl() {
+    char** monster_list;
+    int i;
+    int xdiff;
+    int ydiff;
+    int print_start = 0;
+    int print_end = _characters_count < print_start+20 ? _characters_count : print_start+20;
+    int next_cmd = 0;
+    point_t* pc_pos = characterAPI.get_pc()->position;
+    monster_list = (char**) calloc(_characters_count, sizeof(*monster_list));
+    for(i = 0; i < _characters_count; i++) {
+        character_t* npc = npc_for_id(_alive_characters[i]);
+        if(npc != NULL) {
+            monster_list[i] = (char*) calloc(30, sizeof(**monster_list));
+            xdiff = pc_pos->x - npc->position->x;
+            ydiff = pc_pos->y - npc->position->y;
+            sprintf(monster_list[i], "%2d. %c, %2d %s and %2d %s",
+                    i+1,
+                    characterAPI.char_for_npc_type(npc),
+                    abs(ydiff),
+                    ydiff > 0 ? "north" : "south",
+                    abs(xdiff),
+                    xdiff > 0 ? "west" : "east");
+        }
+    }
+    
+    do {
+        clear();
+        mvprintw(1, 1, "Monster List (%d/%d)", print_end-print_start, _characters_count);
+        for(i = 0; i < print_end - print_start; i++) {
+            mvprintw(i+2, 1, monster_list[i+print_start]);
+        }
+        refresh();
+        next_cmd = getch();
+        if(print_start > 0 && next_cmd == PC_ML_SCRL_UP) {
+            print_start--;
+        } else if(print_start < _characters_count-20 && next_cmd == PC_ML_SCRL_DOWN) {
+            print_start++;
+        }
+        print_end = _characters_count < print_start+20 ? _characters_count : print_start+20;
+    } while(next_cmd != PC_ML_CLOSE);
+    
+    for(i = 0; i < _characters_count; i++) {
+        free(monster_list[i]);
+    }
+    free(monster_list);
+}
+
+static void move_floors_impl() {
+    int i;
+    for(i = 0; i < _characters_size; i++) {
+        if(_characters[i] != NULL) {
+            characterAPI.destruct(_characters[i]);
+        }
+    }
+    free(_characters);
+    free(_alive_characters);
+    if(_PLAYER_PATH != NULL) {
+        pathfinderAPI.destruct(_PLAYER_PATH);
+    }
+    
+    characterStoreAPI.setup();
 }
 
 static character_t* npc_for_id(character_id_t id) {
@@ -199,5 +274,7 @@ character_store_namespace const characterStoreAPI = {
     get_char_for_npc_at_index_impl,
     get_characters_impl,
     is_finished_impl,
-    npc_cleanup_impl
+    npc_cleanup_impl,
+    start_monster_list_impl,
+    move_floors_impl
 };

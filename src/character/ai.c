@@ -47,7 +47,7 @@ void handle_pc_move() {
     index_to_point(v->prev, &next);
     pc->set_position(pc, &next);
     int i;
-    for(i = 1; i < CHARACTER_COUNT; i++) {
+    for(i = 0; i < CHARACTER_COUNT; i++) {
         if(pc->position->distance(pc->position, characters[i]->position) == 0) {
             characters[i]->is_dead = 1;
         }

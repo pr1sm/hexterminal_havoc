@@ -38,7 +38,7 @@ static int distance_impl(point_t* p1, point_t* p2) {
 
 static void print_impl(point_t* p) {
     logger.t("point: (%d, %d)", p->x, p->y);
-    if(DEBUG_MODE) {
+    if(DEBUG_MODE && !NCURSES_MODE) {
         printf("point: (%d, %d)\n", p->x, p->y);
     }
 }
