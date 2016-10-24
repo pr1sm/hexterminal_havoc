@@ -11,6 +11,10 @@
 
 #include "../point/point.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct {
     int dest;
     int weight;
@@ -50,5 +54,9 @@ typedef struct graph_namespace {
     void (*const destruct_path)(path_node_t* pn);
 } graph_namespace;
 extern graph_namespace const graphAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* graph_h */

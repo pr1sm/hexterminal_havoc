@@ -21,6 +21,10 @@
 #include "character/character_store.h"
 #include "events/event_queue.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 int main(int argc, char * argv[]) {
 
 #ifdef DEBUG // Xcode terminal debugging with ncurses
@@ -93,3 +97,7 @@ int main(int argc, char * argv[]) {
     
     return 0;
 }
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
