@@ -11,6 +11,10 @@
 
 #include "../point/point.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #define INTEL_BIT 0
 #define TELEP_BIT 1
 #define TUNNL_BIT 2
@@ -49,5 +53,9 @@ typedef struct character_namespace {
     char         (*const char_for_npc_type)(character_t* c);
 } character_namespace;
 extern character_namespace const characterAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* character_h */

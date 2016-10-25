@@ -14,6 +14,10 @@
 
 #include "../env/env.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct heap_node_t {
     void* data;
     int index;
@@ -43,5 +47,9 @@ typedef struct heap_namespace {
     int   (*const is_empty)(heap_t*);
 } heap_namespace;
 extern heap_namespace const heapAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* heap_h */
