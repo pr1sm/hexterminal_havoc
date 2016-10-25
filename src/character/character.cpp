@@ -1,16 +1,16 @@
 //
-//  character.c
+//  character.cpp
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/3/16.
-//  Copyright Â© 2016 dhanwada. All rights reserved.
+//  Created by Srinivas Dhanwada on 10/25/16.
+//  Copyright © 2016 dhanwada. All rights reserved.
 //
 
-#ifndef __cplusplus
+#ifdef __cplusplus
 
 #include <stdlib.h>
 
-#include "character_t.h"
+#include "character.h"
 #include "ai.h"
 #include "pc_control.h"
 #include "../point/point.h"
@@ -24,7 +24,7 @@ static void perform_impl(character_t* c);
 static character_t* gPLAYER_CHARACTER = NULL;
 
 static character_t* construct_impl(character_type type, point_t* p) {
-    character_t* c = calloc(1, sizeof(character_t));
+    character_t* c = (character_t*)calloc(1, sizeof(character_t));
     point_t* pos;
     c->type = type;
     if(type == PC) {

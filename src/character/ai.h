@@ -9,7 +9,11 @@
 #ifndef ai_h
 #define ai_h
 
-#include "character.h"
+#ifdef __cplusplus
+    #include "character.h"
+#else
+    #include "character_t.h"
+#endif // __cplusplus
 #include "../graph/graph.h"
 #include "../point/point.h"
 

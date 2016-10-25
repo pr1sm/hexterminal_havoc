@@ -12,7 +12,11 @@
 #include <ncurses.h>
 
 #include "character_store.h"
+#ifdef __cplusplus
 #include "character.h"
+#else
+#include "character_t.h"
+#endif // __cplusplus
 #include "ai.h"
 #include "pc_control.h"
 #include "../logger/logger.h"

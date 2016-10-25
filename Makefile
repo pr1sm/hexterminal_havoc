@@ -49,6 +49,7 @@ CSOURCES += $(wildcard src/*/*.c)
 #  Create C++ Source list
 CXXSOURCES += $(wildcard src/*.cpp)
 CXXSOURCES += $(wildcard src/*/*.cpp)
+CXXCSOURCES := $(filter-out $(patsubst %.cpp,%.c,$(CXXSOURCES)),$(CSOURCES))
 
 #  Create list of dependencies
 CDEPENDS := $(patsubst %.c,%.d,$(CSOURCES))
@@ -57,9 +58,10 @@ CXXDEPENDS := $(patsubst %.cpp,%.d,$(CXXSOURCES))
 #  Create list of objects based on .c files
 COBJECTS := $(patsubst %.c,%.o,$(CSOURCES))
 CXXOBJECTS := $(patsubst %.cpp,%.opp,$(CXXSOURCES))
+CXXCOBJECTS := $(patsubst %.c,%.o,$(CXXCSOURCES))
 
 #  Top Level Build Rule
-all: c
+all: cxx
 	@$(ECHO) Done!
 
 cxx: ${CXXTARGET}
@@ -70,9 +72,9 @@ cxx: ${CXXTARGET}
 #  Generic rule for C++ dependencies
 %.opp: %.cpp
 	@$(ECHO) Building $<...
-	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.c,%.o,$<)
+	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.cpp,%.opp,$<)
 
-$(CXXTARGET): $(CXXOBJECTS) $(COBJECTS)
+$(CXXTARGET): $(CXXOBJECTS) $(CXXCOBJECTS)
 	@$(ECHO) Linking $@
 	@$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -96,7 +98,7 @@ $(CTARGET): $(COBJECTS)
 #  Clean instruction
 clean: 
 	@$(ECHO) Cleaning...
-	@$(RM) -rf $(CXXTARGET) $(CTARGET) $(COBJECTS) $(CDEPENDS) *.swp *.tar.gz *.pgm *~ *.dSYM/ logs/
+	@$(RM) -rf $(CXXTARGET) $(CTARGET) $(COBJECTS) $(CXXOBJECTS) $(CXXDEPENDS) $(CDEPENDS) *.swp *.tar.gz *.pgm *~ *.dSYM/ logs/
 	@$(ECHO) Done!
 
 #  More info for debugging
@@ -109,9 +111,11 @@ helpsummary:
 	@echo "TARGET   : $(CXXTARGET)"
 	@echo "VERSION  : $(VERSION)"
 	@echo "CTARGET  : $(CTARGET)"
-	@echo "CSOURCES : $(SOURCES)"
-	@echo "COBJECTS : $(OBJECTS)"
-	@echo "CDEPENDS : $(DEPENDS)"
+	@echo "CSOURCES : $(CSOURCES)"
+	@echo "CXXSOURCES : $(CXXSOURCES)"
+	@echo "CXXCSOURCES : $(CXXCSOURCES)"
+	@echo "COBJECTS : $(COBJECTS)"
+	@echo "CDEPENDS : $(CDEPENDS)"
 	@echo "CFLAGS   : $(CFLAGS)"
 
 printvars:

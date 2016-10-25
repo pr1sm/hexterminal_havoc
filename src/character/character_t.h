@@ -1,19 +1,15 @@
 //
-//  character.h
+//  character_t.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/3/16.
+//  Created by Srinivas Dhanwada on 10/25/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
-#ifndef character_h
-#define character_h
+#ifndef character_t_h
+#define character_t_h
 
 #include "../point/point.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 #define INTEL_BIT 0
 #define TELEP_BIT 1
@@ -53,29 +49,6 @@ typedef struct character_namespace {
     char         (*const char_for_npc_type)(character_t* c);
 } character_namespace;
 extern character_namespace const characterAPI;
-    
-#ifdef __cplusplus
-}
-
-class character {
-private:
-    character_id_t id;
-    character_type type;
-    point_t* position;
-    point_t* destination;
-    int event_count;
-    uint8_t attrs;
-    uint8_t speed;
-    uint8_t turn_count;
-    uint8_t is_dead;
-    
-public:
-    void set_position(const character_t* c, point_t* p);
-    void set_destination(const character_t* c, point_t* p);
-    void perform(const character_t* c);
-};
 
 
-#endif // __cplusplus
-
-#endif /* character_h */
+#endif /* character_t_h */

@@ -21,7 +21,11 @@
 #include "../room/room.h"
 #include "../logger/logger.h"
 #include "../env/env.h"
+#ifdef __cplusplus
 #include "../character/character.h"
+#else
+#include "../character/character_t.h"
+#endif // __cplusplus
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 

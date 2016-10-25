@@ -9,7 +9,11 @@
 #include <stdlib.h>
 
 #include "event_queue.h"
-#include "../character/character.h"
+#ifdef __cplusplus
+    #include "../character/character.h"
+#else
+    #include "../character/character_t.h"
+#endif // __cplusplus
 #include "../character/character_store.h"
 #include "../heap/heap.h"
 #include "../logger/logger.h"
