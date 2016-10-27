@@ -111,7 +111,7 @@ static void setup_impl() {
 #ifdef __cplusplus
         characterAPI.set_id(npc, i+1);
 #else
-        npc->id = i;
+        npc->id = i+1;
 #endif // __cplusplus
         
         setup_npc(npc);
@@ -132,7 +132,7 @@ static void teardown_impl() {
             characterAPI.destruct(_characters[i]);
         }
     }
-    characterAPI.destruct(characterAPI.get_pc());
+    characterAPI.teardown_pc();
     free(_characters);
     free(_alive_characters);
     if(_PLAYER_PATH != NULL) {

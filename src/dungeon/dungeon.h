@@ -42,6 +42,7 @@ struct dungeon_t {
 
 typedef struct dungeon_namespace {
     dungeon_t* (*const get_dungeon)();
+    void       (*const teardown_dungeon)();
     dungeon_t* (*const construct)();
     dungeon_t* (*const move_floors)();
     void (*const destruct)(dungeon_t* d);

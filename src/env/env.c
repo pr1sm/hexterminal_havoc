@@ -229,7 +229,7 @@ static void cleanup() {
     
     characterStoreAPI.teardown();
     eventQueueAPI.teardown();
-    dungeonAPI.destruct(dungeonAPI.get_dungeon());
+    dungeonAPI.teardown_dungeon();
     
     if(NCURSES_MODE) {
         endwin();
