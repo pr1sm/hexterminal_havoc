@@ -6,8 +6,6 @@
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
-#ifdef __cplusplus
-
 #include <stdlib.h>
 
 #include "character.h"
@@ -17,57 +15,103 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
-static void set_position_impl(character_t* self, point_t* p);
-static void set_destination_impl(character_t* self, point_t* p);
-static void perform_impl(character_t* c);
+character::character(character_type type, point_t* spawn) {
+    _type = type;
+    if(_type == PC) {
+        _speed = 10;
+        _attrs = 0;
+    } else if(type == NPC) {
+        _speed = (rand() & 0xf) + 5;
+        _attrs = rand() & 0xf;
+    } else {
+        logger.w("Invalid type passed into character constructor!");
+        _speed = 1;
+        _attrs = 0;
+    }
+    _turn_count = 100 / _speed;
+    
+    if(spawn == NULL) {
+        logger.w("NULL point passed into character constructor!");
+        _position = pointAPI.construct(0, 0);
+    } else {
+        _position = pointAPI.construct(spawn->x, spawn->y);
+    }
+    _destination = NULL;
+}
+
+character::~character() {
+    if(_position != NULL) {
+        pointAPI.destruct(_position);
+    }
+    if(_destination != NULL) {
+        pointAPI.destruct(_destination);
+    }
+}
+
+void character::set_position(point_t* p) {
+    if(p == NULL) {
+        logger.w("NULL point passed into set_position! position will remain unchanged");
+        return;
+    }
+    if(_position == NULL) {
+        _position = pointAPI.construct(p->x, p->y);
+    } else {
+        _position->x = p->x;
+        _position->y = p->y;
+    }
+}
+
+void character::set_destination(point_t* p) {
+    if(p == NULL) {
+        logger.w("NULL point passed into set_point! destructing point!");
+        pointAPI.destruct(_destination);
+        _destination = NULL;
+        return;
+    }
+    if(_destination == NULL) {
+        _destination = pointAPI.construct(p->x, p->y);
+    } else {
+        _destination->x = p->x;
+        _destination->y = p->y;
+    }
+}
+
+void character::perform() {
+    if(_type == PC) {
+        if(PC_AI_MODE) {
+            handle_pc_move();
+        } else {
+            handle_control_move();
+        }
+    } else if(_type == NPC) {
+        // handle_npc_move(<#character_t *c#>);
+    } else {
+        logger.w("performed called on character with invalid type! doing nothing");
+    }
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 static character_t* gPLAYER_CHARACTER = NULL;
 
-static character_t* construct_impl(character_type type, point_t* p) {
-    character_t* c = (character_t*)calloc(1, sizeof(character_t));
-    point_t* pos;
-    c->type = type;
-    if(type == PC) {
-        c->speed = 10;
-        c->attrs = 0;
-    } else if(type == NPC) {
-        c->speed = (rand() & 0xf) + 5;
-        c->attrs = rand() & 0xf;
-    } else {
-        logger.w("Invalid type passed into character constructor! returning NULL!");
-        free(c);
-        return NULL;
-    }
-    c->turn_count = 100 / c->speed;
-    
-    if(p == NULL) {
-        logger.w("NULL point passed into character constructor! returning NULL!");
-        free(c);
-        return NULL;
-    } else {
-        pos = pointAPI.construct(p->x, p->y);
-        c->position = pos;
-    }
-    c->destination = NULL;
-    
-    c->set_position = set_position_impl;
-    c->set_destination = set_destination_impl;
-    c->perform = perform_impl;
-    return c;
+static character_t* construct(character_type type, point_t* p) {
+    character* c = new character(type, p);
+    return (character_t*) c;
 }
 
 static character_t* construct_npc_impl(point_t* p) {
-    return construct_impl(NPC, p);
+    return construct(NPC, p);
 }
 
 static void destruct_impl(character_t* c) {
-    if(c->position != NULL) {
-        free(c->position);
+    if(c == NULL) {
+        logger.w("destruct called with NULL character!");
+        return;
     }
-    if(c->destination != NULL) {
-        free(c->destination);
-    }
-    free(c);
+    character* c1 = (character*)c;
+    delete c1;
 }
 
 static character_t* get_pc_impl() {
@@ -79,65 +123,120 @@ static character_t* get_pc_impl() {
         } else {
             dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
         }
-        gPLAYER_CHARACTER = construct_impl(PC, &spawn);
-        gPLAYER_CHARACTER->id = 0;
+        gPLAYER_CHARACTER = construct(PC, &spawn);
+        characterAPI.set_id(gPLAYER_CHARACTER, 0);
     }
     return gPLAYER_CHARACTER;
 }
 
 static char char_for_npc_type_impl(character_t* self) {
-    if(self->type == PC) {
+    if(characterAPI.get_type(self) == PC) {
         return '@';
     }
-    if(self->attrs < 10) {
-        return '0'+self->attrs;
+    if(characterAPI.get_attrs(self) < 10) {
+        return '0'+ characterAPI.get_attrs(self);
     }
-    return 'a'+self->attrs-10;
+    return 'a'+characterAPI.get_attrs(self)-10;
+}
+    
+static void perform_impl(character_t* self) {
+    // IMPLEMENT
+}
+    
+static character_id_t get_id_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_id;
 }
 
-static void set_position_impl(character_t* self, point_t* p) {
-    if(p == NULL) {
-        logger.w("NULL point passed into set_point! returning without changing!");
-        return;
-    }
-    if(self->position == NULL) {
-        self->position = pointAPI.construct(p->x, p->y);
-    } else {
-        self->position->x = p->x;
-        self->position->y = p->y;
-    }
+static void set_id_impl(character_t* self, character_id_t id) {
+    character* c = (character*)self;
+    c->_id = id;
 }
 
-static void set_destination_impl(character_t* self, point_t* p) {
-    if(p == NULL) {
-        logger.w("NULL point passed into set_point! returning without changing!");
-        return;
-    }
-    if(self->destination == NULL) {
-        self->destination = pointAPI.construct(p->x, p->y);
-    } else {
-        self->destination->x = p->x;
-        self->destination->y = p->y;
-    }
+static character_type get_type_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_type;
 }
 
-static void perform_impl(character_t* c) {
-    if(c->type == PC) {
-        if(PC_AI_MODE) {
-            handle_pc_move();
-        } else {
-            handle_control_move();
-        }
-    } else {
-        handle_npc_move(c);
-    }
+static point_t* get_pos_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_position;
+}
+
+static void set_pos_impl(character_t* self, point_t* p) {
+    character* c = (character*)self;
+    c->set_position(p);
+}
+
+static point_t* get_dest_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_destination;
+}
+
+static void set_dest_impl(character_t* self, point_t* p) {
+    character* c = (character*)self;
+    c->set_destination(p);
+}
+
+static int get_event_count_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_event_count;
+}
+
+static void set_event_count_impl(character_t* self, int event_count) {
+    character* c = (character*)self;
+    c->_event_count = event_count;
+}
+
+static uint8_t get_attrs_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_attrs;
+}
+
+static uint8_t get_speed_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_speed;
+}
+
+static uint8_t get_turn_count_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_turn_count;
+}
+
+static uint8_t get_is_dead_impl(character_t* self) {
+    character* c = (character*)self;
+    return c->_is_dead;
+}
+
+static void set_is_dead_impl(character_t* self, uint8_t is_dead) {
+    character* c = (character*)self;
+    c->_is_dead = is_dead;
 }
 
 const character_namespace characterAPI = {
     construct_npc_impl,
     destruct_impl,
     get_pc_impl,
-    char_for_npc_type_impl
+    char_for_npc_type_impl,
+    perform_impl,
+    
+    // Accessors and Mutators
+    get_id_impl,
+    set_id_impl,
+    get_type_impl,
+    get_pos_impl,
+    set_pos_impl,
+    get_dest_impl,
+    set_dest_impl,
+    get_event_count_impl,
+    set_event_count_impl,
+    get_attrs_impl,
+    get_speed_impl,
+    get_turn_count_impl,
+    get_is_dead_impl,
+    set_is_dead_impl
 };
-
+    
+#ifdef __cplusplus
+}
 #endif // __cplusplus

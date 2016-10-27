@@ -18,7 +18,7 @@
 #include "../dungeon/dungeon.h"
 
 static graph_t* construct(int invert) {
-    graph_t* g = calloc(1, sizeof(graph_t));
+    graph_t* g = (graph_t*)calloc(1, sizeof(graph_t));
     
     // Implement a general case!
     
@@ -88,7 +88,7 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
     heap_t* h = heapAPI.construct(graphAPI.compare_vertices, NULL);
     heapAPI.insert(h, start);
     while(h->size) {
-        vertex_t* v = heapAPI.remove(h);
+        vertex_t* v = (vertex_t*)heapAPI.remove(h);
         if(v->index == ib) {
             logger.i("Found Path with dist: %d", v->dist);
             break;

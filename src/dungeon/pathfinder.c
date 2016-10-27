@@ -32,7 +32,7 @@ static int hardness_to_weight(int hardness) {
 
 static graph_t* construct(dungeon_t* d, int tunnel) {
     logger.d("Constructing Graph for path mapping%s...", tunnel ? " with tunnelling" : "");
-    graph_t* g = calloc(1, sizeof(graph_t));
+    graph_t* g = (graph_t*)calloc(1, sizeof(graph_t));
     g->point_to_index = point_to_index;
     
     // add all edges to graph

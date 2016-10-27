@@ -21,7 +21,7 @@
 #define LINE_SPACING 32
 
 static int initialized = 0;
-static char* log_name = DEFAULT_LOG_NAME;
+static const char* log_name = DEFAULT_LOG_NAME;
 static int modes_enabled = LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F;
 
 static char* get_date_string();

@@ -58,7 +58,7 @@ CXXDEPENDS := $(patsubst %.cpp,%.d,$(CXXSOURCES))
 #  Create list of objects based on .c files
 COBJECTS := $(patsubst %.c,%.o,$(CSOURCES))
 CXXOBJECTS := $(patsubst %.cpp,%.opp,$(CXXSOURCES))
-CXXCOBJECTS := $(patsubst %.c,%.o,$(CXXCSOURCES))
+CXXCOBJECTS := $(patsubst %.c,%.oc,$(CXXCSOURCES))
 
 #  Top Level Build Rule
 all: cxx
@@ -89,6 +89,10 @@ c: ${CTARGET}
 	@$(ECHO) Building $<...
 	@$(CC) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.c,%.o,$<)
 
+#  Generic Rule for building C sources using CXX compiler
+%.oc: %.c
+	@$(ECHO) Building with cxx $<...
+	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c -x c++ $< -o $(patsubst %.c,%.oc,$<)
 
 #  Target build based on objects
 $(CTARGET): $(COBJECTS)
@@ -98,7 +102,7 @@ $(CTARGET): $(COBJECTS)
 #  Clean instruction
 clean: 
 	@$(ECHO) Cleaning...
-	@$(RM) -rf $(CXXTARGET) $(CTARGET) $(COBJECTS) $(CXXOBJECTS) $(CXXDEPENDS) $(CDEPENDS) *.swp *.tar.gz *.pgm *~ *.dSYM/ logs/
+	@$(RM) -rf $(CXXTARGET) $(CTARGET) $(COBJECTS) $(CXXOBJECTS) $(CXXCOBJECTS) $(CXXDEPENDS) $(CDEPENDS) *.swp *.tar.gz *.pgm *~ *.dSYM/ logs/
 	@$(ECHO) Done!
 
 #  More info for debugging

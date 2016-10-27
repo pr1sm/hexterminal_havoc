@@ -110,7 +110,9 @@ static void set_position_impl(character_t* self, point_t* p) {
 
 static void set_destination_impl(character_t* self, point_t* p) {
     if(p == NULL) {
-        logger.w("NULL point passed into set_point! returning without changing!");
+        logger.w("NULL point passed into set_point! destructing point!");
+        pointAPI.destruct(self->destination);
+        self->destination = NULL;
         return;
     }
     if(self->destination == NULL) {

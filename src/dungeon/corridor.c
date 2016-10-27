@@ -39,7 +39,7 @@ static void check_room_intercept(dungeon_t* d, point_t* point) {
 
 static graph_t* construct(dungeon_t* d, int invert) {
     logger.d("Constructing Graph for pathfinding...");
-    graph_t* g = calloc(1, sizeof(graph_t));
+    graph_t* g = (graph_t*)calloc(1, sizeof(graph_t));
     g->point_to_index = point_to_index;
     
     // add all edges to graph
