@@ -79,6 +79,9 @@ static int perform_event_impl() {
         c = (character_t*)heapAPI.remove(_event_queue);
         character_perform(c);
         c = (character_t*)heapAPI.peek(_event_queue);
+        if(c == NULL) {
+            break;
+        }
 #ifdef __cplusplus
         character_ec = characterAPI.get_event_count(c);
 #else
