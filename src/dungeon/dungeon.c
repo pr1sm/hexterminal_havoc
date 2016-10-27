@@ -184,8 +184,18 @@ static void update_path_maps_impl(dungeon_t* d) {
         d->non_tunnel_map = pathfinderAPI.construct(d, 0);
     }
     
-    pathfinderAPI.generate_pathmap(d->non_tunnel_map, d, p, 0);
-    pathfinderAPI.generate_pathmap(d->tunnel_map, d, p, 1);
+    int error1 = pathfinderAPI.generate_pathmap(d->non_tunnel_map, d, p, 0);
+    if(error1) {
+        // need to regenerate the graph
+        pathfinderAPI.destruct(d->non_tunnel_map);
+        d->non_tunnel_map = pathfinderAPI.construct(d, 0);
+    }
+    int error2 = pathfinderAPI.generate_pathmap(d->tunnel_map, d, p, 1);
+    if(error2) {
+        // need to regenerate the graph
+        pathfinderAPI.destruct(d->non_tunnel_map);
+        d->non_tunnel_map = pathfinderAPI.construct(d, 0);
+    }
 }
 
 static void print_impl(dungeon_t* d, int mode) {

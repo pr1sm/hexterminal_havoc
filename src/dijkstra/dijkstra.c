@@ -74,7 +74,7 @@ static path_node_t* bresenham(point_t* a, point_t* b) {
     return head;
 }
 
-static void dijkstra(graph_t* g, point_t* a, point_t* b) {
+static int dijkstra(graph_t* g, point_t* a, point_t* b) {
     int i, j;
     int ia = g->point_to_index(a);
     // if no point b is passed in, we will visit all points
@@ -82,7 +82,7 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
     vertex_t* start = g->vertices[ia];
     if(start == NULL) {
         logger.e("start of dijkstra's algorithm isn't in this map! returning...");
-        return;
+        return 1;
     }
     for(i = 0; i < g->size; i++) {
         // Catch the outer rows and cols
@@ -113,6 +113,7 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
         }
     }
     heapAPI.destruct(h);
+    return 0;
 }
 
 dijkstra_namespace const dijkstraAPI = {

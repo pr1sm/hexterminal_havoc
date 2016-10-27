@@ -88,11 +88,12 @@ static void destruct(graph_t* g) {
     logger.d("Graph for path mapping destructed");
 }
 
-static void gen_map(graph_t* g, dungeon_t* d, point_t* start, int tunnel) {
+static int gen_map(graph_t* g, dungeon_t* d, point_t* start, int tunnel) {
     logger.i("Generating path map%s...", tunnel ? " with tunnelling" : "");
-    dijkstraAPI.dijkstra(g, start, NULL);
+    int error = dijkstraAPI.dijkstra(g, start, NULL);
     update_tiles(g, d, tunnel);
     logger.i("Path map Generated");
+    return error;
 }
 
 static void update_tiles(graph_t* g, dungeon_t* d, int tunnel) {
