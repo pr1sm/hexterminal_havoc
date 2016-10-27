@@ -78,7 +78,7 @@ int main(int argc, char * argv[]) {
         }
         win_status = characterStoreAPI.is_finished();
         d->print(d, PM_DUNGEON);
-        usleep(250000);
+        usleep(100000);
     }
     
     if(SAVE_DUNGEON) {

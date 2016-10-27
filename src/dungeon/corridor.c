@@ -18,6 +18,10 @@
 #include "../logger/logger.h"
 #include "../util/util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void place_path(graph_t* g, dungeon_t* d, point_t* b);
 
 static void check_room_intercept(dungeon_t* d, point_t* point) {
@@ -118,3 +122,7 @@ corridor_namespace const corridorAPI = {
     destruct,
     pathfind
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

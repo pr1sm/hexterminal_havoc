@@ -21,12 +21,16 @@
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 int DEBUG_MODE   = 0;
 int NCURSES_MODE = 1;
 int PC_AI_MODE   = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
-int NUM_MONSTERS = 6; // default is 6
+int NUM_MONSTERS = 10; // default is 10
 int QUIT_FLAG    = 0;
 int STAIR_FLAG   = 0;
 uint8_t X_START  = 255;
@@ -251,3 +255,7 @@ const env_namespace envAPI = {
     cleanup,
     move_floors_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

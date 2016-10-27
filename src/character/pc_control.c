@@ -14,6 +14,10 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 void setup_control_movement() {
     character_t* pc;
     pc = characterAPI.get_pc();
@@ -204,3 +208,8 @@ void handle_control_move() {
     pointAPI.destruct(dest);
     eventQueueAPI.add_event(pc);
 }
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+

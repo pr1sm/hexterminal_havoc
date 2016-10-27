@@ -12,6 +12,10 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void add_vertex(graph_t* g, point_t* p) {
     if(g->point_to_index == NULL) {
         logger.w("point_to_index was null, could not convert point to an index!");
@@ -123,3 +127,7 @@ graph_namespace const graphAPI = {
     add_path_node,
     destruct_path
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

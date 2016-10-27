@@ -29,6 +29,10 @@
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 // Private variables
 static dungeon_t* _base_dungeon = NULL;
 
@@ -766,3 +770,7 @@ dungeon_namespace const dungeonAPI = {
     generate_impl,
     rand_point_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

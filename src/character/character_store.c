@@ -26,6 +26,10 @@
 #include "../env/env.h"
 #include "../dungeon/pathfinder.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static character_t** _characters = NULL;
 static character_id_t* _alive_characters = NULL;
 static int _characters_size = 0;
@@ -101,11 +105,11 @@ static void setup_impl() {
         point_t* spawn = pointAPI.construct(0, 0);
         do {
             dungeonAPI.rand_point(d, spawn);
-        } while(spawn->distance(spawn, pc_pos) <= 9); // have a radius of 3 blocks
+        } while(spawn->distance(spawn, pc_pos) <= 3); // have a radius of 3 blocks
         
         character_t* npc = characterAPI.construct_npc(spawn);
 #ifdef __cplusplus
-        characterAPI.set_id(npc, i);
+        characterAPI.set_id(npc, i+1);
 #else
         npc->id = i;
 #endif // __cplusplus
@@ -114,7 +118,7 @@ static void setup_impl() {
         
         eventQueueAPI.add_event(npc);
         _characters[i] = npc;
-        _alive_characters[i] = i;
+        _alive_characters[i] = i+1;
         
         free(spawn);
         print_char(npc);
@@ -239,6 +243,7 @@ static void npc_cleanup_impl() {
     uint8_t npc_is_dead = 0;
     // check if NPCs are dead and shift others over
     for(i = 0; i < _characters_count; i++) {
+        npc_is_dead = 0;
         character_t* npc = npc_for_id(_alive_characters[i]);
 #ifdef __cplusplus
         npc_is_dead = characterAPI.get_is_dead(npc);
@@ -246,6 +251,7 @@ static void npc_cleanup_impl() {
         npc_is_dead = npc->is_dead;
 #endif // __cplusplus
         if(npc_is_dead) {
+            logger.d("npc %d is dead, shifting over", _alive_characters[i]);
             // shift over other npcs
             for(j = i; j < _characters_count-1; j++) {
                 _alive_characters[j] = _alive_characters[j+1];
@@ -366,3 +372,7 @@ character_store_namespace const characterStoreAPI = {
     start_monster_list_impl,
     move_floors_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

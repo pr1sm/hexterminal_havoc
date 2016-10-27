@@ -20,6 +20,10 @@
 #define DEFAULT_LOG_NAME "default.log";
 #define LINE_SPACING 32
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static int initialized = 0;
 static const char* log_name = DEFAULT_LOG_NAME;
 static int modes_enabled = LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F;
@@ -320,3 +324,7 @@ logger_namespace const logger = {
     create,
     set_modes_enabled
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

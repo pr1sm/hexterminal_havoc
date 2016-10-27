@@ -32,6 +32,7 @@ struct tile_t {
     uint8_t dist;
     uint8_t dist_tunnel;
     tile_content content;
+    char last_known_content;
     tile_t* changes;
     
     // functions

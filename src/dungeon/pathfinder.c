@@ -18,6 +18,10 @@
 #include "../logger/logger.h"
 #include "../util/util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void update_tiles(graph_t* g, dungeon_t* d, int tunnel);
 
 static int hardness_to_weight(int hardness) {
@@ -114,3 +118,7 @@ pathfinder_namespace const pathfinderAPI = {
     destruct,
     gen_map
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

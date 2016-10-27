@@ -29,6 +29,9 @@ character::character(character_type type, point_t* spawn) {
         _attrs = 0;
     }
     _turn_count = 100 / _speed;
+    _is_dead = 0;
+    _event_count = 0;
+    _id = -1;
     
     if(spawn == NULL) {
         logger.w("NULL point passed into character constructor!");

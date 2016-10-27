@@ -13,6 +13,10 @@
 
 #define HEAP_START_SIZE 128
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void percolate_up(heap_t* h, int index) {
     int parent;
     heap_node_t* tmp;
@@ -170,3 +174,7 @@ heap_namespace const heapAPI = {
     decrease_key,
     is_empty
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

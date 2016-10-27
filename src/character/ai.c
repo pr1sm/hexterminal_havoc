@@ -23,6 +23,10 @@
 #include "character_t.h"
 #endif // __cplusplus
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 graph_t* _PLAYER_PATH = NULL;
 
 static void get_random_dir(character_t* c, point_t* new_pos);
@@ -364,4 +368,8 @@ static void set_position(character_t* c, point_t* pos) {
     c->set_position(c, pos);
 #endif // __cplusplus
 }
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 

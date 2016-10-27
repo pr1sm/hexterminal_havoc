@@ -18,6 +18,10 @@
 #include "../heap/heap.h"
 #include "../logger/logger.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 event_counter_t EVENT_TIME = 0;
 
 static heap_t* _event_queue = NULL;
@@ -119,3 +123,7 @@ event_queue_namespace const eventQueueAPI = {
     teardown_impl,
     move_floors_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

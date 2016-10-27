@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <limits.h>
+#include <ncurses.h>
 
 #include "tile.h"
 #include "../env/env.h"
@@ -33,6 +34,10 @@
 #define UPSTR_CHAR '<'
 #define DNSTR_CHAR '>'
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 // Public Functions
 static void update_hardness_impl(tile_t* tile, uint8_t value);
 static void update_content_impl(tile_t* tile, tile_content value);
@@ -53,6 +58,7 @@ static tile_t* construct_impl(uint8_t x, uint8_t y) {
     t->location = location;
     t->content = tc_UNSET;
     t->rock_hardness = 0;
+    t->last_known_content = ROCK_CHAR;
     t->changes = (tile_t*)calloc(1, sizeof(tile_t));
     t->update_hardness = update_hardness_impl;
     t->update_content = update_content_impl;
@@ -86,6 +92,9 @@ static void update_hardness_impl(tile_t* tile, uint8_t value) {
 static void update_content_impl(tile_t* tile, tile_content value) {
     tile->content = value;
     tile->changes->content = value;
+    if(tile->content == tc_BORDER && tile->last_known_content != BORDER_CHAR) {
+        tile->last_known_content = BORDER_CHAR;
+    }
 }
 
 static void update_dist_impl(tile_t* tile, uint8_t value) {
@@ -119,6 +128,9 @@ static void commit_updates_impl(tile_t* tile) {
     tile->content       = tile->changes->content;
     tile->dist          = tile->changes->dist;
     tile->dist_tunnel   = tile->changes->dist_tunnel;
+    if(tile->content == tc_BORDER && tile->last_known_content != BORDER_CHAR) {
+        tile->last_known_content = BORDER_CHAR;
+    }
 }
 
 static int are_changes_proposed_impl(tile_t* tile) {
@@ -130,16 +142,28 @@ static int are_changes_proposed_impl(tile_t* tile) {
 
 static char char_for_content_impl(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
-        int npc_idx = characterStoreAPI.contains_npc(tile->location);
-        if(npc_idx != -1) {
-            return characterStoreAPI.get_char_for_npc_at_index(npc_idx);
+        character_t* pc = characterAPI.get_pc();
+        point_t* pc_pos;
+#ifdef __cplusplus
+        pc_pos = characterAPI.get_pos(pc);
+#else
+        pc_pos = pc->position;
+#endif // __cplusplus
+        // tile is outside of pc's light
+        if(tile->location->distance(tile->location, pc_pos) > 3) {
+            return tile->last_known_content;
         }
-        return tile->content == tc_BORDER ? BORDER_CHAR :
-               tile->content == tc_ROCK   ? ROCK_CHAR   :
-               tile->content == tc_ROOM   ? ROOM_CHAR   :
-               tile->content == tc_PATH   ? PATH_CHAR   :
-               tile->content == tc_UPSTR  ? UPSTR_CHAR  :
-               tile->content == tc_DNSTR  ? DNSTR_CHAR  : DEFAULT_CHAR ;
+        int npc_idx = characterStoreAPI.contains_npc(tile->location);
+        tile->last_known_content = tile->content == tc_BORDER ? BORDER_CHAR :
+                                   tile->content == tc_ROCK   ? ROCK_CHAR   :
+                                   tile->content == tc_ROOM   ? ROOM_CHAR   :
+                                   tile->content == tc_PATH   ? PATH_CHAR   :
+                                   tile->content == tc_UPSTR  ? UPSTR_CHAR  :
+                                   tile->content == tc_DNSTR  ? DNSTR_CHAR  : DEFAULT_CHAR ;
+        if(npc_idx != -1) {
+            return characterStoreAPI.get_char_for_npc_at_index(npc_idx) | A_BOLD;
+        }
+        return tile->last_known_content | A_BOLD;
     } else if(mode == PM_ROOM_PATH_MAP || mode == PM_TUNN_PATH_MAP) {
         uint8_t val = (mode == 1 ? tile->dist : tile->dist_tunnel);
         if(val < 10) {
@@ -185,3 +209,7 @@ tile_namespace const tileAPI = {
     destruct_impl,
     import_tile_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
