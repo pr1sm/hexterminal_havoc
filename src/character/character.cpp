@@ -84,7 +84,7 @@ void character::perform() {
             handle_control_move();
         }
     } else if(_type == NPC) {
-        // handle_npc_move(<#character_t *c#>);
+         handle_npc_move((character_t*)this);
     } else {
         logger.w("performed called on character with invalid type! doing nothing");
     }
@@ -140,7 +140,8 @@ static char char_for_npc_type_impl(character_t* self) {
 }
     
 static void perform_impl(character_t* self) {
-    // IMPLEMENT
+    character* c = (character*)self;
+    c->perform();
 }
     
 static character_id_t get_id_impl(character_t* self) {
