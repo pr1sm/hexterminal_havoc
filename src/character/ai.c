@@ -102,7 +102,7 @@ void handle_pc_move() {
 
 void handle_npc_move(character_t* c) {
     character_type c_type;
-    uint8_t c_is_dead;
+    uint8_t c_is_dead = 0;
     point_t* c_pos;
     point_t* c_dest;
     uint8_t c_attrs;
@@ -111,19 +111,19 @@ void handle_npc_move(character_t* c) {
     point_t* pc_pos;
     
 #ifdef __cplusplus
-    c_type = characterAPI.get_type(c);
+    c_type    = characterAPI.get_type(c);
     c_is_dead = characterAPI.get_is_dead(c);
     c_pos     = characterAPI.get_pos(c);
     c_attrs   = characterAPI.get_attrs(c);
     c_dest    = characterAPI.get_dest(c);
-    pc_pos = characterAPI.get_pos(pc);
+    pc_pos    = characterAPI.get_pos(pc);
 #else
-    c_type = c->type;
+    c_type    = c->type;
     c_is_dead = c->is_dead;
-    c_pos = c->position;
-    c_attrs = c->attrs;
-    c_dest = c->destination;
-    pc_pos = pc->position;
+    c_pos     = c->position;
+    c_attrs   = c->attrs;
+    c_dest    = c->destination;
+    pc_pos    = pc->position;
 #endif // __cplusplus
     if(c_type == PC) {
         return;

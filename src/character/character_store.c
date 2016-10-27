@@ -141,6 +141,11 @@ static int contains_npc_impl(point_t* p) {
     point_t* npc_pos;
     point_t* pc_pos;
     uint8_t  npc_is_dead;
+#ifdef __cplusplus
+    pc_pos = characterAPI.get_pos(characterAPI.get_pc());
+#else
+    pc_pos = characterAPI.get_pc()->position;
+#endif // __cplusplus
     // check npcs first, then player
     for(i = 0; i < _characters_count; i++) {
 #ifdef __cplusplus
@@ -154,12 +159,6 @@ static int contains_npc_impl(point_t* p) {
             return i+1;
         }
     }
-    
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(characterAPI.get_pc());
-#else
-    pc_pos = characterAPI.get_pc()->position;
-#endif // __cplusplus
     if(p->distance(p, pc_pos) == 0) {
         return 0;
     }
@@ -237,7 +236,7 @@ static void npc_cleanup_impl() {
     int i;
     int j;
     int old_count = _characters_count;
-    uint8_t npc_is_dead;
+    uint8_t npc_is_dead = 0;
     // check if NPCs are dead and shift others over
     for(i = 0; i < _characters_count; i++) {
         character_t* npc = npc_for_id(_alive_characters[i]);
