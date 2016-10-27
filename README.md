@@ -45,6 +45,33 @@ Usage: hexterm_havoc [options]
 
 ## Assignments
 
+### Assignment 1.06 - "Fog of War" and interfacing with C and C++
+
+For this assignment, we had to start switching our codebase over to C++ and write
+an interface in C++ so our C codebase could interact with the class we created. 
+We had to port our character structs (for the pc and npcs) over to a Character
+class in C++ and write a set of mutators and accessors to interface between the
+two languages.  Most of the codebase remained largely unchanged, but because I 
+now had these mutators and accessors, I had to use these instead of accessing
+the character_t's elements.  I took this a step further and maintained compatibility
+with gcc as well.  A rule was added to the Makefile so the project could be still
+compiled with gcc and the old characterAPI and character struct would be used.  
+The default make rule will now compile using g++ and the character class interface
+will be used.  The Makefile is now also able to tell which files have been converted
+to .cpp files and will only build those when compiling for C++.  If compiling for C,
+the .c file will be used.  
+
+I also added fog of war support, which was trivial to add.  This allows the player
+to only see a radius of 3 around it and changes to the dungeon in other places are
+not rendered until the player moves to a position closer.  The only issue that I 
+had while writing this feature was an interesting error where the npc count would
+be much lower than the specified count.  This turned out to be an initialization
+error with the class where I wasn't specifically initializing the `is_dead` property
+to 0 in the class constructor for the Character.  There was another minor bug I 
+discovered during testing where a crash would occur when the player stepped on a
+tile that had been tunneled through by an npc.  This was a pretty easy fix and 
+the error is logged and resolved automatically now.  
+
 ### Assignment 1.05 - User Interface with Ncurses
 
 For this assignment, we had to implement a user interface for the player and
