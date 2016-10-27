@@ -4,6 +4,22 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.06] - 2016-10-26
+
+### Added
+- character.cpp (start of C ~> C++ conversion)
+- fog of war 
+
+### Changed
+- Makefile can compile for C or C++ (use `make` or `make cxx` for C++ and `make c` for C)
+- Refactors to existing codebase to accomodate the change to C++
+
+### Fixed
+- Crash when pc moved to path that had been tunnelled by an npc
+- initialization error with character class
+- small bug fixes
+- memory leaks
+
 ## [1.05] - 2016-10-19
 
 ### Added

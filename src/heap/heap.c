@@ -13,6 +13,10 @@
 
 #define HEAP_START_SIZE 128
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void percolate_up(heap_t* h, int index) {
     int parent;
     heap_node_t* tmp;
@@ -29,7 +33,7 @@ static void percolate_up(heap_t* h, int index) {
 
 static void percolate_down(heap_t* h, int index) {
     int child;
-    void* tmp;
+    heap_node_t* tmp;
     
     for(child = (2 * index) + 1;
         child < h->size;
@@ -58,12 +62,12 @@ static void heapify(heap_t* h) {
 
 static heap_t* construct(int (*compare)(const void* a, const void* b),
                        void (*data_delete)(void *)) {
-    heap_t* h = malloc(sizeof(heap_t));
+    heap_t* h = (heap_t*)malloc(sizeof(heap_t));
     h->size = 0;
     h->arr_size = HEAP_START_SIZE;
     h->compare = compare;
     h->data_delete=  data_delete;
-    h->array = calloc(h->arr_size, sizeof(*h->array));
+    h->array = (heap_node_t**)calloc(h->arr_size, sizeof(*h->array));
     return h;
 }
 
@@ -74,14 +78,14 @@ static heap_t* construct_from_array(void* array,
                                   void (*data_delete)(void*)) {
     int i;
     char* a;
-    heap_t* h = malloc(sizeof(heap_t));
+    heap_t* h = (heap_t*)malloc(sizeof(heap_t));
     h->size = h->arr_size = num_members;
     h->compare = compare;
     h->data_delete = data_delete;
-    h->array = calloc(h->arr_size, sizeof(*h->array));
+    h->array = (heap_node_t**)calloc(h->arr_size, sizeof(*h->array));
     
-    for(i = 0, a = array; i < h->size; i++) {
-        h->array[i] = malloc(sizeof(*h->array[i]));
+    for(i = 0, a = (char*)array; i < h->size; i++) {
+        h->array[i] = (heap_node_t*)malloc(sizeof(*h->array[i]));
         h->array[i]->index = i;
         h->array[i]->data = a + (i*size);
     }
@@ -116,7 +120,7 @@ static heap_node_t* insert(heap_t* h, void* v) {
     
     if(h->size == h->arr_size) {
         h->arr_size *= 2;
-        tmp = realloc(h->array, h->arr_size * sizeof(*h->array));
+        tmp = (heap_node_t**)realloc(h->array, h->arr_size * sizeof(*h->array));
         if(!tmp) {
             // TODO log error
         } else {
@@ -124,7 +128,7 @@ static heap_node_t* insert(heap_t* h, void* v) {
         }
     }
     
-    h->array[h->size] = retval = malloc(sizeof(*h->array[h->size]));
+    h->array[h->size] = retval = (heap_node_t*)malloc(sizeof(*h->array[h->size]));
     h->array[h->size]->data = v;
     h->array[h->size]->index = h->size;
     
@@ -170,3 +174,7 @@ heap_namespace const heapAPI = {
     decrease_key,
     is_empty
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

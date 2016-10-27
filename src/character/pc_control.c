@@ -14,24 +14,38 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 void setup_control_movement() {
-    eventQueueAPI.add_event(characterAPI.get_pc());
+    character_t* pc;
+    pc = characterAPI.get_pc();
+    eventQueueAPI.add_event(pc);
 }
 
 void handle_control_move() {
     character_t** characters = characterStoreAPI.get_characters();
     dungeon_t* d = dungeonAPI.get_dungeon();
-    character_t* pc = characterAPI.get_pc();
+    character_t* pc;
+    point_t* pc_pos;
+    point_t* npc_pos;
+    pc = characterAPI.get_pc();
+#ifdef __cplusplus
+    pc_pos = characterAPI.get_pos(pc);
+#else
+    pc_pos = pc->position;
+#endif // __cplusplus
     pc_move_t move = mv_NONE;
-    point_t* dest = pointAPI.construct(pc->position->x, pc->position->y);
+    point_t* dest = pointAPI.construct(pc_pos->x, pc_pos->y);
     int i;
     mvprintw(0, 0, "ENTER COMMAND:                                ");
     refresh();
     int is_valid = 0;
     do {
         move = mv_NONE;
-        dest->x = pc->position->x;
-        dest->y = pc->position->y;
+        dest->x = pc_pos->x;
+        dest->y = pc_pos->y;
         int ch = getch();
         switch (ch) {
             case PC_QUIT:
@@ -104,7 +118,7 @@ void handle_control_move() {
         }
         
         if(!is_valid && move == mv_UPSTR) {
-            if(d->tiles[pc->position->y][pc->position->x]->content == tc_UPSTR) {
+            if(d->tiles[pc_pos->y][pc_pos->x]->content == tc_UPSTR) {
                 is_valid = 1;
             }
             
@@ -112,7 +126,7 @@ void handle_control_move() {
                 mvprintw(0, 0, "Whoops! You can't go up without stairs!");
             }
         } else if(!is_valid && move == mv_DNSTR) {
-            if(d->tiles[pc->position->y][pc->position->x]->content == tc_DNSTR) {
+            if(d->tiles[pc_pos->y][pc_pos->x]->content == tc_DNSTR) {
                 is_valid = 1;
             }
             
@@ -164,13 +178,27 @@ void handle_control_move() {
     } else if(move != mv_RS) {
         logger.i("Moving to point (%2d, %2d)", dest->x, dest->y);
         // move pc
-        pc->position->x = dest->x;
-        pc->position->y = dest->y;
+#ifdef __cplusplus
+        characterAPI.set_pos(pc, dest);
+        pc_pos = characterAPI.get_pos(pc);
+#else
+        pc->set_position(pc, dest);
+        pc_pos = pc->position;
+#endif // __cplusplus
         
         // check for collision
         for(i = 0; i < CHARACTER_COUNT; i++) {
-            if(pc->position->distance(pc->position, characters[i]->position) == 0) {
+#ifdef __cplusplus
+            npc_pos = characterAPI.get_pos(characters[i]);
+#else
+            npc_pos = characters[i]->position;
+#endif // __cplusplus
+            if(pc_pos->distance(pc_pos, npc_pos) == 0) {
+#ifdef __cplusplus
+                characterAPI.set_is_dead(characters[i], 1);
+#else
                 characters[i]->is_dead = 1;
+#endif // __cplusplus
             }
         }
     } else if(move == mv_RS) {
@@ -180,3 +208,8 @@ void handle_control_move() {
     pointAPI.destruct(dest);
     eventQueueAPI.add_event(pc);
 }
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
+

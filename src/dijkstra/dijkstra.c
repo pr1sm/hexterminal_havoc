@@ -17,8 +17,12 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static graph_t* construct(int invert) {
-    graph_t* g = calloc(1, sizeof(graph_t));
+    graph_t* g = (graph_t*)calloc(1, sizeof(graph_t));
     
     // Implement a general case!
     
@@ -70,11 +74,16 @@ static path_node_t* bresenham(point_t* a, point_t* b) {
     return head;
 }
 
-static void dijkstra(graph_t* g, point_t* a, point_t* b) {
+static int dijkstra(graph_t* g, point_t* a, point_t* b) {
     int i, j;
     int ia = g->point_to_index(a);
     // if no point b is passed in, we will visit all points
     int ib = b != NULL ? g->point_to_index(b) : -1;
+    vertex_t* start = g->vertices[ia];
+    if(start == NULL) {
+        logger.e("start of dijkstra's algorithm isn't in this map! returning...");
+        return 1;
+    }
     for(i = 0; i < g->size; i++) {
         // Catch the outer rows and cols
         if(g->vertices[i] == NULL) continue;
@@ -83,12 +92,11 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
         v->prev = 0;
         v->visited = 0;
     }
-    vertex_t* start = g->vertices[ia];
     start->dist = 0;
     heap_t* h = heapAPI.construct(graphAPI.compare_vertices, NULL);
     heapAPI.insert(h, start);
     while(h->size) {
-        vertex_t* v = heapAPI.remove(h);
+        vertex_t* v = (vertex_t*)heapAPI.remove(h);
         if(v->index == ib) {
             logger.i("Found Path with dist: %d", v->dist);
             break;
@@ -105,6 +113,7 @@ static void dijkstra(graph_t* g, point_t* a, point_t* b) {
         }
     }
     heapAPI.destruct(h);
+    return 0;
 }
 
 dijkstra_namespace const dijkstraAPI = {
@@ -113,3 +122,7 @@ dijkstra_namespace const dijkstraAPI = {
     dijkstra,
     bresenham
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -18,6 +18,10 @@
 #include "../logger/logger.h"
 #include "../util/util.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void update_tiles(graph_t* g, dungeon_t* d, int tunnel);
 
 static int hardness_to_weight(int hardness) {
@@ -32,7 +36,7 @@ static int hardness_to_weight(int hardness) {
 
 static graph_t* construct(dungeon_t* d, int tunnel) {
     logger.d("Constructing Graph for path mapping%s...", tunnel ? " with tunnelling" : "");
-    graph_t* g = calloc(1, sizeof(graph_t));
+    graph_t* g = (graph_t*)calloc(1, sizeof(graph_t));
     g->point_to_index = point_to_index;
     
     // add all edges to graph
@@ -84,11 +88,12 @@ static void destruct(graph_t* g) {
     logger.d("Graph for path mapping destructed");
 }
 
-static void gen_map(graph_t* g, dungeon_t* d, point_t* start, int tunnel) {
+static int gen_map(graph_t* g, dungeon_t* d, point_t* start, int tunnel) {
     logger.i("Generating path map%s...", tunnel ? " with tunnelling" : "");
-    dijkstraAPI.dijkstra(g, start, NULL);
+    int error = dijkstraAPI.dijkstra(g, start, NULL);
     update_tiles(g, d, tunnel);
     logger.i("Path map Generated");
+    return error;
 }
 
 static void update_tiles(graph_t* g, dungeon_t* d, int tunnel) {
@@ -114,3 +119,7 @@ pathfinder_namespace const pathfinderAPI = {
     destruct,
     gen_map
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

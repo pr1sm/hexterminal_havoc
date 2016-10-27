@@ -21,30 +21,34 @@
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 int DEBUG_MODE   = 0;
 int NCURSES_MODE = 1;
 int PC_AI_MODE   = 0;
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
-int NUM_MONSTERS = 6; // default is 6
+int NUM_MONSTERS = 10; // default is 10
 int QUIT_FLAG    = 0;
 int STAIR_FLAG   = 0;
 uint8_t X_START  = 255;
 uint8_t Y_START  = 255;
-char* HOME = "";
+char* HOME;
 char* LOAD_FILE;
 char* SAVE_FILE;
 
 static int is_number(char* str);
 
-static char* help_text = "Usage: hexterm_havoc [options]\n\n"
-                         "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
-                         "-h,       --help        | Print this help message.\n"
-                         "-m,       --nummon=<val>| Set the number of monsters in the dungeon\n"
-                         "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
-                         "                        |   name <name> (in save directory).\n"
-                         "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
-                         "-y<val> , --ypos <val>  | Start the player at a specified y coord\n";
+static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
+                               "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
+                               "-h,       --help        | Print this help message.\n"
+                               "-m,       --nummon=<val>| Set the number of monsters in the dungeon\n"
+                               "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
+                               "                        |   name <name> (in save directory).\n"
+                               "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
+                               "-y<val> , --ypos <val>  | Start the player at a specified y coord\n";
 
 static void setup_environment() {
     logger.i("%%%% SETTING ENVIRONMENT %%%%");
@@ -251,3 +255,7 @@ const env_namespace envAPI = {
     cleanup,
     move_floors_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -21,9 +21,17 @@
 #include "../room/room.h"
 #include "../logger/logger.h"
 #include "../env/env.h"
-#include "../character/character.h"
+#ifdef __cplusplus
+    #include "../character/character.h"
+#else
+    #include "../character/character_t.h"
+#endif // __cplusplus
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 // Private variables
 static dungeon_t* _base_dungeon = NULL;
@@ -71,12 +79,12 @@ static dungeon_t* construct_impl() {
     int i, j;
     srand((unsigned)time(NULL));
     
-    dungeon_t* d = calloc(1, sizeof(dungeon_t));
+    dungeon_t* d = (dungeon_t*)calloc(1, sizeof(dungeon_t));
     
-    d->tiles = calloc(DUNGEON_HEIGHT, sizeof(*d->tiles));
+    d->tiles = (tile_t***)calloc(DUNGEON_HEIGHT, sizeof(*d->tiles));
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
-        d->tiles[i] = calloc(DUNGEON_WIDTH, sizeof(**d->tiles));
+        d->tiles[i] = (tile_t**)calloc(DUNGEON_WIDTH, sizeof(**d->tiles));
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             d->tiles[i][j] = tileAPI.construct(j, i);
         }
@@ -129,11 +137,19 @@ static dungeon_t* move_floors_impl() {
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             if(STAIR_FLAG == 1 && _base_dungeon->tiles[i][j]->content == tc_DNSTR) { // pc went upstairs, so it should be placed on the down stairs
+#ifdef __cplusplus
+                characterAPI.set_pos(pc, _base_dungeon->tiles[i][j]->location);
+#else
                 pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
+#endif // __cplusplus
                 pc_placed = 1;
                 break;
             } else if(STAIR_FLAG == 2 && _base_dungeon->tiles[i][j]->content == tc_UPSTR) { // pc went downstairs, so it should be placed on the up stairs
+#ifdef __cplusplus
+                characterAPI.set_pos(pc, _base_dungeon->tiles[i][j]->location);
+#else
                 pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
+#endif // __cplusplus
                 pc_placed = 1;
                 break;
             }
@@ -155,7 +171,12 @@ static void generate_impl(dungeon_t* d) {
 }
 
 static void update_path_maps_impl(dungeon_t* d) {
-    point_t* p = characterAPI.get_pc()->position;
+    point_t* p;
+#ifdef __cplusplus
+    p = characterAPI.get_pos(characterAPI.get_pc());
+#else
+    p = characterAPI.get_pc()->position;
+#endif // __cplusplus
     if(d->tunnel_map == NULL) {
         d->tunnel_map = pathfinderAPI.construct(d, 1);
     }
@@ -163,8 +184,18 @@ static void update_path_maps_impl(dungeon_t* d) {
         d->non_tunnel_map = pathfinderAPI.construct(d, 0);
     }
     
-    pathfinderAPI.generate_pathmap(d->non_tunnel_map, d, p, 0);
-    pathfinderAPI.generate_pathmap(d->tunnel_map, d, p, 1);
+    int error1 = pathfinderAPI.generate_pathmap(d->non_tunnel_map, d, p, 0);
+    if(error1) {
+        // need to regenerate the graph
+        pathfinderAPI.destruct(d->non_tunnel_map);
+        d->non_tunnel_map = pathfinderAPI.construct(d, 0);
+    }
+    int error2 = pathfinderAPI.generate_pathmap(d->tunnel_map, d, p, 1);
+    if(error2) {
+        // need to regenerate the graph
+        pathfinderAPI.destruct(d->non_tunnel_map);
+        d->non_tunnel_map = pathfinderAPI.construct(d, 0);
+    }
 }
 
 static void print_impl(dungeon_t* d, int mode) {
@@ -252,7 +283,7 @@ static void load_impl(dungeon_t* d) {
     }
     
     d->room_size = num_rooms;
-    d->rooms = calloc(d->room_size, sizeof(*d->rooms));
+    d->rooms = (room_t**)calloc(d->room_size, sizeof(*d->rooms));
     for(i = 0; i < num_rooms; i++) {
         // read in room data
         fread(room_data, sizeof(uint8_t), 4, f);
@@ -282,7 +313,7 @@ static void save_impl(dungeon_t* d) {
     int i, j;
     room_t* r;
     uint8_t room_data[4];
-    char* semantic = "RLG327";
+    const char* semantic = "RLG327";
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(SAVE_FILE, "wb");
@@ -357,7 +388,7 @@ static void place_rooms(dungeon_t* d) {
     int overlap_valid = 1;
     int place_attempts_fail = 0;
     d->room_size = 6;
-    d->rooms = calloc(d->room_size, sizeof(*d->rooms));
+    d->rooms = (room_t**)calloc(d->room_size, sizeof(*d->rooms));
     
     // initally create the 6 rooms and check if overlap is valid.
     logger.d("Generating initial rooms...");
@@ -749,3 +780,7 @@ dungeon_namespace const dungeonAPI = {
     generate_impl,
     rand_point_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -13,6 +13,10 @@
 #include "../logger/logger.h"
 #include "../env/env.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 // Public Functions
 static int distance_impl(point_t* p1, point_t* p2);
 static void print_impl(point_t* p);
@@ -33,7 +37,10 @@ static int destruct_impl(point_t* point) {
 }
 
 static int distance_impl(point_t* p1, point_t* p2) {
-    return (p1->x - p2->x)*(p1->x - p2->x) + (p1->y - p2->y)*(p1->y - p2->y);
+    int absxdiff = ((p1->x - p2->x) > 0) ? (p1->x - p2->x) : (p2->x - p1->x);
+    int absydiff = ((p1->y - p2->y) > 0) ? (p1->y - p2->y) : (p2->y - p1->y);
+    return (absxdiff > absydiff) ? absxdiff : absydiff; // Calculate distance with the fact that diagonals are length 1 too
+//    return (absxdiff*absxdiff) + (absydiff*absydiff);
 }
 
 static void print_impl(point_t* p) {
@@ -47,3 +54,7 @@ point_namespace const pointAPI = {
     construct_impl,
     destruct_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

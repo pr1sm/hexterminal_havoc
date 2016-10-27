@@ -21,6 +21,10 @@
 #include "character/character_store.h"
 #include "events/event_queue.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 int main(int argc, char * argv[]) {
 
 #ifdef DEBUG // Xcode terminal debugging with ncurses
@@ -74,7 +78,7 @@ int main(int argc, char * argv[]) {
         }
         win_status = characterStoreAPI.is_finished();
         d->print(d, PM_DUNGEON);
-        usleep(250000);
+        usleep(100000);
     }
     
     if(SAVE_DUNGEON) {
@@ -93,3 +97,7 @@ int main(int argc, char * argv[]) {
     
     return 0;
 }
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

@@ -9,7 +9,15 @@
 #ifndef event_queue_h
 #define event_queue_h
 
+#ifdef __cplusplus
 #include "../character/character.h"
+#else
+#include "../character/character_t.h"
+#endif // __cplusplus
+
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
 typedef int event_counter_t;
 
@@ -22,5 +30,9 @@ typedef struct event_queue_namespace {
     void (*const move_floors)();
 } event_queue_namespace;
 extern event_queue_namespace const eventQueueAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* event_queue_h */

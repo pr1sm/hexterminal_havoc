@@ -12,6 +12,10 @@
 #include "../point/point.h"
 #include "../env/env.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #define PM_DUNGEON 0
 #define PM_ROOM_PATH_MAP 1
 #define PM_TUNN_PATH_MAP 2
@@ -28,6 +32,7 @@ struct tile_t {
     uint8_t dist;
     uint8_t dist_tunnel;
     tile_content content;
+    char last_known_content;
     tile_t* changes;
     
     // functions
@@ -51,5 +56,9 @@ typedef struct {
     void    (*const import_tile)(tile_t* tile, uint8_t value, int room);
 } tile_namespace;
 extern tile_namespace const tileAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* tile_h */

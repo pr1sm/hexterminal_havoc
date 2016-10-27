@@ -9,6 +9,10 @@
 #ifndef pc_control_h
 #define pc_control_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #define PC_QUIT          81
 #define PC_UP_LEFT_7     55
 #define PC_UP_8          56
@@ -41,5 +45,9 @@ typedef enum pc_move_t {
 
 void setup_control_movement();
 void handle_control_move();
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* pc_control_h */

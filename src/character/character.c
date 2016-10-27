@@ -6,9 +6,11 @@
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
+#ifndef __cplusplus
+
 #include <stdlib.h>
 
-#include "character.h"
+#include "character_t.h"
 #include "ai.h"
 #include "pc_control.h"
 #include "../point/point.h"
@@ -108,7 +110,9 @@ static void set_position_impl(character_t* self, point_t* p) {
 
 static void set_destination_impl(character_t* self, point_t* p) {
     if(p == NULL) {
-        logger.w("NULL point passed into set_point! returning without changing!");
+        logger.w("NULL point passed into set_point! destructing point!");
+        pointAPI.destruct(self->destination);
+        self->destination = NULL;
         return;
     }
     if(self->destination == NULL) {
@@ -137,3 +141,5 @@ const character_namespace characterAPI = {
     get_pc_impl,
     char_for_npc_type_impl
 };
+
+#endif // __cplusplus

@@ -12,6 +12,10 @@
 #include "../point/point.h"
 #include "../env/env.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 typedef struct room_t room_t;
 struct room_t {
     // variables
@@ -31,5 +35,9 @@ typedef struct room_namespace {
     void (*const destruct)(room_t* room);
 } room_namespace;
 extern room_namespace const roomAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* room_h */

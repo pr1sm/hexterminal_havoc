@@ -15,6 +15,10 @@
 #include "../room/room.h"
 #include "../graph/graph.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 #define ROCK_MAX 255
@@ -45,5 +49,9 @@ typedef struct dungeon_namespace {
     void (*const rand_point)(dungeon_t* d, point_t* p);
 } dungeon_namespace;
 extern dungeon_namespace const dungeonAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* dungeon_h */
