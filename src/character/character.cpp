@@ -43,10 +43,14 @@ character::character(character_type type, point_t* spawn) {
 }
 
 character::~character() {
+    static int char_count = 0;
+    logger.i("character destructor called - %d", ++char_count);
     if(_position != NULL) {
+        logger.i("destructing position");
         pointAPI.destruct(_position);
     }
     if(_destination != NULL) {
+        logger.i("destructing destination");
         pointAPI.destruct(_destination);
     }
 }
@@ -114,6 +118,7 @@ static void destruct_impl(character_t* c) {
         return;
     }
     character* c1 = (character*)c;
+    
     delete c1;
 }
 
@@ -133,7 +138,7 @@ static character_t* get_pc_impl() {
 }
     
 static void teardown_pc_impl() {
-    if(gPLAYER_CHARACTER == NULL) {
+    if(gPLAYER_CHARACTER != NULL) {
         characterAPI.destruct(gPLAYER_CHARACTER);
         gPLAYER_CHARACTER = NULL;
     }

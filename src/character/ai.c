@@ -267,6 +267,8 @@ void handle_npc_move(character_t* c) {
                         }
                     }
                     // next tile is rock and npc is non-tunneler, nothing can be done
+                }
+                if(new_path != NULL) {
                     graphAPI.destruct_path(new_path);
                 }
                 // path couldn't be found, do nothing

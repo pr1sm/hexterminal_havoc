@@ -26,8 +26,8 @@ extern "C" {
 #endif // __cplusplus
 
 int DEBUG_MODE   = 0;
-int NCURSES_MODE = 1;
-int PC_AI_MODE   = 0;
+int NCURSES_MODE = 0;
+int PC_AI_MODE   = 0; // pc control enabled by default (so ncurses is enabled implicitly)
 int LOAD_DUNGEON = 0;
 int SAVE_DUNGEON = 0;
 int NUM_MONSTERS = 10; // default is 10
@@ -42,9 +42,11 @@ char* SAVE_FILE;
 static int is_number(char* str);
 
 static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
+                               "-a      , --ai          | Enable AI mode for PC (pc control used by default)\n"
+                               "-h      , --help        | Print this help message.\n"
                                "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
-                               "-h,       --help        | Print this help message.\n"
                                "-m<val> , --nummon=<val>| Set the number of monsters in the dungeon\n"
+                               "-n      , --ncurses     | Use Ncurses to render game\n"
                                "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
                                "                        |   name <name> (in save directory).\n"
                                "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
@@ -68,6 +70,10 @@ static void setup_environment() {
 #ifdef DEBUG
     DEBUG_MODE = 1;
 #endif // DEBUG
+    
+    if(!PC_AI_MODE) {
+        NCURSES_MODE = 1; // pc control means we must use NCURSES_MODE
+    }
     
     if(DEBUG_MODE) {
         logger.i("%%%% RUNNING IN DEBUG MODE %%%%");
@@ -101,17 +107,19 @@ static void parse_args(int argc, char** argv) {
     while(1) {
         // Setup options
         static struct option long_options[] = {
-            {"load", optional_argument, 0, 'l'},
-            {"save", optional_argument, 0, 's'},
-            {"nummon", required_argument, 0, 'm'},
-            {"help", no_argument, 0, 'h'},
-            {"xpos", required_argument, 0, 'x'},
-            {"ypos", required_argument, 0, 'y'},
+            {"ai",      no_argument,       0, 'a'},
+            {"load",    optional_argument, 0, 'l'},
+            {"save",    optional_argument, 0, 's'},
+            {"nummon",  required_argument, 0, 'm'},
+            {"ncurses", no_argument,       0, 'n'},
+            {"help",    no_argument,       0, 'h'},
+            {"xpos",    required_argument, 0, 'x'},
+            {"ypos",    required_argument, 0, 'y'},
             {0, 0, 0, 0}
         };
         
         int option_index = 0;
-        flag = getopt_long(argc, argv, "hm:x:y:s::l::", long_options, &option_index);
+        flag = getopt_long(argc, argv, "ahnm:x:y:s::l::", long_options, &option_index);
         
         if(flag == -1) {
             break;
@@ -127,6 +135,10 @@ static void parse_args(int argc, char** argv) {
                     printf(" with args %s", optarg);
                 }
                 printf("\n");
+                break;
+                
+            case 'a':
+                PC_AI_MODE = 1;
                 break;
             
             case 'h':
@@ -157,6 +169,10 @@ static void parse_args(int argc, char** argv) {
                     envAPI.exit_gracefully();
                 }
                 NUM_MONSTERS = num;
+                break;
+                
+            case 'n':
+                NCURSES_MODE = 1;
                 break;
                 
             case 'l':
