@@ -43,6 +43,7 @@ character::character(character_type type, point_t* spawn) {
 }
 
 character::~character() {
+    logger.d("character destructor called");
     if(_position != NULL) {
         pointAPI.destruct(_position);
     }
@@ -114,6 +115,7 @@ static void destruct_impl(character_t* c) {
         return;
     }
     character* c1 = (character*)c;
+    
     delete c1;
 }
 
