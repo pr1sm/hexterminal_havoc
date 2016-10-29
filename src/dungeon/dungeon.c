@@ -73,6 +73,13 @@ static dungeon_t* get_dungeon_impl() {
     }
     return _base_dungeon;
 }
+    
+static void teardown_dungeon_impl() {
+    if(_base_dungeon != NULL) {
+        dungeonAPI.destruct(_base_dungeon);
+        _base_dungeon = NULL;
+    }
+}
 
 static dungeon_t* construct_impl() {
     logger.i("Constructing Dungeon...");
@@ -774,6 +781,7 @@ static void add_rooms(dungeon_t* d) {
 
 dungeon_namespace const dungeonAPI = {
     get_dungeon_impl,
+    teardown_dungeon_impl,
     construct_impl,
     move_floors_impl,
     destruct_impl,

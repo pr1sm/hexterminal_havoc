@@ -3,7 +3,7 @@
 //  cs_327
 //
 //  Created by Srinivas Dhanwada on 10/25/16.
-//  Copyright © 2016 dhanwada. All rights reserved.
+//  Copyright ï¿½ 2016 dhanwada. All rights reserved.
 //
 
 #include <stdlib.h>
@@ -131,6 +131,13 @@ static character_t* get_pc_impl() {
     }
     return gPLAYER_CHARACTER;
 }
+    
+static void teardown_pc_impl() {
+    if(gPLAYER_CHARACTER == NULL) {
+        characterAPI.destruct(gPLAYER_CHARACTER);
+        gPLAYER_CHARACTER = NULL;
+    }
+}
 
 static char char_for_npc_type_impl(character_t* self) {
     if(characterAPI.get_type(self) == PC) {
@@ -221,6 +228,7 @@ const character_namespace characterAPI = {
     construct_npc_impl,
     destruct_impl,
     get_pc_impl,
+    teardown_pc_impl,
     char_for_npc_type_impl,
     perform_impl,
     

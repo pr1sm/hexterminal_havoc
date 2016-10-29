@@ -85,6 +85,13 @@ static character_t* get_pc_impl() {
     return gPLAYER_CHARACTER;
 }
 
+static void teardown_pc_impl() {
+    if(gPLAYER_CHARACTER != NULL) {
+        characterAPI.destruct(gPLAYER_CHARACTER);
+        gPLAYER_CHARACTER = NULL;
+    }
+}
+
 static char char_for_npc_type_impl(character_t* self) {
     if(self->type == PC) {
         return '@';
@@ -139,6 +146,7 @@ const character_namespace characterAPI = {
     construct_npc_impl,
     destruct_impl,
     get_pc_impl,
+    teardown_pc_impl,
     char_for_npc_type_impl
 };
 

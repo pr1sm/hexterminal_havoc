@@ -44,7 +44,7 @@ static int is_number(char* str);
 static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
                                "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
                                "-h,       --help        | Print this help message.\n"
-                               "-m,       --nummon=<val>| Set the number of monsters in the dungeon\n"
+                               "-m<val> , --nummon=<val>| Set the number of monsters in the dungeon\n"
                                "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
                                "                        |   name <name> (in save directory).\n"
                                "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
@@ -229,7 +229,7 @@ static void cleanup() {
     
     characterStoreAPI.teardown();
     eventQueueAPI.teardown();
-    dungeonAPI.destruct(dungeonAPI.get_dungeon());
+    dungeonAPI.teardown_dungeon();
     
     if(NCURSES_MODE) {
         endwin();
