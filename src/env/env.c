@@ -167,7 +167,7 @@ static void parse_args(int argc, char** argv) {
                 num = is_number(optarg);
                 if(num < 1 || num > 50) {
                     logger.w("nummon is out of bounds! Must be in range [1, 50]");
-                    fprintf(stderr, "Error: num monsters must be in range [1, 50]");
+                    fprintf(stderr, "Error: num monsters must be in range [1, 50]\n");
                     envAPI.exit_gracefully();
                 }
                 NUM_MONSTERS = num;
@@ -197,7 +197,7 @@ static void parse_args(int argc, char** argv) {
                 num = is_number(optarg);
                 if(num < 1 || num > 79) {
                     logger.w("Input X is out of bounds! Must be in range [1, 79]");
-                    fprintf(stderr, "Error: starting x coordinate must be in range [1, 79]");
+                    fprintf(stderr, "Error: starting x coordinate must be in range [1, 79]\n");
                     envAPI.exit_gracefully();
                 }
                 X_START = num;
@@ -207,7 +207,7 @@ static void parse_args(int argc, char** argv) {
                 num = is_number(optarg);
                 if(num < 1 || num > 20) {
                     logger.w("Input Y is out of bounds! Must be in range [1, 20]");
-                    fprintf(stderr, "Error: starting y coordinate must be in range [1, 20]");
+                    fprintf(stderr, "Error: starting y coordinate must be in range [1, 20]\n");
                     envAPI.exit_gracefully();
                 }
                 Y_START = num;
