@@ -46,9 +46,11 @@ character::~character() {
     static int char_count = 0;
     logger.i("character destructor called - %d", ++char_count);
     if(_position != NULL) {
+        logger.i("destructing position");
         pointAPI.destruct(_position);
     }
     if(_destination != NULL) {
+        logger.i("destructing destination");
         pointAPI.destruct(_destination);
     }
 }
