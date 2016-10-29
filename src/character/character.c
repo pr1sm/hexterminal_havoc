@@ -76,6 +76,13 @@ static character_t* get_pc_impl() {
         if(X_START < 80 && Y_START < 21) {
             spawn.x = X_START;
             spawn.y = Y_START;
+            
+            // check if this point is valid
+            dungeon_t* d = dungeonAPI.get_dungeon();
+            if(d->tiles[spawn.y][spawn.x]->content == tc_ROCK) {
+                logger.e("Spawn point from CLI is invalid, setting new random point in the dungeon!");
+                dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
+            }
         } else {
             dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
         }
@@ -83,6 +90,13 @@ static character_t* get_pc_impl() {
         gPLAYER_CHARACTER->id = 0;
     }
     return gPLAYER_CHARACTER;
+}
+
+static void teardown_pc_impl() {
+    if(gPLAYER_CHARACTER != NULL) {
+        characterAPI.destruct(gPLAYER_CHARACTER);
+        gPLAYER_CHARACTER = NULL;
+    }
 }
 
 static char char_for_npc_type_impl(character_t* self) {
@@ -139,6 +153,7 @@ const character_namespace characterAPI = {
     construct_npc_impl,
     destruct_impl,
     get_pc_impl,
+    teardown_pc_impl,
     char_for_npc_type_impl
 };
 

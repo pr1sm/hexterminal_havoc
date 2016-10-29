@@ -73,6 +73,13 @@ static dungeon_t* get_dungeon_impl() {
     }
     return _base_dungeon;
 }
+    
+static void teardown_dungeon_impl() {
+    if(_base_dungeon != NULL) {
+        dungeonAPI.destruct(_base_dungeon);
+        _base_dungeon = NULL;
+    }
+}
 
 static dungeon_t* construct_impl() {
     logger.i("Constructing Dungeon...");
@@ -110,8 +117,14 @@ static void destruct_impl(dungeon_t* d) {
     }
     free(d->rooms);
     
-    pathfinderAPI.destruct(d->non_tunnel_map);
-    pathfinderAPI.destruct(d->tunnel_map);
+    if(d->non_tunnel_map != NULL) {
+        pathfinderAPI.destruct(d->non_tunnel_map);
+        d->non_tunnel_map = NULL;
+    }
+    if(d->tunnel_map != NULL) {
+        pathfinderAPI.destruct(d->tunnel_map);
+        d->tunnel_map = NULL;
+    }
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
@@ -244,7 +257,7 @@ static void load_impl(dungeon_t* d) {
     int i, j, k;
     int num_rooms = 0;
     uint8_t room_data[4];
-    char* semantic = (char*)malloc(7*sizeof(char));
+    char* semantic = (char*)calloc(7, sizeof(char));
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(LOAD_FILE, "rb");
@@ -252,6 +265,7 @@ static void load_impl(dungeon_t* d) {
         logger.f("Dungeon save file could not be loaded: %s.  Exiting with error!", LOAD_FILE);
         free(semantic);
         free(hardness_map);
+        envAPI.cleanup();
         exit(3);
     }
     
@@ -264,6 +278,7 @@ static void load_impl(dungeon_t* d) {
         free(semantic);
         free(hardness_map);
         fclose(f);
+        envAPI.cleanup();
         exit(3);
     }
     
@@ -774,6 +789,7 @@ static void add_rooms(dungeon_t* d) {
 
 dungeon_namespace const dungeonAPI = {
     get_dungeon_impl,
+    teardown_dungeon_impl,
     construct_impl,
     move_floors_impl,
     destruct_impl,

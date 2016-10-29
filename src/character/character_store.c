@@ -57,10 +57,10 @@ static void print_char(character_t* npc) {
     if(DEBUG_MODE && !NCURSES_MODE) {
         printf("NPC: spawn: (%2d, %2d) ",
                npc_pos->x,
-               npc_dest->y);
+               npc_pos->y);
         if(npc_dest != NULL) {
             printf("dest: (%2d, %2d) ",
-                   npc_pos->x,
+                   npc_dest->x,
                    npc_dest->y);
         } else {
             printf("dest: NONE       ");
@@ -111,7 +111,7 @@ static void setup_impl() {
 #ifdef __cplusplus
         characterAPI.set_id(npc, i+1);
 #else
-        npc->id = i;
+        npc->id = i+1;
 #endif // __cplusplus
         
         setup_npc(npc);
@@ -132,7 +132,7 @@ static void teardown_impl() {
             characterAPI.destruct(_characters[i]);
         }
     }
-    characterAPI.destruct(characterAPI.get_pc());
+    characterAPI.teardown_pc();
     free(_characters);
     free(_alive_characters);
     if(_PLAYER_PATH != NULL) {
@@ -272,6 +272,11 @@ void start_monster_list_impl() {
     int next_cmd = 0;
     point_t* pc_pos;
     point_t* npc_pos;
+    
+    if(!NCURSES_MODE) {
+        return; // this can only be shown when using pc control, which requires NCURSES_MODE to be active.
+    }
+    
 #ifdef __cplusplus
     pc_pos = characterAPI.get_pos(characterAPI.get_pc());
 #else

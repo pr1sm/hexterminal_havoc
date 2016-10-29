@@ -100,7 +100,10 @@ static int perform_event_impl() {
 }
 
 static void teardown_impl() {
-    heapAPI.destruct(_event_queue);
+    if(_event_queue != NULL) {
+        heapAPI.destruct(_event_queue);
+        _event_queue = NULL;
+    }
 }
 
 static void move_floors_impl() {

@@ -3,7 +3,7 @@
 //  cs_327
 //
 //  Created by Srinivas Dhanwada on 10/25/16.
-//  Copyright © 2016 dhanwada. All rights reserved.
+//  Copyright ï¿½ 2016 dhanwada. All rights reserved.
 //
 
 #include <stdlib.h>
@@ -43,10 +43,14 @@ character::character(character_type type, point_t* spawn) {
 }
 
 character::~character() {
+    static int char_count = 0;
+    logger.i("character destructor called - %d", ++char_count);
     if(_position != NULL) {
+        logger.i("destructing position");
         pointAPI.destruct(_position);
     }
     if(_destination != NULL) {
+        logger.i("destructing destination");
         pointAPI.destruct(_destination);
     }
 }
@@ -114,6 +118,7 @@ static void destruct_impl(character_t* c) {
         return;
     }
     character* c1 = (character*)c;
+    
     delete c1;
 }
 
@@ -123,6 +128,13 @@ static character_t* get_pc_impl() {
         if(X_START < 80 && Y_START < 21) {
             spawn.x = X_START;
             spawn.y = Y_START;
+            
+            // check if this point is valid
+            dungeon_t* d = dungeonAPI.get_dungeon();
+            if(d->tiles[spawn.y][spawn.x]->content == tc_ROCK) {
+                logger.e("Spawn point from CLI is invalid, setting new random point in the dungeon!");
+                dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
+            }
         } else {
             dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &spawn);
         }
@@ -130,6 +142,13 @@ static character_t* get_pc_impl() {
         characterAPI.set_id(gPLAYER_CHARACTER, 0);
     }
     return gPLAYER_CHARACTER;
+}
+    
+static void teardown_pc_impl() {
+    if(gPLAYER_CHARACTER != NULL) {
+        characterAPI.destruct(gPLAYER_CHARACTER);
+        gPLAYER_CHARACTER = NULL;
+    }
 }
 
 static char char_for_npc_type_impl(character_t* self) {
@@ -221,6 +240,7 @@ const character_namespace characterAPI = {
     construct_npc_impl,
     destruct_impl,
     get_pc_impl,
+    teardown_pc_impl,
     char_for_npc_type_impl,
     perform_impl,
     
