@@ -259,6 +259,7 @@ static void load_impl(dungeon_t* d) {
         logger.f("Dungeon save file could not be loaded: %s.  Exiting with error!", LOAD_FILE);
         free(semantic);
         free(hardness_map);
+        envAPI.cleanup();
         exit(3);
     }
     
@@ -271,6 +272,7 @@ static void load_impl(dungeon_t* d) {
         free(semantic);
         free(hardness_map);
         fclose(f);
+        envAPI.cleanup();
         exit(3);
     }
     
