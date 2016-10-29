@@ -61,12 +61,6 @@ static void setup_environment() {
         }
     }
     
-    if((env = getenv("HOME"))) {
-        if(strlen(env) > 0) {
-            HOME = env;
-        }
-    }
-    
 #ifdef DEBUG
     DEBUG_MODE = 1;
 #endif // DEBUG
@@ -94,6 +88,14 @@ static void setup_environment() {
 }
 
 static void parse_args(int argc, char** argv) {
+    // get the HOME env var
+    char* env;
+    if((env = getenv("HOME"))) {
+        if(strlen(env) > 0) {
+            HOME = env;
+        }
+    }
+    
     if(argc <= 1) return;
     
     int flag;

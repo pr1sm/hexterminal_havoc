@@ -117,8 +117,14 @@ static void destruct_impl(dungeon_t* d) {
     }
     free(d->rooms);
     
-    pathfinderAPI.destruct(d->non_tunnel_map);
-    pathfinderAPI.destruct(d->tunnel_map);
+    if(d->non_tunnel_map != NULL) {
+        pathfinderAPI.destruct(d->non_tunnel_map);
+        d->non_tunnel_map = NULL;
+    }
+    if(d->tunnel_map != NULL) {
+        pathfinderAPI.destruct(d->tunnel_map);
+        d->tunnel_map = NULL;
+    }
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
