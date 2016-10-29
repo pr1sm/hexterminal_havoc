@@ -138,7 +138,7 @@ static character_t* get_pc_impl() {
 }
     
 static void teardown_pc_impl() {
-    if(gPLAYER_CHARACTER == NULL) {
+    if(gPLAYER_CHARACTER != NULL) {
         characterAPI.destruct(gPLAYER_CHARACTER);
         gPLAYER_CHARACTER = NULL;
     }
