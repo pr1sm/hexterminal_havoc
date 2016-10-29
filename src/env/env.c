@@ -43,7 +43,7 @@ static int is_number(char* str);
 
 static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
                                "-a      , --ai          | Enable AI mode for PC (pc control used by default)\n"
-                               "-h,       --help        | Print this help message.\n"
+                               "-h      , --help        | Print this help message.\n"
                                "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
                                "-m<val> , --nummon=<val>| Set the number of monsters in the dungeon\n"
                                "-n      , --ncurses     | Use Ncurses to render game\n"
