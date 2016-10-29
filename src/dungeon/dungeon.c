@@ -257,7 +257,7 @@ static void load_impl(dungeon_t* d) {
     int i, j, k;
     int num_rooms = 0;
     uint8_t room_data[4];
-    char* semantic = (char*)malloc(7*sizeof(char));
+    char* semantic = (char*)calloc(7, sizeof(char));
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(LOAD_FILE, "rb");
