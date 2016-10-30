@@ -34,9 +34,11 @@ detailing all options should be printed similar to this:
 ```bash
 Usage: hexterm_havoc [options]
 
+-a      , --ai          | Enable AI mode for PC (pc control used by default)
+-h      , --help        | Print this help message.
 -l<name>, --load=<name> | Load dungeon with name <name> (in save directory).
--h,       --help        | Print this help message.
--m,       --nummon=<val>| Set the number of monsters in the dungeon
+-m<val> , --nummon=<val>| Set the number of monsters in the dungeon
+-n      , --ncurses     | Use Ncurses to render game
 -s<name>, --save=<name> | Save the dungeon after loading/generating it with
                         |   name <name> (in save directory).
 -x<val> , --xpos <val>  | Start the player at a specified x coord
@@ -71,6 +73,18 @@ to 0 in the class constructor for the Character.  There was another minor bug I
 discovered during testing where a crash would occur when the player stepped on a
 tile that had been tunneled through by an npc.  This was a pretty easy fix and 
 the error is logged and resolved automatically now.  
+
+UPDATE:
+There were many outstanding issues I had logged that I thought should be included 
+in this assignment, but I was not able to get to them due to time constraints.  I
+now have addressed them and have released a 1.06.1 tag that adds more memory leak
+fixes found when going through control flow paths other than the standard game.
+I also added CLI flags to control whether or not the PC AI should be used (disabled
+by default) and whether or not ncurses should be used for rendering the dungeon.
+I also fixed an issue with the player spawn point.  This can be specified through
+the command line, however there were not any checks besides the range of the input.
+I added checks on if the proposed spawn point was valid (in a path or room).  If it
+was not, I changed the spawn point to a random room in the dungeon.  
 
 ### Assignment 1.05 - User Interface with Ncurses
 
