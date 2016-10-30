@@ -34,9 +34,11 @@ detailing all options should be printed similar to this:
 ```bash
 Usage: hexterm_havoc [options]
 
+-a      , --ai          | Enable AI mode for PC (pc control used by default)
+-h      , --help        | Print this help message.
 -l<name>, --load=<name> | Load dungeon with name <name> (in save directory).
--h,       --help        | Print this help message.
--m,       --nummon=<val>| Set the number of monsters in the dungeon
+-m<val> , --nummon=<val>| Set the number of monsters in the dungeon
+-n      , --ncurses     | Use Ncurses to render game
 -s<name>, --save=<name> | Save the dungeon after loading/generating it with
                         |   name <name> (in save directory).
 -x<val> , --xpos <val>  | Start the player at a specified x coord
