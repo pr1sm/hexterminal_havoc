@@ -12,6 +12,10 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static void add_vertex(graph_t* g, point_t* p) {
     if(g->point_to_index == NULL) {
         logger.w("point_to_index was null, could not convert point to an index!");
@@ -31,13 +35,13 @@ static void add_vertex(graph_t* g, point_t* p) {
     int j;
     if (g->size < i + 1) {
         int size = g->size * 2 > i ? g->size * 2 : i + 4;
-        g->vertices = realloc(g->vertices, size * sizeof (vertex_t *));
+        g->vertices = (vertex_t**)realloc(g->vertices, size * sizeof (vertex_t *));
         for (j = g->size; j < size; j++)
             g->vertices[j] = NULL;
         g->size = size;
     }
     if (!g->vertices[i]) {
-        g->vertices[i] = calloc(1, sizeof (vertex_t));
+        g->vertices[i] = (vertex_t*)calloc(1, sizeof (vertex_t));
         g->vertices[i]->index = i;
         g->len++;
         logger.t("Added vertex at index: %d", i);
@@ -79,14 +83,34 @@ static void add_edge(graph_t* g, point_t* src, point_t* dest, int weight) {
     if(v->edges_len >= v->edges_size) {
         v->edges_size = v->edges_size ? v->edges_size * 2 : 5;
         // TODO: Deal with this possible realloc error
-        v->edges = realloc(v->edges, v->edges_size * sizeof (*v->edges));
+        v->edges = (edge_t**)realloc(v->edges, v->edges_size * sizeof (*v->edges));
     }
-    edge_t* e = calloc(1, sizeof(edge_t));
+    edge_t* e = (edge_t*)calloc(1, sizeof(edge_t));
     e->dest = g->point_to_index(dest);
     // Invert the rock hardness based on flag
     e->weight = weight;
     v->edges[v->edges_len++] = e;
     g->edge_count++;
+}
+
+static path_node_t* add_path_node(point_t* p) {
+    if(p == NULL) {
+        logger.w("Tried to create path node with NULL point! Returning NULL");
+        return NULL;
+    }
+    path_node_t* pn = (path_node_t*)calloc(1, sizeof(path_node_t));
+    point_t* curr = pointAPI.construct(p->x, p->y);
+    pn->curr = curr;
+    pn->next = NULL;
+    return pn;
+}
+
+static void destruct_path(path_node_t* pn) {
+    free(pn->curr);
+    if(pn->next != NULL) {
+        graphAPI.destruct_path(pn->next);
+    }
+    free(pn);
 }
 
 static int compare_vertices(const void* a, const void* b) {
@@ -99,5 +123,11 @@ graph_namespace const graphAPI = {
     add_vertex,
     add_edge,
     free_vertex,
-    compare_vertices
+    compare_vertices,
+    add_path_node,
+    destruct_path
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

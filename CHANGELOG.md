@@ -4,7 +4,73 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.03] - 2016-8-21
+## [1.06.1] - 2016-10-29
+
+### Added
+- pc ai mode flag (--ai or -a)
+- ncurses render mode flag (--ncurses or -n), enabled automatically when using keyboard control
+- help message updated
+
+### Changed
+- teardown methods are more robust and not prone to segmentation faults in some control flow paths
+- Spawn points passed in through CLI are verified before placing the pc at that position
+- If a spawn point passed is invalid a log message is generated and it is placed at a random point
+
+### Fixed
+- memory leak fixes with the line of sight pathing in the npc ai
+- memory leak fixes with the .cpp character management
+- floating point exception when using some CLI flags
+- small bug fixes with control flow path
+
+## [1.06] - 2016-10-26
+
+### Added
+- character.cpp (start of C ~> C++ conversion)
+- fog of war 
+
+### Changed
+- Makefile can compile for C or C++ (use `make` or `make cxx` for C++ and `make c` for C)
+- Refactors to existing codebase to accomodate the change to C++
+
+### Fixed
+- Crash when pc moved to path that had been tunnelled by an npc
+- initialization error with character class
+- small bug fixes
+- memory leaks
+
+## [1.05] - 2016-10-19
+
+### Added
+- ncurses support (on by default)
+- player control (pc ai is still available, but recompilation is necessary to turn it on)
+- monster list that shows monster and position relative to player
+- staircases and movement between dungeon floors
+
+### Changed
+- Refactors to cleanup code at the end of the program (all cleanup is housed in one function)
+- character array now only holds npcs (pc is separate)
+
+### Fixed
+- small bug fixes
+- fixed memory leak due to player ai and character variable
+
+## [1.04] - 2016-10-4
+
+### Added
+- Event queue to perform different npc and player events
+- Player AI to control player in dungeon (temporary!)
+- NPC AI to have monsters chase the player
+- More Logging!
+- bresenhams algorithm for line of sight checking
+
+### Changed
+- Major refactors towards a more object oriented style
+- Change functions to have funtion pointers in structs instead of separate API (when applicable)
+
+### Fixed
+- Various bug fixes
+
+## [1.03] - 2016-9-21
 
 ### Added
 - Player Marker on the dungeon (gets randomly spawned on dungeon load or generate)

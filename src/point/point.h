@@ -11,17 +11,29 @@
 
 #include "../env/env.h"
 
-typedef struct point_t {
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+typedef struct point_t point_t;
+struct point_t {
+    // variables
     uint8_t x;
     uint8_t y;
-} point_t;
+    
+    // functions
+    int (*distance)(point_t* p1, point_t* p2);
+    void (*print)(point_t* p);
+};
 
 typedef struct point_namespace {
     point_t* (*const construct)(uint8_t x, uint8_t y);
     int (*const destruct)(point_t* point);
-    int (*const distance)(point_t* p1, point_t* p2);
-    void (*const print)(point_t* p);
 } point_namespace;
 extern point_namespace const pointAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* point_h */

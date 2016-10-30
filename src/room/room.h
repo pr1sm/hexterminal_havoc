@@ -12,20 +12,32 @@
 #include "../point/point.h"
 #include "../env/env.h"
 
-typedef struct room_t {
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+typedef struct room_t room_t;
+struct room_t {
+    // variables
     point_t* location;
     uint8_t width;
     uint8_t height;
     uint8_t connected;
-} room_t;
+    
+    // functions
+    int  (*is_overlap)(room_t* r1, room_t* r2);
+    int  (*contains)(room_t* r, point_t* p);
+    void (*export_room)(room_t* r, uint8_t* data);
+};
 
 typedef struct room_namespace {
     room_t* (*const construct)(uint8_t x, uint8_t y, uint8_t width, uint8_t height);
     void (*const destruct)(room_t* room);
-    int  (*const is_overlap)(room_t* r1, room_t* r2);
-    int  (*const contains)(room_t* r, point_t* p);
-    void (*const export_room)(room_t* r, uint8_t* data);
 } room_namespace;
 extern room_namespace const roomAPI;
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus
 
 #endif /* room_h */

@@ -17,7 +17,16 @@
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 
-static room_t* construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
+// Public Functions
+static int is_overlap_impl(room_t* r1, room_t* r2);
+static int contains_impl(room_t* r, point_t* p);
+static void export_room_impl(room_t* r, uint8_t* data);
+
+static room_t* construct_impl(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     room_t* r = (room_t*)malloc(sizeof(room_t));
     
     if(x < 1 || x >= DUNGEON_WIDTH - 1) {
@@ -45,15 +54,19 @@ static room_t* construct(uint8_t x, uint8_t y, uint8_t width, uint8_t height) {
     r->width = width;
     r->height = height;
     r->connected = 0;
+    
+    r->is_overlap = is_overlap_impl;
+    r->contains = contains_impl;
+    r->export_room = export_room_impl;
     return r;
 }
 
-static void destruct(room_t* room) {
+static void destruct_impl(room_t* room) {
     free(room->location);
     free(room);
 }
 
-static int is_overlap(room_t* r1, room_t* r2) {
+static int is_overlap_impl(room_t* r1, room_t* r2) {
     int small_x, large_x, x_diff;
     int small_y, large_y, y_diff;
     int min_x_dim = (r1->width + r2->width + 1);
@@ -83,7 +96,7 @@ static int is_overlap(room_t* r1, room_t* r2) {
     return 0;
 }
 
-static int contains(room_t* r, point_t* p) {
+static int contains_impl(room_t* r, point_t* p) {
     logger.t("Checking room: (%2d, %2d, %2d, %2d) contains point: (%2d, %2d)...",
              r->location->x,
              r->location->y,
@@ -100,7 +113,7 @@ static int contains(room_t* r, point_t* p) {
     return 0;
 }
 
-static void export_room(room_t* r, uint8_t* data) {
+static void export_room_impl(room_t* r, uint8_t* data) {
     // ASSUME: data is an array with length of 4
     data[0] = r->location->x;
     data[1] = r->width;
@@ -109,9 +122,10 @@ static void export_room(room_t* r, uint8_t* data) {
 }
 
 room_namespace const roomAPI = {
-    construct,
-    destruct,
-    is_overlap,
-    contains,
-    export_room
+    construct_impl,
+    destruct_impl
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

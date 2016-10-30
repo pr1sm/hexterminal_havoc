@@ -20,8 +20,12 @@
 #define DEFAULT_LOG_NAME "default.log";
 #define LINE_SPACING 32
 
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
+
 static int initialized = 0;
-static char* log_name = DEFAULT_LOG_NAME;
+static const char* log_name = DEFAULT_LOG_NAME;
 static int modes_enabled = LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F;
 
 static char* get_date_string();
@@ -190,7 +194,7 @@ static void wrap_lines(char* msg, int msg_size) {
     int i;
     
     // used to keep track of how much is read from msg after each line
-    int line_feed_size = 80;
+    size_t line_feed_size = 80;
     
     // character we need to replace with a '\n'
     char* return_pos;
@@ -209,7 +213,7 @@ static void wrap_lines(char* msg, int msg_size) {
     strncpy(temp_buffer, msg, line_feed_size * sizeof(char));
     
     // Iterate through the message to wrap lines every [line_feed_size]
-    for(i = line_feed_size; i < strlen(msg); i+= line_feed_size) {
+    for(i = (int)line_feed_size; i < (int)strlen(msg); i+= line_feed_size) {
         char wrap_text[255];
         
         // find last space in temp buffer and replace it with newline and line_spacing
@@ -219,7 +223,7 @@ static void wrap_lines(char* msg, int msg_size) {
         sprintf(return_pos + 1, "%s%s", indented_line_spacing, wrap_text);
         
         // calculate what the next line_feed_size needs to be so we add up to 80 characters
-        line_feed_size = 80 - (int)(strlen(wrap_text) + strlen(indented_line_spacing));
+        line_feed_size = 80 - (strlen(wrap_text) + strlen(indented_line_spacing));
         
         // copy either the length of line_feed_size, or the rest of the message,
         // which ever is smaller.
@@ -258,7 +262,7 @@ static void write_log(logger_mode mode, const char* str, va_list args) {
     
     // Create the message from the variable argument list.
     char* va_msg = (char*) malloc(strlen(str) + max_va_list_size);
-    int va_string_size = vsnprintf(va_msg, strlen(str) + max_va_list_size, str, args);
+    size_t va_string_size = vsnprintf(va_msg, strlen(str) + max_va_list_size, str, args);
     
     char* date = get_date_string();
     
@@ -305,7 +309,7 @@ static void write_log(logger_mode mode, const char* str, va_list args) {
     
     // if the message was truncated, print a log message to notify the user.
     if(va_string_size > (strlen(str) + max_va_list_size)) {
-        int truncated_size = va_string_size - ((int)strlen(str) + max_va_list_size);
+        size_t truncated_size = va_string_size - (strlen(str) + max_va_list_size);
         logger.i("Previous message truncated by %d bytes to fit into buffer", truncated_size);
     }
 }
@@ -320,3 +324,7 @@ logger_namespace const logger = {
     create,
     set_modes_enabled
 };
+    
+#ifdef __cplusplus
+}
+#endif // __cplusplus

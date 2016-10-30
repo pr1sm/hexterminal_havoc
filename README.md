@@ -34,8 +34,11 @@ detailing all options should be printed similar to this:
 ```bash
 Usage: hexterm_havoc [options]
 
+-a      , --ai          | Enable AI mode for PC (pc control used by default)
+-h      , --help        | Print this help message.
 -l<name>, --load=<name> | Load dungeon with name <name> (in save directory).
--h,       --help        | Print this help message.
+-m<val> , --nummon=<val>| Set the number of monsters in the dungeon
+-n      , --ncurses     | Use Ncurses to render game
 -s<name>, --save=<name> | Save the dungeon after loading/generating it with
                         |   name <name> (in save directory).
 -x<val> , --xpos <val>  | Start the player at a specified x coord
@@ -43,6 +46,104 @@ Usage: hexterm_havoc [options]
 ```
 
 ## Assignments
+
+### Assignment 1.06 - "Fog of War" and interfacing with C and C++
+
+For this assignment, we had to start switching our codebase over to C++ and write
+an interface in C++ so our C codebase could interact with the class we created. 
+We had to port our character structs (for the pc and npcs) over to a Character
+class in C++ and write a set of mutators and accessors to interface between the
+two languages.  Most of the codebase remained largely unchanged, but because I 
+now had these mutators and accessors, I had to use these instead of accessing
+the character_t's elements.  I took this a step further and maintained compatibility
+with gcc as well.  A rule was added to the Makefile so the project could be still
+compiled with gcc and the old characterAPI and character struct would be used.  
+The default make rule will now compile using g++ and the character class interface
+will be used.  The Makefile is now also able to tell which files have been converted
+to .cpp files and will only build those when compiling for C++.  If compiling for C,
+the .c file will be used.  
+
+I also added fog of war support, which was trivial to add.  This allows the player
+to only see a radius of 3 around it and changes to the dungeon in other places are
+not rendered until the player moves to a position closer.  The only issue that I 
+had while writing this feature was an interesting error where the npc count would
+be much lower than the specified count.  This turned out to be an initialization
+error with the class where I wasn't specifically initializing the `is_dead` property
+to 0 in the class constructor for the Character.  There was another minor bug I 
+discovered during testing where a crash would occur when the player stepped on a
+tile that had been tunneled through by an npc.  This was a pretty easy fix and 
+the error is logged and resolved automatically now.  
+
+UPDATE:
+There were many outstanding issues I had logged that I thought should be included 
+in this assignment, but I was not able to get to them due to time constraints.  I
+now have addressed them and have released a 1.06.1 tag that adds more memory leak
+fixes found when going through control flow paths other than the standard game.
+I also added CLI flags to control whether or not the PC AI should be used (disabled
+by default) and whether or not ncurses should be used for rendering the dungeon.
+I also fixed an issue with the player spawn point.  This can be specified through
+the command line, however there were not any checks besides the range of the input.
+I added checks on if the proposed spawn point was valid (in a path or room).  If it
+was not, I changed the spawn point to a random room in the dungeon.  
+
+### Assignment 1.05 - User Interface with Ncurses
+
+For this assignment, we had to implement a user interface for the player and
+use ncurses as the default rendering for our dungeon.  The move the ncurses 
+was very simple for me since there were only a couple of places I printed the
+dungeon out.  A global enviroment flag was added to support any changes that 
+needed to be made based on the presence of ncurses or not.  I also added an
+option to turn on the player AI I used in assignment 1.04, or use the user
+interface I implemented in this assignment.  Both of these flags currently do
+not have a runtime configuration setting, so recompilation is necessary to change
+these settings, however that will be address in later assignments.  
+
+The implementation of the character control was also very simple since similar
+steps were required for the pc AI.  The only change was that I asked ncurses to 
+get the input of the key during the pc's move.  I kept in the sleep timer 
+between moves because I like the feeling of the monsters moving one step at a time
+versus having them move 2 steps automatically.  In my opionion this added an 
+immersion into the game because the monsters moved on their own in between the pause
+for the pc control.  
+
+The implementation of the monster list was also simple and is done within on 
+function so the list of monsters is only allocated once and all the control
+for that screen is done separately in that function.  Once the close button is
+pressed, control is then returned to the move function for the pc control, which
+prompts the user for their next pc move.  The function also cleans up itself,
+so it can be called over and over again without leaking memory
+
+The staircases generation and implementation was slightly harder since there 
+was a fair amount of cleanup necessary to do this.  The overall approach was
+to free all the memory with the dungeon and the npcs and generate a new dungeon
+and characters, placing the pc at the correct location where the stairs were.  
+When the pc moves downstairs, they are placed at the spot where the stairs upward
+is generated.  Similarly when they move upstairs, they are placed at the stairs 
+going downward.  I had all the functions necessary to cleanup all my data structures
+and reallocate them, I just had to create a function that did both in the correct 
+order and call that at the right time.  
+
+### Assignment 1.04 - Player Character and Monsters
+
+For this assignment, we had to implement the Monster AI as well as implement
+a temporary player AI so we could watch the monsters chase the player.  My 
+implementation of this consisted of creating a new data type to hold the 
+character information.  I found that much of the information between the pc
+and the npcs were the same, so they are all in the same data type.  This allowed
+me to use a priority queue for my event system.  The event system uses events
+as the input and returns the event that should be run first based on the characters
+speed.  I also implemented bresenhams line pathing algorithm to check line of
+sight between the monsters and the player.  This was used to check if the 
+destination of the monster should be set to the player (player is in line of sight)
+or another random point in the dungeon.  This of course was also affected by the 
+monsters inert attributes and modifiers such as telepathy overrode this los check.
+I also performed a major refactor of my codebase to move to a more object oriented
+style.  Many of the functions were move to be function pointers in the data type
+itself rather than an API function.  I did this because it made more sense to me
+when reading the code that the struct should be calling the function rather than
+another API struct that holds all the function names.  I also fixed some outstanding
+bugs and tweaks from previous assignments that I had put in a backlog.  This seemed
+appropriate since I did a major refactor of the code base. 
 
 ### Assignment 1.03 - Path Finding
 
