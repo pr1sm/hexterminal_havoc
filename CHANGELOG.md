@@ -4,6 +4,24 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.06.1] - 2016-10-29
+
+### Added
+- pc ai mode flag (--ai or -a)
+- ncurses render mode flag (--ncurses or -n), enabled automatically when using keyboard control
+- help message updated
+
+### Changed
+- teardown methods are more robust and not prone to segmentation faults in some control flow paths
+- Spawn points passed in through CLI are verified before placing the pc at that position
+- If a spawn point passed is invalid a log message is generated and it is placed at a random point
+
+### Fixed
+- memory leak fixes with the line of sight pathing in the npc ai
+- memory leak fixes with the .cpp character management
+- floating point exception when using some CLI flags
+- small bug fixes with control flow path
+
 ## [1.06] - 2016-10-26
 
 ### Added

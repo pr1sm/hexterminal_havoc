@@ -72,6 +72,18 @@ discovered during testing where a crash would occur when the player stepped on a
 tile that had been tunneled through by an npc.  This was a pretty easy fix and 
 the error is logged and resolved automatically now.  
 
+UPDATE:
+There were many outstanding issues I had logged that I thought should be included 
+in this assignment, but I was not able to get to them due to time constraints.  I
+now have addressed them and have released a 1.06.1 tag that adds more memory leak
+fixes found when going through control flow paths other than the standard game.
+I also added CLI flags to control whether or not the PC AI should be used (disabled
+by default) and whether or not ncurses should be used for rendering the dungeon.
+I also fixed an issue with the player spawn point.  This can be specified through
+the command line, however there were not any checks besides the range of the input.
+I added checks on if the proposed spawn point was valid (in a path or room).  If it
+was not, I changed the spawn point to a random room in the dungeon.  
+
 ### Assignment 1.05 - User Interface with Ncurses
 
 For this assignment, we had to implement a user interface for the player and
