@@ -112,15 +112,15 @@ help: printvars helpsummary
 .PHONY: printvars clean helpsummary help submit
 
 helpsummary:
-	@echo "TARGET   : $(CXXTARGET)"
-	@echo "VERSION  : $(VERSION)"
-	@echo "CTARGET  : $(CTARGET)"
-	@echo "CSOURCES : $(CSOURCES)"
-	@echo "CXXSOURCES : $(CXXSOURCES)"
+	@echo "TARGET      : $(CXXTARGET)"
+	@echo "VERSION     : $(VERSION)"
+	@echo "CTARGET     : $(CTARGET)"
+	@echo "CSOURCES    : $(CSOURCES)"
+	@echo "CXXSOURCES  : $(CXXSOURCES)"
 	@echo "CXXCSOURCES : $(CXXCSOURCES)"
-	@echo "COBJECTS : $(COBJECTS)"
-	@echo "CDEPENDS : $(CDEPENDS)"
-	@echo "CFLAGS   : $(CFLAGS)"
+	@echo "COBJECTS    : $(COBJECTS)"
+	@echo "CDEPENDS    : $(CDEPENDS)"
+	@echo "CFLAGS      : $(CFLAGS)"
 
 printvars:
 	@$(foreach V,$(sort $(.VARIABLES)), \
