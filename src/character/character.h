@@ -10,7 +10,21 @@
 #define character_h
 
 #include "../point/point.h"
-#include "character_common.h"
+
+#define INTEL_BIT 0
+#define TELEP_BIT 1
+#define TUNNL_BIT 2
+#define ERATC_BIT 3
+#define INTEL_VAL (1 << INTEL_BIT)
+#define TELEP_VAL (1 << TELEP_BIT)
+#define TUNNL_VAL (1 << TUNNL_BIT)
+#define ERATC_VAL (1 << ERATC_BIT)
+
+typedef enum character_type {
+    NONE, PC, NPC
+} character_type;
+
+typedef int character_id_t;
 
 #ifdef __cplusplus
 extern "C" {

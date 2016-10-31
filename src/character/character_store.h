@@ -9,11 +9,7 @@
 #ifndef character_store_h
 #define character_store_h
 
-#ifdef __cplusplus
-    #include "character.h"
-#else
-    #include "character_t.h"
-#endif // __cplusplus
+#include "character.h"
 #include "../point/point.h"
 
 #ifdef __cplusplus

@@ -14,11 +14,7 @@
 #include "../env/env.h"
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
-#ifdef __cplusplus
 #include "../character/character.h"
-#else
-#include "../character/character_t.h"
-#endif // __cplusplus
 #include "../character/character_store.h"
 
 #define BORDER_CHAR_DEBUG '%'
