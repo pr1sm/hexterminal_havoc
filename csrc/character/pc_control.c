@@ -14,10 +14,6 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 void setup_control_movement() {
     character_t* pc;
     pc = characterAPI.get_pc();
@@ -31,11 +27,7 @@ void handle_control_move() {
     point_t* pc_pos;
     point_t* npc_pos;
     pc = characterAPI.get_pc();
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(pc);
-#else
     pc_pos = pc->position;
-#endif // __cplusplus
     pc_move_t move = mv_NONE;
     point_t* dest = pointAPI.construct(pc_pos->x, pc_pos->y);
     int i;
@@ -178,27 +170,14 @@ void handle_control_move() {
     } else if(move != mv_RS) {
         logger.i("Moving to point (%2d, %2d)", dest->x, dest->y);
         // move pc
-#ifdef __cplusplus
-        characterAPI.set_pos(pc, dest);
-        pc_pos = characterAPI.get_pos(pc);
-#else
         pc->set_position(pc, dest);
         pc_pos = pc->position;
-#endif // __cplusplus
         
         // check for collision
         for(i = 0; i < CHARACTER_COUNT; i++) {
-#ifdef __cplusplus
-            npc_pos = characterAPI.get_pos(characters[i]);
-#else
             npc_pos = characters[i]->position;
-#endif // __cplusplus
             if(pc_pos->distance(pc_pos, npc_pos) == 0) {
-#ifdef __cplusplus
-                characterAPI.set_is_dead(characters[i], 1);
-#else
                 characters[i]->is_dead = 1;
-#endif // __cplusplus
             }
         }
     } else if(move == mv_RS) {
@@ -208,8 +187,4 @@ void handle_control_move() {
     pointAPI.destruct(dest);
     eventQueueAPI.add_event(pc);
 }
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 

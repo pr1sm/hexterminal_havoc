@@ -14,11 +14,7 @@
 #include "../env/env.h"
 #include "../dungeon/dungeon.h"
 #include "../point/point.h"
-#ifdef __cplusplus
 #include "../character/character.h"
-#else
-#include "../character/character_t.h"
-#endif // __cplusplus
 #include "../character/character_store.h"
 
 #define BORDER_CHAR_DEBUG '%'
@@ -33,10 +29,6 @@
 #define PC_CHAR '@'
 #define UPSTR_CHAR '<'
 #define DNSTR_CHAR '>'
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 // Public Functions
 static void update_hardness_impl(tile_t* tile, uint8_t value);
@@ -144,11 +136,7 @@ static char char_for_content_impl(tile_t* tile, int mode) {
     if(mode == PM_DUNGEON) {
         character_t* pc = characterAPI.get_pc();
         point_t* pc_pos;
-#ifdef __cplusplus
-        pc_pos = characterAPI.get_pos(pc);
-#else
         pc_pos = pc->position;
-#endif // __cplusplus
         // tile is outside of pc's light
         if(tile->location->distance(tile->location, pc_pos) > 3) {
             return tile->last_known_content;
@@ -209,7 +197,3 @@ tile_namespace const tileAPI = {
     destruct_impl,
     import_tile_impl
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

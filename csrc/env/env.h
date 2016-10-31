@@ -14,10 +14,6 @@
 typedef unsigned char uint8_t;
 #endif // _UINT8_T
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 extern int DEBUG_MODE;
 extern int NCURSES_MODE;
 extern int PC_AI_MODE;
@@ -40,9 +36,5 @@ typedef struct env_namespace {
     void (*const move_floors)();
 } env_namespace;
 extern const env_namespace envAPI;
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif /* env_h */

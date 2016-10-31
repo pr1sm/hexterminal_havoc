@@ -10,7 +10,7 @@
 
 #include <stdlib.h>
 
-#include "character_t.h"
+#include "character.h"
 #include "ai.h"
 #include "pc_control.h"
 #include "../point/point.h"

@@ -11,10 +11,6 @@
 
 #include "../env/env.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef enum logger_mode {
     LOG_T = 1,
     LOG_D = 2,
@@ -35,9 +31,5 @@ typedef struct logger_namespace {
     void (*const set_modes_enabled)(int modes);
 } logger_namespace;
 extern logger_namespace const logger;
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif /* logger_h */

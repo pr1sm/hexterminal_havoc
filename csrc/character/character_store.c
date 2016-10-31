@@ -12,11 +12,7 @@
 #include <ncurses.h>
 
 #include "character_store.h"
-#ifdef __cplusplus
-    #include "character.h"
-#else
-    #include "character_t.h"
-#endif // __cplusplus
+#include "character.h"
 #include "ai.h"
 #include "pc_control.h"
 #include "../logger/logger.h"
@@ -25,10 +21,6 @@
 #include "../events/event_queue.h"
 #include "../env/env.h"
 #include "../dungeon/pathfinder.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 static character_t** _characters = NULL;
 static character_id_t* _alive_characters = NULL;
@@ -45,15 +37,9 @@ static void print_char(character_t* npc) {
     point_t* npc_pos;
     point_t* npc_dest;
     uint8_t  npc_attrs;
-#ifdef __cplusplus
-    npc_pos   = characterAPI.get_pos(npc);
-    npc_dest  = characterAPI.get_dest(npc);
-    npc_attrs = characterAPI.get_attrs(npc);
-#else
     npc_pos   = npc->position;
     npc_dest  = npc->destination;
     npc_attrs = npc->attrs;
-#endif // __cplusplus
     if(DEBUG_MODE && !NCURSES_MODE) {
         printf("NPC: spawn: (%2d, %2d) ",
                npc_pos->x,
@@ -91,11 +77,7 @@ static void setup_impl() {
     _alive_characters = (character_id_t*) calloc(_characters_count, sizeof(*_alive_characters));
     character_t* pc = characterAPI.get_pc();
     point_t* pc_pos;
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(pc);
-#else
     pc_pos = pc->position;
-#endif // __cplusplus
     if(PC_AI_MODE) {
         setup_pc_movement();
     } else {
@@ -108,11 +90,7 @@ static void setup_impl() {
         } while(spawn->distance(spawn, pc_pos) <= 3); // have a radius of 3 blocks
         
         character_t* npc = characterAPI.construct_npc(spawn);
-#ifdef __cplusplus
-        characterAPI.set_id(npc, i+1);
-#else
         npc->id = i+1;
-#endif // __cplusplus
         
         setup_npc(npc);
         
@@ -145,20 +123,11 @@ static int contains_npc_impl(point_t* p) {
     point_t* npc_pos;
     point_t* pc_pos;
     uint8_t  npc_is_dead;
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(characterAPI.get_pc());
-#else
     pc_pos = characterAPI.get_pc()->position;
-#endif // __cplusplus
     // check npcs first, then player
     for(i = 0; i < _characters_count; i++) {
-#ifdef __cplusplus
-        npc_pos = characterAPI.get_pos(_characters[i]);
-        npc_is_dead = characterAPI.get_is_dead(_characters[i]);
-#else
         npc_pos = _characters[i]->position;
         npc_is_dead = _characters[i]->is_dead;
-#endif // __cplusplus
         if(p->distance(p, npc_pos) == 0 && !npc_is_dead) {
             return i+1;
         }
@@ -184,15 +153,9 @@ static void setup_npc(character_t* npc) {
     point_t* pc_pos;
     point_t* npc_pos;
     uint8_t npc_attrs;
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(characterAPI.get_pc());
-    npc_pos = characterAPI.get_pos(npc);
-    npc_attrs = characterAPI.get_attrs(npc);
-#else
     pc_pos = characterAPI.get_pc()->position;
     npc_pos = npc->position;
     npc_attrs = npc->attrs;
-#endif // __cplusplus
     // telepathic npcs get the pc position
     if(npc_attrs & TELEP_VAL) {
         set_destination(npc, pc_pos);
@@ -211,24 +174,15 @@ static int is_finished_impl() {
     point_t* pc_pos;
     point_t* npc_pos;
     uint8_t  npc_is_dead;
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(characterAPI.get_pc());
-#else
     pc_pos = characterAPI.get_pc()->position;
-#endif // __cplusplus
     // only 1 character left (pc) so pc has won
     if(_characters_count == 0) {
         return 2;
     }
     // check all npcs that ARE NOT the pc for collision
     for(i = 0; i < _characters_size; i++) {
-#ifdef __cplusplus
-        npc_pos = characterAPI.get_pos(_characters[i]);
-        npc_is_dead = characterAPI.get_is_dead(_characters[i]);
-#else
         npc_pos = _characters[i]->position;
         npc_is_dead = _characters[i]->is_dead;
-#endif // __cplusplus
         if(pc_pos->distance(pc_pos, npc_pos) == 0 && !npc_is_dead) {
             return 1;
         }
@@ -245,11 +199,7 @@ static void npc_cleanup_impl() {
     for(i = 0; i < _characters_count; i++) {
         npc_is_dead = 0;
         character_t* npc = npc_for_id(_alive_characters[i]);
-#ifdef __cplusplus
-        npc_is_dead = characterAPI.get_is_dead(npc);
-#else
         npc_is_dead = npc->is_dead;
-#endif // __cplusplus
         if(npc_is_dead) {
             logger.d("npc %d is dead, shifting over", _alive_characters[i]);
             // shift over other npcs
@@ -276,21 +226,12 @@ void start_monster_list_impl() {
     if(!NCURSES_MODE) {
         return; // this can only be shown when using pc control, which requires NCURSES_MODE to be active.
     }
-    
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(characterAPI.get_pc());
-#else
     pc_pos = characterAPI.get_pc()->position;
-#endif // __cplusplus
     monster_list = (char**) calloc(_characters_count, sizeof(*monster_list));
     for(i = 0; i < _characters_count; i++) {
         character_t* npc = npc_for_id(_alive_characters[i]);
         if(npc != NULL) {
-#ifdef __cplusplus
-            npc_pos = characterAPI.get_pos(npc);
-#else
             npc_pos = npc->position;
-#endif // __cplusplus
             monster_list[i] = (char*) calloc(30, sizeof(**monster_list));
             xdiff = pc_pos->x - npc_pos->x;
             ydiff = pc_pos->y - npc_pos->y;
@@ -346,11 +287,7 @@ static character_t* npc_for_id(character_id_t id) {
     int i;
     uint8_t npc_id;
     for(i = 0; i < _characters_size; i++) {
-#ifdef __cplusplus
-        npc_id = characterAPI.get_id(_characters[i]);
-#else
         npc_id = _characters[i]->id;
-#endif // __cplusplus
         if(id == npc_id) {
             return _characters[i];
         }
@@ -359,11 +296,7 @@ static character_t* npc_for_id(character_id_t id) {
 }
 
 static void set_destination(character_t* c, point_t* dest) {
-#ifdef __cplusplus
-    characterAPI.set_dest(c, dest);
-#else
     c->set_destination(c, dest);
-#endif // __cplusplus
 }
 
 character_store_namespace const characterStoreAPI = {
@@ -377,7 +310,3 @@ character_store_namespace const characterStoreAPI = {
     start_monster_list_impl,
     move_floors_impl
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

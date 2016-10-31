@@ -43,13 +43,12 @@ CTARGET := hexterm_havoc_c
 CXXTARGET := hexterm_havoc
 
 #  Create C Source list
-CSOURCES += $(wildcard src/*.c)
-CSOURCES += $(wildcard src/*/*.c)
+CSOURCES := $(wildcard csrc/*.c)
+CSOURCES += $(wildcard csrc/*/*.c)
 
 #  Create C++ Source list
-CXXSOURCES += $(wildcard src/*.cpp)
+CXXSOURCES := $(wildcard src/*.cpp)
 CXXSOURCES += $(wildcard src/*/*.cpp)
-CXXCSOURCES := $(filter-out $(patsubst %.cpp,%.c,$(CXXSOURCES)),$(CSOURCES))
 
 #  Create list of dependencies
 CDEPENDS := $(patsubst %.c,%.d,$(CSOURCES))
@@ -58,7 +57,6 @@ CXXDEPENDS := $(patsubst %.cpp,%.d,$(CXXSOURCES))
 #  Create list of objects based on .c files
 COBJECTS := $(patsubst %.c,%.o,$(CSOURCES))
 CXXOBJECTS := $(patsubst %.cpp,%.opp,$(CXXSOURCES))
-CXXCOBJECTS := $(patsubst %.c,%.oc,$(CXXCSOURCES))
 
 #  Top Level Build Rule
 all: cxx
@@ -74,7 +72,7 @@ cxx: ${CXXTARGET}
 	@$(ECHO) Building $<...
 	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.cpp,%.opp,$<)
 
-$(CXXTARGET): $(CXXOBJECTS) $(CXXCOBJECTS)
+$(CXXTARGET): $(CXXOBJECTS)
 	@$(ECHO) Linking $@
 	@$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
@@ -89,11 +87,6 @@ c: ${CTARGET}
 	@$(ECHO) Building $<...
 	@$(CC) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.c,%.o,$<)
 
-#  Generic Rule for building C sources using CXX compiler
-%.oc: %.c
-	@$(ECHO) Building with cxx $<...
-	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c -x c++ $< -o $(patsubst %.c,%.oc,$<)
-
 #  Target build based on objects
 $(CTARGET): $(COBJECTS)
 	@$(ECHO) Linking $@...
@@ -102,7 +95,7 @@ $(CTARGET): $(COBJECTS)
 #  Clean instruction
 clean: 
 	@$(ECHO) Cleaning...
-	@$(RM) -rf $(CXXTARGET) $(CTARGET) $(COBJECTS) $(CXXOBJECTS) $(CXXCOBJECTS) $(CXXDEPENDS) $(CDEPENDS) *.swp *.tar.gz *.pgm *~ *.dSYM/ logs/
+	@$(RM) -rf $(CXXTARGET) $(CTARGET) $(COBJECTS) $(CXXOBJECTS) $(CXXDEPENDS) $(CDEPENDS) *.out *.log *.swp *.tar.gz *.pgm *~ *.dSYM/ logs/
 	@$(ECHO) Done!
 
 #  More info for debugging
@@ -112,15 +105,16 @@ help: printvars helpsummary
 .PHONY: printvars clean helpsummary help submit
 
 helpsummary:
-	@echo "TARGET      : $(CXXTARGET)"
-	@echo "VERSION     : $(VERSION)"
-	@echo "CTARGET     : $(CTARGET)"
-	@echo "CSOURCES    : $(CSOURCES)"
-	@echo "CXXSOURCES  : $(CXXSOURCES)"
-	@echo "CXXCSOURCES : $(CXXCSOURCES)"
-	@echo "COBJECTS    : $(COBJECTS)"
-	@echo "CDEPENDS    : $(CDEPENDS)"
-	@echo "CFLAGS      : $(CFLAGS)"
+	@echo "VERSION    : $(VERSION)"
+	@echo "CFLAGS     : $(CFLAGS)"
+	@echo "CTARGET    : $(CTARGET)"
+	@echo "CSOURCES   : $(CSOURCES)"
+	@echo "COBJECTS   : $(COBJECTS)"
+	@echo "CDEPENDS   : $(CDEPENDS)"
+	@echo "TARGET     : $(CXXTARGET)"
+	@echo "CXXSOURCES : $(CXXSOURCES)"
+	@echo "CXXOBJECTS : $(CXXOBJECTS)"
+	@echo "CXXDEPENDS : $(CXXDEPENDS)"
 
 printvars:
 	@$(foreach V,$(sort $(.VARIABLES)), \

@@ -18,14 +18,6 @@
 #include "../dijkstra/dijkstra.h"
 #include "../util/util.h"
 #include "character.h"
-#ifdef __cplusplus
-#else
-#include "character_t.h"
-#endif // __cplusplus
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 graph_t* _PLAYER_PATH = NULL;
 
@@ -42,15 +34,9 @@ void setup_pc_movement() {
     dungeonAPI.rand_point(dungeonAPI.get_dungeon(), &rand_dest);
     point_t* pc_pos;
     point_t* pc_dest;
-#ifdef __cplusplus
-    characterAPI.set_dest(pc, &rand_dest);
-    pc_dest = characterAPI.get_dest(pc);
-    pc_pos = characterAPI.get_pos(pc);
-#else
     pc->set_destination(pc, &rand_dest);
     pc_dest = pc->destination;
     pc_pos = pc->position;
-#endif // __cplusplus
     logger.i("Setting player path from (%2d, %2d) to (%2d, %2d)",
              pc_pos->x,
              pc_dest->y,
@@ -65,37 +51,20 @@ void handle_pc_move() {
     character_t* pc = characterAPI.get_pc();
     point_t* pc_pos;
     point_t* pc_dest;
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(pc);
-    pc_dest = characterAPI.get_dest(pc);
-#else
     pc_pos = pc->position;
     pc_dest = pc->destination;
-#endif // __cplusplus
     vertex_t* v = _PLAYER_PATH->vertices[point_to_index(pc_pos)];
     point_t next;
     index_to_point(v->prev, &next);
-#ifdef __cplusplus
-    characterAPI.set_pos(pc, &next);
-    pc_pos = characterAPI.get_pos(pc);
-#else
     pc->set_position(pc, &next);
     pc_pos = pc->position;
-#endif // __cplusplus
     int i;
     for(i = 0; i < CHARACTER_COUNT; i++) {
         point_t* npc_pos;
-#ifdef __cplusplus
-        npc_pos = characterAPI.get_pos(characters[i]);
-        if(pc_pos->distance(pc_pos, npc_pos) == 0) {
-            characterAPI.set_is_dead(characters[i], 1);
-        }
-#else
         npc_pos = characters[i]->position;
         if(pc_pos->distance(pc_pos, npc_pos) == 0) {
             characters[i]->is_dead = 1;
         }
-#endif // __cplusplus
     }
     if(pc_pos->distance(pc_pos, pc_dest) == 0) {
         setup_pc_movement();
@@ -113,22 +82,12 @@ void handle_npc_move(character_t* c) {
     
     character_t* pc = characterAPI.get_pc();
     point_t* pc_pos;
-    
-#ifdef __cplusplus
-    c_type    = characterAPI.get_type(c);
-    c_is_dead = characterAPI.get_is_dead(c);
-    c_pos     = characterAPI.get_pos(c);
-    c_attrs   = characterAPI.get_attrs(c);
-    c_dest    = characterAPI.get_dest(c);
-    pc_pos    = characterAPI.get_pos(pc);
-#else
     c_type    = c->type;
     c_is_dead = c->is_dead;
     c_pos     = c->position;
     c_attrs   = c->attrs;
     c_dest    = c->destination;
     pc_pos    = pc->position;
-#endif // __cplusplus
     if(c_type == PC) {
         return;
     }
@@ -156,11 +115,7 @@ void handle_npc_move(character_t* c) {
     }
     
     // refresh c_dest
-#ifdef __cplusplus
-    c_dest    = characterAPI.get_dest(c);
-#else
     c_dest = c->destination;
-#endif // __cplusplus
     
     dungeon_t* d = dungeonAPI.get_dungeon();
     
@@ -196,11 +151,7 @@ void handle_npc_move(character_t* c) {
                 dungeonAPI.rand_point(d, &rand_dest);
                 set_destination(c, &rand_dest);
                 // refresh c_dest
-#ifdef __cplusplus
-                c_dest    = characterAPI.get_dest(c);
-#else
                 c_dest = c->destination;
-#endif // __cplusplus
             }
             // choose correct map and use dijkstras
             graph_t* map = (c_attrs & TUNNL_VAL) ? d->tunnel_map : d->non_tunnel_map;
@@ -293,11 +244,7 @@ path_node_t* los_to_pc(point_t* p) {
     }
     character_t* pc = characterAPI.get_pc();
     point_t* pc_pos;
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(pc);
-#else
     pc_pos = pc->position;
-#endif // __cplusplus
     path_node_t* path = dijkstraAPI.bresenham(pc_pos, p);
     path_node_t* temp = path;
     dungeon_t* d = dungeonAPI.get_dungeon();
@@ -323,13 +270,8 @@ static void get_random_dir(character_t* c, point_t* new_pos) {
     tile_t* tile;
     point_t* c_pos;
     uint8_t c_attrs;
-#ifdef __cplusplus
-    c_pos = characterAPI.get_pos(c);
-    c_attrs = characterAPI.get_attrs(c);
-#else
     c_pos = c->position;
     c_attrs = c->attrs;
-#endif // __cplusplus
     int is_valid = 0;
     int new_x = c_pos->x;
     int new_y = c_pos->y;
@@ -356,22 +298,10 @@ static void get_random_dir(character_t* c, point_t* new_pos) {
 }
 
 static void set_destination(character_t* c, point_t* dest) {
-#ifdef __cplusplus
-    characterAPI.set_dest(c, dest);
-#else
     c->set_destination(c, dest);
-#endif // __cplusplus
 }
 
 static void set_position(character_t* c, point_t* pos) {
-#ifdef __cplusplus
-    characterAPI.set_pos(c, pos);
-#else
     c->set_position(c, pos);
-#endif // __cplusplus
 }
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 

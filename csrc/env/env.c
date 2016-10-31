@@ -21,10 +21,6 @@
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 int DEBUG_MODE   = 0;
 int NCURSES_MODE = 0;
 int PC_AI_MODE   = 0; // pc control enabled by default (so ncurses is enabled implicitly)
@@ -273,7 +269,3 @@ const env_namespace envAPI = {
     cleanup,
     move_floors_impl
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

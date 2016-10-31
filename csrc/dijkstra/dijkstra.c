@@ -17,10 +17,6 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 static graph_t* construct(int invert) {
     graph_t* g = (graph_t*)calloc(1, sizeof(graph_t));
     
@@ -122,7 +118,3 @@ dijkstra_namespace const dijkstraAPI = {
     dijkstra,
     bresenham
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

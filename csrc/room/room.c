@@ -17,10 +17,6 @@
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 // Public Functions
 static int is_overlap_impl(room_t* r1, room_t* r2);
 static int contains_impl(room_t* r, point_t* p);
@@ -125,7 +121,3 @@ room_namespace const roomAPI = {
     construct_impl,
     destruct_impl
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

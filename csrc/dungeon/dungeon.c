@@ -21,17 +21,9 @@
 #include "../room/room.h"
 #include "../logger/logger.h"
 #include "../env/env.h"
-#ifdef __cplusplus
-    #include "../character/character.h"
-#else
-    #include "../character/character_t.h"
-#endif // __cplusplus
+#include "../character/character.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 // Private variables
 static dungeon_t* _base_dungeon = NULL;
@@ -150,19 +142,11 @@ static dungeon_t* move_floors_impl() {
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             if(STAIR_FLAG == 1 && _base_dungeon->tiles[i][j]->content == tc_DNSTR) { // pc went upstairs, so it should be placed on the down stairs
-#ifdef __cplusplus
-                characterAPI.set_pos(pc, _base_dungeon->tiles[i][j]->location);
-#else
                 pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
-#endif // __cplusplus
                 pc_placed = 1;
                 break;
             } else if(STAIR_FLAG == 2 && _base_dungeon->tiles[i][j]->content == tc_UPSTR) { // pc went downstairs, so it should be placed on the up stairs
-#ifdef __cplusplus
-                characterAPI.set_pos(pc, _base_dungeon->tiles[i][j]->location);
-#else
                 pc->set_position(pc, _base_dungeon->tiles[i][j]->location);
-#endif // __cplusplus
                 pc_placed = 1;
                 break;
             }
@@ -185,11 +169,7 @@ static void generate_impl(dungeon_t* d) {
 
 static void update_path_maps_impl(dungeon_t* d) {
     point_t* p;
-#ifdef __cplusplus
-    p = characterAPI.get_pos(characterAPI.get_pc());
-#else
     p = characterAPI.get_pc()->position;
-#endif // __cplusplus
     if(d->tunnel_map == NULL) {
         d->tunnel_map = pathfinderAPI.construct(d, 1);
     }
@@ -796,7 +776,3 @@ dungeon_namespace const dungeonAPI = {
     generate_impl,
     rand_point_impl
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

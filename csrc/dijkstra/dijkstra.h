@@ -13,10 +13,6 @@
 #include "../env/env.h"
 #include "../graph/graph.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 typedef struct dijkstra_namespace {
     graph_t* (*const construct)(int invert);
     void     (*const destruct)(graph_t* g);
@@ -24,9 +20,5 @@ typedef struct dijkstra_namespace {
     path_node_t* (*const bresenham)(point_t* end, point_t* start);
 } dijkstra_namespace;
 extern dijkstra_namespace const dijkstraAPI;
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif /* dijkstra_h */

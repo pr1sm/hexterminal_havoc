@@ -11,15 +11,7 @@
 
 #include "../point/point.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 int  point_to_index(point_t* p);
 void index_to_point(int index, point_t* p);
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif /* util_h */

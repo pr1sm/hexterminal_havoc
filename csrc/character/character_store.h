@@ -9,16 +9,8 @@
 #ifndef character_store_h
 #define character_store_h
 
-#ifdef __cplusplus
-    #include "character.h"
-#else
-    #include "character_t.h"
-#endif // __cplusplus
+#include "character.h"
 #include "../point/point.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 extern int CHARACTER_COUNT;
 
@@ -34,9 +26,5 @@ typedef struct character_store_namespace {
     void (*const move_floors)();
 } character_store_namespace;
 extern character_store_namespace const characterStoreAPI;
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 
 #endif /* character_store_h */

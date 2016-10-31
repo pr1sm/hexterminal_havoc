@@ -13,10 +13,6 @@
 #include "../logger/logger.h"
 #include "../env/env.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 // Public Functions
 static int distance_impl(point_t* p1, point_t* p2);
 static void print_impl(point_t* p);
@@ -54,7 +50,3 @@ point_namespace const pointAPI = {
     construct_impl,
     destruct_impl
 };
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
