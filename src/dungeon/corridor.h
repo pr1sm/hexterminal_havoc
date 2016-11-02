@@ -2,7 +2,7 @@
 //  corridor.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 9/20/16.
+//  Created by Srinivas Dhanwada on 11/2/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
@@ -14,19 +14,14 @@
 #include "../graph/graph.h"
 #include "dungeon.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-typedef struct corridor_namespace {
-    graph_t* (*const construct)(dungeon_t* d, int invert);
-    void     (*const destruct)(graph_t* g);
-    void     (*const pathfind)(graph_t* g, dungeon_t* d, point_t* start, point_t* end);
-} corridor_namespace;
-extern corridor_namespace const corridorAPI;
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+class corridor {
+private:
+    static void place_path(graph* g, dungeon* d, point* b);
+    static void check_room_intercept(dungeon* d, point* p);
+public:
+    static graph* construct(dungeon* d, int invert);
+    static void   destruct(graph* g);
+    static void   pathfind(graph* g, dungeon* d, point* start, point* end);
+};
 
 #endif /* corridor_h */

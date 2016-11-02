@@ -7,6 +7,19 @@
 //
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <errno.h>
+#include <limits.h>
+#include <unistd.h>
+
+#include "env/env.h"
+#include "dungeon/dungeon.h"
+#include "logger/logger.h"
+#include "tile/tile.h"
+#include "character/character_store.h"
+#include "events/event_queue.h"
 
 int main(int argc, char * argv[]) {
  
@@ -23,52 +36,52 @@ int main(int argc, char * argv[]) {
     }
 #endif // DEBUG
     
-    envAPI.parse_args(argc, argv);
-    envAPI.setup_environment();
+    env::parse_args(argc, argv);
+    env::setup_environment();
     
-    if(DEBUG_MODE) {
-        logger.set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
+    if(env_constants::DEBUG_MODE) {
+        logger::set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
     } else {
-        logger.set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
+        logger::set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
     }
     
-    dungeon_t* d = dungeonAPI.get_dungeon();
+    dungeon* d = dungeon::get_dungeon();
     
-    if(LOAD_DUNGEON) {
-        d->load(d);
+    if(env_constants::LOAD_DUNGEON) {
+        d->load();
     } else {
-        dungeonAPI.generate(d);
+        d->generate();
     }
     
-    d->update_path_maps(d);
+    d->update_path_maps();
     
-    characterStoreAPI.setup();
+    character_store::setup();
     
-    if(DEBUG_MODE) {
-        d->print(d, PM_ROOM_PATH_MAP);
-        d->print(d, PM_TUNN_PATH_MAP);
+    if(env_constants::DEBUG_MODE) {
+        d->print(PM_ROOM_PATH_MAP);
+        d->print(PM_TUNN_PATH_MAP);
     }
     
-    d->print(d, PM_DUNGEON);
+    d->print(PM_DUNGEON);
     
     int next_turn = 1;
-    int win_status = characterStoreAPI.is_finished();
+    int win_status = character_store::is_finished();
     while(!win_status && next_turn) {
-        next_turn = eventQueueAPI.perform_event();
-        if(STAIR_FLAG == 1 || STAIR_FLAG == 2) {
-            envAPI.move_floors();
-            d = dungeonAPI.get_dungeon();
+        next_turn = event_queue::perform_event();
+        if(env_constants::STAIR_FLAG == 1 || env_constants::STAIR_FLAG == 2) {
+            env::move_floors();
+            d = dungeon::get_dungeon();
         }
-        win_status = characterStoreAPI.is_finished();
-        d->print(d, PM_DUNGEON);
+        win_status = character_store::is_finished();
+        d->print(PM_DUNGEON);
         usleep(100000);
     }
     
-    if(SAVE_DUNGEON) {
-        d->save(d);
+    if(env_constants::SAVE_DUNGEON) {
+        d->save();
     }
     
-    envAPI.cleanup();
+    env::cleanup();
     
     if(win_status == 1) {
         printf("YOU LOSE!\n");

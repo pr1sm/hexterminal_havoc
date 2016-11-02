@@ -2,11 +2,11 @@
 //  heap.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 9/3/16.
+//  Created by Srinivas Dhanwada on 11/1/16.
 //  This is an implementation of the binary heap provided
-//  to us through assignmet 1.03.  I've modified the variable
+//  to us through assignment 1.03.  I've modified the variable
 //  names so they make sense to me and adapted the functions
-//  into the struct API notation I've been using.
+//  into a class definition with templates.
 //
 
 #ifndef heap_h
@@ -14,42 +14,51 @@
 
 #include "../env/env.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+template<class T>
+class comparator {
+public:
+    virtual int compare(const T* a, const T* b);
+};
 
-typedef struct heap_node_t {
-    void* data;
-    int index;
-} heap_node_t;
-
-typedef struct heap_t {
-    heap_node_t** array;
-    int size;
-    int arr_size;
-    int (*compare)(const void* a, const void* b);
-    void (*data_delete)(void*);
-} heap_t;
-
-typedef struct heap_namespace {
-    heap_t*  (*const construct)(int (*compare)(const void* a, const void* b),
-                                void (*data_delete)(void*));
-    heap_t*  (*const construct_from_array)(void* array,
-                                           int size,
-                                           int num_members,
-                                           int (*compare)(const void* a, const void* b),
-                                           void (*data_delete)(void*));
-    void  (*const destruct)(heap_t* h);
-    heap_node_t* (*const insert)(heap_t* h, void* v);
-    void* (*const peek)(heap_t* h);
-    void* (*const remove)(heap_t* h);
-    void  (*const decrease_key)(heap_t* h, heap_node_t* n);
-    int   (*const is_empty)(heap_t*);
-} heap_namespace;
-extern heap_namespace const heapAPI;
+template<class T>
+class heap_node {
+public:
+    T*    data;
+    int   index;
+    bool  delete_data;
     
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+    heap_node(T* d, int idx);
+    ~heap_node();
+};
+
+template<class T>
+class heap {
+private:
+    heap_node<T>** _array;
+    int _size;
+    int _arr_size;
+    comparator<T>* _comparator;
+    bool _delete_data;
+    
+    void percolate_up(int index);
+    void percolate_down(int index);
+    void heapify();
+    
+public:
+    heap(::comparator<T>* c,
+         bool delete_data);
+    heap(T* array,
+         int size,
+         int num_members,
+         ::comparator<T>* c,
+         bool delete_data);
+    ~heap();
+    
+    heap_node<T>* insert(T* data);
+    T* peek();
+    T* remove();
+    void  decrease_key(heap_node<T>* node);
+    bool  is_empty();
+};
 
 #endif /* heap_h */

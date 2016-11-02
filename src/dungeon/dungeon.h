@@ -2,7 +2,7 @@
 //  dungeon.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 9/5/16.
+//  Created by Srinivas Dhanwada on 11/2/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
@@ -15,10 +15,6 @@
 #include "../room/room.h"
 #include "../graph/graph.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
 #define DUNGEON_HEIGHT 21
 #define DUNGEON_WIDTH 80
 #define ROCK_MAX 255
@@ -26,33 +22,45 @@ extern "C" {
 #define ROCK_MED  85
 #define ROCK_SOFT 1
 
-typedef struct dungeon_t dungeon_t;
-struct dungeon_t {
-    tile_t*** tiles;
-    room_t**  rooms;
-    int       room_size;
-    graph_t* tunnel_map;
-    graph_t* non_tunnel_map;
-    void (*update_path_maps)(dungeon_t* d);
-    void (*print)(dungeon_t* d, int mode);
-    void (*printn)(dungeon_t* d, int mode);
-    void (*load)(dungeon_t* d);
-    void (*save)(dungeon_t* d);
-};
-
-typedef struct dungeon_namespace {
-    dungeon_t* (*const get_dungeon)();
-    void       (*const teardown_dungeon)();
-    dungeon_t* (*const construct)();
-    dungeon_t* (*const move_floors)();
-    void (*const destruct)(dungeon_t* d);
-    void (*const generate)(dungeon_t* d);
-    void (*const rand_point)(dungeon_t* d, point_t* p);
-} dungeon_namespace;
-extern dungeon_namespace const dungeonAPI;
+class dungeon {
+private:
+    static dungeon* _base;
     
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+    static void     d_log_room(room* r);
+    
+    void accent();
+    void diffuse();
+    void smooth();
+    void add_borders();
+    bool is_open_space();
+    void add_rooms();
+    void write_pgm(const char* file_name, int zone);
+    void generate_terrain();
+    void place_rooms();
+    void place_staircases();
+    void pathfind();
+    void update_path_hardnesses();
+    
+    dungeon();
+    ~dungeon();
+public:
+    tile*** tiles;
+    room** rooms;
+    int    room_size;
+    graph* tunnel_map;
+    graph* non_tunnel_map;
+    
+    void update_path_maps();
+    void print(int mode);
+    void printn(int mode);
+    void load();
+    void save();
+    void generate();
+    
+    static dungeon* get_dungeon();
+    static void     teardown();
+    static dungeon* move_floors();
+    static void     rand_point(dungeon* d, point* p);
+};
 
 #endif /* dungeon_h */

@@ -1,5 +1,5 @@
 //
-//  env_flags.c
+//  env.c
 //  cs_327
 //
 //  Created by Srinivas Dhanwada on 9/7/16.
@@ -14,30 +14,13 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <ncurses.h>
+#include <cstddef>
 
 #include "env.h"
 #include "../logger/logger.h"
 #include "../character/character_store.h"
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-int DEBUG_MODE   = 0;
-int NCURSES_MODE = 0;
-int PC_AI_MODE   = 0; // pc control enabled by default (so ncurses is enabled implicitly)
-int LOAD_DUNGEON = 0;
-int SAVE_DUNGEON = 0;
-int NUM_MONSTERS = 10; // default is 10
-int QUIT_FLAG    = 0;
-int STAIR_FLAG   = 0;
-uint8_t X_START  = 255;
-uint8_t Y_START  = 255;
-char* HOME;
-char* LOAD_FILE;
-char* SAVE_FILE;
 
 static int is_number(char* str);
 
@@ -52,29 +35,29 @@ static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
                                "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
                                "-y<val> , --ypos <val>  | Start the player at a specified y coord\n";
 
-static void setup_environment() {
-    logger.i("%%%% SETTING ENVIRONMENT %%%%");
+void env::setup_environment() {
+    logger::i("%%%% SETTING ENVIRONMENT %%%%");
     char* env;
     if((env = getenv("ENV"))) {
         if(!strcmp(env, "DEBUG")) {
-            DEBUG_MODE = 1;
+            env_constants::DEBUG_MODE = 1;
         }
     }
     
 #ifdef DEBUG
-    DEBUG_MODE = 1;
+    env_constants::DEBUG_MODE = 1;
 #endif // DEBUG
     
-    if(!PC_AI_MODE) {
-        NCURSES_MODE = 1; // pc control means we must use NCURSES_MODE
+    if(!env_constants::PC_AI_MODE) {
+        env_constants::NCURSES_MODE = 1; // pc control means we must use NCURSES_MODE
     }
     
-    if(DEBUG_MODE) {
-        logger.i("%%%% RUNNING IN DEBUG MODE %%%%");
+    if(env_constants::DEBUG_MODE) {
+        logger::i("%%%% RUNNING IN DEBUG MODE %%%%");
     }
     
-    if(NCURSES_MODE) {
-        logger.i("%%%% SETTING UP NCURSES %%%%");
+    if(env_constants::NCURSES_MODE) {
+        logger::i("%%%% SETTING UP NCURSES %%%%");
         initscr();
         noecho();
         cbreak();
@@ -84,15 +67,15 @@ static void setup_environment() {
         refresh();
     }
     
-    logger.i("%%%% ENVIRONMENT SET %%%%");
+    logger::i("%%%% ENVIRONMENT SET %%%%");
 }
 
-static void parse_args(int argc, char** argv) {
+void env::parse_args(int argc, char** argv) {
     // get the HOME env var
     char* env;
     if((env = getenv("HOME"))) {
         if(strlen(env) > 0) {
-            HOME = env;
+            env_constants::HOME = env;
         }
     }
     
@@ -140,7 +123,7 @@ static void parse_args(int argc, char** argv) {
                 break;
                 
             case 'a':
-                PC_AI_MODE = 1;
+                env_constants::PC_AI_MODE = 1;
                 break;
             
             case 'h':
@@ -148,132 +131,120 @@ static void parse_args(int argc, char** argv) {
                 break;
                 
             case 's':
-                SAVE_DUNGEON = 1;
-                size = 1 + strlen(HOME) + strlen("/.rlg327/") + ((optarg && *optarg) ? strlen(optarg) : strlen("dungeon"));
-                SAVE_FILE = (char*)calloc(size, sizeof(char));
-                sprintf(SAVE_FILE, "%s/.rlg327/", HOME);
-                e = mkdir(SAVE_FILE, 0755);
+                env_constants::SAVE_DUNGEON = 1;
+                size = 1 + strlen(env_constants::HOME) + strlen("/.rlg327/") + ((optarg && *optarg) ? strlen(optarg) : strlen("dungeon"));
+                env_constants::SAVE_FILE = (char*)calloc(size, sizeof(char));
+                sprintf(env_constants::SAVE_FILE, "%s/.rlg327/", env_constants::HOME);
+                e = mkdir(env_constants::SAVE_FILE, 0755);
                 // clear the error if there is one.
                 if(e == -1) {
                     errno = 0;
                 } else {
-                    logger.i("Creating save directory...");
+                    logger::i("Creating save directory...");
                 }
-                strcat(SAVE_FILE, (optarg && *optarg) ? optarg : "dungeon");
-                logger.i("Save File Set: %s", SAVE_FILE);
+                strcat(env_constants::SAVE_FILE, (optarg && *optarg) ? optarg : "dungeon");
+                logger::i("Save File Set: %s", env_constants::SAVE_FILE);
                 break;
                 
             case 'm':
                 num = is_number(optarg);
                 if(num < 1 || num > 50) {
-                    logger.w("nummon is out of bounds! Must be in range [1, 50]");
+                    logger::w("nummon is out of bounds! Must be in range [1, 50]");
                     fprintf(stderr, "Error: num monsters must be in range [1, 50]\n");
-                    envAPI.exit_gracefully();
+                    env::exit_gracefully();
                 }
-                NUM_MONSTERS = num;
+                env_constants::NUM_MONSTERS = num;
                 break;
                 
             case 'n':
-                NCURSES_MODE = 1;
+                env_constants::NCURSES_MODE = 1;
                 break;
                 
             case 'l':
-                LOAD_DUNGEON = 1;
-                size = 1 + strlen(HOME) + strlen("/.rlg327/") + ((optarg && *optarg) ? strlen(optarg) : strlen("dungeon"));
-                LOAD_FILE = (char*)calloc(size, sizeof(char));
-                sprintf(LOAD_FILE, "%s/.rlg327/", HOME);
-                e = mkdir(LOAD_FILE, 0755);
+                env_constants::LOAD_DUNGEON = 1;
+                size = 1 + strlen(env_constants::HOME) + strlen("/.rlg327/") + ((optarg && *optarg) ? strlen(optarg) : strlen("dungeon"));
+                env_constants::LOAD_FILE = (char*)calloc(size, sizeof(char));
+                sprintf(env_constants::LOAD_FILE, "%s/.rlg327/", env_constants::HOME);
+                e = mkdir(env_constants::LOAD_FILE, 0755);
                 // clear the error if there is one.
                 if(e == -1) {
                     errno = 0;
                 } else {
-                    logger.i("Creating save directory...");
+                    logger::i("Creating save directory...");
                 }
-                strcat(LOAD_FILE, (optarg && *optarg) ? optarg : "dungeon");
-                logger.i("Load File Set: %s", LOAD_FILE);
+                strcat(env_constants::LOAD_FILE, (optarg && *optarg) ? optarg : "dungeon");
+                logger::i("Load File Set: %s", env_constants::LOAD_FILE);
                 break;
                 
             case 'x':
                 num = is_number(optarg);
                 if(num < 1 || num > 79) {
-                    logger.w("Input X is out of bounds! Must be in range [1, 79]");
+                    logger::w("Input X is out of bounds! Must be in range [1, 79]");
                     fprintf(stderr, "Error: starting x coordinate must be in range [1, 79]\n");
-                    envAPI.exit_gracefully();
+                    env::exit_gracefully();
                 }
-                X_START = num;
+                env_constants::X_START = num;
                 break;
                 
             case 'y':
                 num = is_number(optarg);
                 if(num < 1 || num > 20) {
-                    logger.w("Input Y is out of bounds! Must be in range [1, 20]");
+                    logger::w("Input Y is out of bounds! Must be in range [1, 20]");
                     fprintf(stderr, "Error: starting y coordinate must be in range [1, 20]\n");
-                    envAPI.exit_gracefully();
+                    env::exit_gracefully();
                 }
-                Y_START = num;
+                env_constants::Y_START = num;
                 break;
                 
             case '?':
                 break;
             
             default:
-                envAPI.exit_gracefully();
+                env::exit_gracefully();
         }
     }
     
     if(opterr) {
         fprintf(stderr, "Error: invalid flag parsed.\n");
-        envAPI.exit_gracefully();
+        env::exit_gracefully();
     }
     
     if(help_flag) {
-        envAPI.exit_gracefully();
+        env::exit_gracefully();
     }
 }
 
-static void exit_gracefully() {
-    envAPI.cleanup();
+void env::exit_gracefully() {
+    env::cleanup();
     printf("%s", help_text);
     exit(0);
 }
 
-static void cleanup() {
-    if(SAVE_FILE) {
-        free(SAVE_FILE);
+void env::cleanup() {
+    if(env_constants::SAVE_FILE) {
+        free(env_constants::SAVE_FILE);
     }
-    if(LOAD_FILE) {
-        free(LOAD_FILE);
+    if(env_constants::LOAD_FILE) {
+        free(env_constants::LOAD_FILE);
     }
     
-    characterStoreAPI.teardown();
-    eventQueueAPI.teardown();
-    dungeonAPI.teardown_dungeon();
+    character_store::teardown();
+    event_queue::teardown();
+    dungeon::teardown();
     
-    if(NCURSES_MODE) {
+    if(env_constants::NCURSES_MODE) {
         endwin();
     }
 }
 
-static void move_floors_impl() {
-    eventQueueAPI.move_floors();
-    dungeonAPI.move_floors();
-    characterStoreAPI.move_floors();
-    STAIR_FLAG = 0; // reset flag
+void env::move_floors() {
+    event_queue::move_floors();
+    dungeon::move_floors();
+    character_store::move_floors();
+    env_constants::STAIR_FLAG = 0; // reset flag
 }
 
 static int is_number(char* str) {
     int val = atoi(str);
     return (val > 0 || (val == 0 && strlen(str) == 1)) ? val : -1;
 }
-
-const env_namespace envAPI = {
-    parse_args,
-    setup_environment,
-    exit_gracefully,
-    cleanup,
-    move_floors_impl
-};
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

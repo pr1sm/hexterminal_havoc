@@ -1,8 +1,8 @@
 //
-//  pc_control.c
+//  pc_control.cpp
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/19/16.
+//  Created by Srinivas Dhanwada on 11/1/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
@@ -14,30 +14,20 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-void setup_control_movement() {
-    character_t* pc;
-    pc = characterAPI.get_pc();
-    eventQueueAPI.add_event(pc);
+void pc_control::setup_control_movement() {
+    event_queue::add_event(character::get_pc());
 }
 
-void handle_control_move() {
-    character_t** characters = characterStoreAPI.get_characters();
-    dungeon_t* d = dungeonAPI.get_dungeon();
-    character_t* pc;
-    point_t* pc_pos;
-    point_t* npc_pos;
-    pc = characterAPI.get_pc();
-#ifdef __cplusplus
-    pc_pos = characterAPI.get_pos(pc);
-#else
-    pc_pos = pc->position;
-#endif // __cplusplus
+void pc_control::handle_control_move() {
+    character** characters = character_store::get_characters();
+    dungeon* d = dungeon::get_dungeon();
+    character* pc;
+    point* pc_pos;
+    point* npc_pos;
+    pc = character::get_pc();
+    pc_pos = pc->_position;
     pc_move_t move = mv_NONE;
-    point_t* dest = pointAPI.construct(pc_pos->x, pc_pos->y);
+    point* dest = new point(pc_pos);
     int i;
     mvprintw(0, 0, "ENTER COMMAND:                                ");
     refresh();
@@ -49,7 +39,7 @@ void handle_control_move() {
         int ch = getch();
         switch (ch) {
             case PC_QUIT:
-                QUIT_FLAG = 1;
+                env_constants::QUIT_FLAG = 1;
                 is_valid = 1;
                 break;
                 
@@ -157,8 +147,8 @@ void handle_control_move() {
             }
         }
         if(move == mv_ML) {
-            characterStoreAPI.start_monster_list();
-            dungeonAPI.get_dungeon()->print(dungeonAPI.get_dungeon(), PM_DUNGEON);
+            character_store::start_monster_list();
+            dungeon::get_dungeon()->print(PM_DUNGEON);
             mvprintw(0, 0, "ENTER COMMAND:                          ");
             refresh();
             is_valid = 0;
@@ -166,50 +156,33 @@ void handle_control_move() {
     } while(!is_valid);
     
     if(move == mv_ML) {
-        logger.i("Starting monster list...");
-        characterStoreAPI.start_monster_list();
-        logger.i("Ending monster list");
+        logger::i("Starting monster list...");
+        character_store::start_monster_list();
+        logger::i("Ending monster list");
     } else if(move == mv_UPSTR) {
-        logger.i("Moving upstairs");
-        STAIR_FLAG = 1; // move upstairs
+        logger::i("Moving upstairs");
+        env_constants::STAIR_FLAG = 1; // move upstairs
     } else if(move == mv_DNSTR) {
-        logger.i("Moving downstairs");
-        STAIR_FLAG = 2; // move downstairs
+        logger::i("Moving downstairs");
+        env_constants::STAIR_FLAG = 2; // move downstairs
     } else if(move != mv_RS) {
-        logger.i("Moving to point (%2d, %2d)", dest->x, dest->y);
+        logger::i("Moving to point (%2d, %2d)", dest->x, dest->y);
         // move pc
-#ifdef __cplusplus
-        characterAPI.set_pos(pc, dest);
-        pc_pos = characterAPI.get_pos(pc);
-#else
-        pc->set_position(pc, dest);
-        pc_pos = pc->position;
-#endif // __cplusplus
+        pc->set_position(dest);
+        pc_pos = pc->_position;
         
         // check for collision
-        for(i = 0; i < CHARACTER_COUNT; i++) {
-#ifdef __cplusplus
-            npc_pos = characterAPI.get_pos(characters[i]);
-#else
-            npc_pos = characters[i]->position;
-#endif // __cplusplus
-            if(pc_pos->distance(pc_pos, npc_pos) == 0) {
-#ifdef __cplusplus
-                characterAPI.set_is_dead(characters[i], 1);
-#else
-                characters[i]->is_dead = 1;
-#endif // __cplusplus
+        for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
+            npc_pos = characters[i]->_position;
+            if(pc_pos->distance_to(npc_pos) == 0) {
+                characters[i]->_is_dead = 1;
             }
         }
     } else if(move == mv_RS) {
-        logger.i("Resting 1 turn");
+        logger::i("Resting 1 turn");
     }
     
-    pointAPI.destruct(dest);
-    eventQueueAPI.add_event(pc);
+    delete dest;
+    event_queue::add_event(pc);
 }
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
 

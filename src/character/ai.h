@@ -2,7 +2,7 @@
 //  ai.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/16/16.
+//  Created by Srinivas Dhanwada on 11/1/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
@@ -13,20 +13,17 @@
 #include "../graph/graph.h"
 #include "../point/point.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-extern graph_t* _PLAYER_PATH;
-
-void setup_pc_movement();
-void handle_pc_move();
-
-void handle_npc_move(character_t* c);
-path_node_t* los_to_pc(point_t* p);
+class ai {
+private:
+    static void get_random_dir(character* c, point* p);
+public:
+    static graph* PLAYER_PATH;
     
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+    static void setup_pc_movement();
+    static void handle_pc_move();
+    static void handle_npc_move(character* c);
+    static path_node* los_to_pc(point* p);
+    
+};
 
 #endif /* ai_h */

@@ -56,7 +56,7 @@ CXXDEPENDS := $(patsubst %.cpp,%.d,$(CXXSOURCES))
 
 #  Create list of objects based on .c files
 COBJECTS := $(patsubst %.c,%.o,$(CSOURCES))
-CXXOBJECTS := $(patsubst %.cpp,%.opp,$(CXXSOURCES))
+CXXOBJECTS := $(patsubst %.cpp,%.o,$(CXXSOURCES))
 
 #  Top Level Build Rule
 all: cxx
@@ -68,13 +68,13 @@ cxx: ${CXXTARGET}
 -include $(CXXDEPENDS)
 
 #  Generic rule for C++ dependencies
-%.opp: %.cpp
+%.o: %.cpp
 	@$(ECHO) Building $<...
-	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.cpp,%.opp,$<)
+	@$(CXX) $(CFLAGS) -MMD -MF '$*.d' -c $< -o $(patsubst %.cpp,%.o,$<)
 
 $(CXXTARGET): $(CXXOBJECTS)
 	@$(ECHO) Linking $@
-	@$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+	$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 #  C Target Build Rule
 c: ${CTARGET}

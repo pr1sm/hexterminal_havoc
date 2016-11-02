@@ -1,8 +1,8 @@
 //
-//  logger.c
+//  logger.cpp
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 9/3/16.
+//  Created by Srinivas Dhanwada on 11/2/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
@@ -14,43 +14,30 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <cstddef>
 
 #include "logger.h"
 
 #define DEFAULT_LOG_NAME "default.log";
 #define LINE_SPACING 32
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-static int initialized = 0;
-static const char* log_name = DEFAULT_LOG_NAME;
-static int modes_enabled = LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F;
-
-static char* get_date_string();
-static int   file_exists(char* file_name);
-static void  create_bak(char* prev, char* dir_path);
-static void  create_bak_r(char* prev, char* dir_path, int idx);
-static void  get_full_path(char* path);
-static void  wrap_lines(char* msg, int msg_size);
-static void  write_log(logger_mode mode, const char* str, va_list args);
-
 // Create function.  This function creates
 // a log file as well as moves an existing log
 // file to a backup state.
-static void create(const char* name) {
+void logger::create(const char* name) {
     char cwd[256];
     char log_file[256];
     FILE* log;
     
     if(initialized) {
-        logger.w("Create called after logger has already been initialized!");
+        w("Create called after logger has already been initialized!");
         return;
     }
     
-    if(name != NULL) {
+    if(name != nullptr) {
         log_name = (char*)name;
+    } else {
+        log_name = DEFAULT_LOG_NAME;
     }
     
     getcwd(cwd, sizeof(cwd));
@@ -74,49 +61,49 @@ static void create(const char* name) {
     initialized = 1;
 }
 
-static void t(const char* str, ...) {
+void logger::t(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_T, str, args);
     va_end(args);
 }
 
-static void d(const char* str, ...) {
+void logger::d(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_D, str, args);
     va_end(args);
 }
 
-static void i(const char* str, ...) {
+void logger::i(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_I, str, args);
     va_end(args);
 }
 
-static void w(const char* str, ...) {
+void logger::w(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_W, str, args);
     va_end(args);
 }
 
-static void e(const char* str, ...) {
+void logger::e(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_E, str, args);
     va_end(args);
 }
 
-static void f(const char* str, ...) {
+void logger::f(const char* str, ...) {
     va_list args;
     va_start(args, str);
     write_log(LOG_F, str, args);
     va_end(args);
 }
 
-static void set_modes_enabled(int modes) {
+void logger::set_modes_enabled(int modes) {
     modes_enabled = 0;
     modes_enabled += (modes & LOG_T) ? LOG_T : 0;
     modes_enabled += (modes & LOG_D) ? LOG_D : 0;
@@ -124,26 +111,26 @@ static void set_modes_enabled(int modes) {
     modes_enabled += (modes & LOG_W) ? LOG_W : 0;
     modes_enabled += (modes & LOG_E) ? LOG_E : 0;
     modes_enabled += (modes & LOG_F) ? LOG_F : 0;
-    logger.i("Setting modes enabled to: %x", modes_enabled);
+    i("Setting modes enabled to: %x", modes_enabled);
 }
 
 // Get the current date and
 // create a formated string from it.
-static char* get_date_string() {
-    time_t t = time(NULL);
+char* logger::get_date_string() {
+    time_t t = time(nullptr);
     char* date = (char*) malloc(100 * sizeof(char));
     strftime(date, 100 * sizeof(char), "[%F %T]", localtime(&t));
     return date;
 }
 
 // Private function to check if file exists.
-static int file_exists(char* file_name) {
+bool logger::file_exists(char* file_name) {
     struct stat buffer;
     int exist = stat(file_name, &buffer);
     if(exist == 0) {
-        return 1;
+        return true;
     }
-    return 0;
+    return false;
 }
 
 // Private function to start the process of creating a backup.
@@ -152,7 +139,7 @@ static int file_exists(char* file_name) {
 // to the rest of the backup files.  A maximum of 10 backup files will
 // be created (.bak - .bak9) and after that .bak9 will be deleted,
 // so the cascade can take effect.
-static void create_bak(char* prev, char* dir_path) {
+void logger::create_bak(char* prev, char* dir_path) {
     char log_file[256];
     sprintf(log_file, "%s%s.bak", dir_path, log_name);
     if(file_exists(log_file)) {
@@ -163,7 +150,7 @@ static void create_bak(char* prev, char* dir_path) {
 
 // The recursive call of create_bak that moves the file names properly
 // so .bak is always the most recent previous log file.
-static void create_bak_r(char* prev, char* dir_path, int idx) {
+void logger::create_bak_r(char* prev, char* dir_path, int idx) {
     char cur[256];
     sprintf(cur, "%s%s.bak%d", dir_path, log_name, idx);
     if(file_exists(cur)) {
@@ -180,7 +167,7 @@ static void create_bak_r(char* prev, char* dir_path, int idx) {
 // This adds the path of current working directory,
 // the /logs/ folder, then adds the log_name and
 // stores it in path.
-static void get_full_path(char* path) {
+void logger::get_full_path(char* path) {
     char cwd[256];
     getcwd(cwd, sizeof(cwd));
     sprintf(cwd + strlen(cwd), "/logs/");
@@ -189,7 +176,7 @@ static void get_full_path(char* path) {
 
 // Wrap lines of msg and adds spaces to align
 // text on the new line with the previous line
-static void wrap_lines(char* msg, int msg_size) {
+void logger::wrap_lines(char* msg, int msg_size) {
     // iterator
     int i;
     
@@ -244,7 +231,7 @@ static void wrap_lines(char* msg, int msg_size) {
     free(indented_line_spacing);
 }
 
-static void write_log(logger_mode mode, const char* str, va_list args) {
+void logger::write_log(logger_mode mode, const char* str, va_list args) {
     // check if mode is enabled
     if((modes_enabled & mode) == 0) {
         return;
@@ -292,7 +279,7 @@ static void write_log(logger_mode mode, const char* str, va_list args) {
     
     // If we aren't initialized, call the create function.
     if(!initialized) {
-        logger.create(NULL);
+        create(nullptr);
     }
     
     // Perform file writing
@@ -310,21 +297,6 @@ static void write_log(logger_mode mode, const char* str, va_list args) {
     // if the message was truncated, print a log message to notify the user.
     if(va_string_size > (strlen(str) + max_va_list_size)) {
         size_t truncated_size = va_string_size - (strlen(str) + max_va_list_size);
-        logger.i("Previous message truncated by %d bytes to fit into buffer", truncated_size);
+        i("Previous message truncated by %d bytes to fit into buffer", truncated_size);
     }
 }
-
-logger_namespace const logger = {
-    t,
-    d,
-    i,
-    w,
-    e,
-    f,
-    create,
-    set_modes_enabled
-};
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus

@@ -12,27 +12,29 @@
 #include "character.h"
 #include "../point/point.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-extern int CHARACTER_COUNT;
-
-typedef struct character_store_namespace {
-    void (*const setup)();
-    void (*const teardown)();
-    int  (*const contains_npc)(point_t* p);
-    char (*const get_char_for_npc_at_index)(int i);
-    character_t** (*const get_characters)();
-    int  (*const is_finished)();
-    void (*const npc_cleanup)();
-    void (*const start_monster_list)();
-    void (*const move_floors)();
-} character_store_namespace;
-extern character_store_namespace const characterStoreAPI;
+class character_store {
+private:
+    static character** _characters;
+    static character_id_t* _alive_characters;
+    static int _characters_size;
+    static int _characters_count;
+    static void print_char(character* npc);
+    static void setup_npc(character* npc);
+    static character* npc_for_id(character_id_t id);
     
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+    
+public:
+    static int CHARACTER_COUNT;
+    
+    static void setup();
+    static void teardown();
+    static int  contains_npc(point* p);
+    static char get_char_for_npc_at_index(int i);
+    static character** get_characters();
+    static int  is_finished();
+    static void npc_cleanup();
+    static void start_monster_list();
+    static void move_floors();
+};
 
 #endif /* character_store_h */
