@@ -83,7 +83,7 @@ int pathing::dijkstra(graph* g, point* a, point* b) {
         }
         v->visited = true;
         for(j = 0; j < v->edges_len; j++) {
-            edge* e = v->edges[i];
+            edge* e = v->edges[j];
             vertex* u = g->vertices[e->dest];
             if(!u->visited && ((v->dist + e->weight) < u->dist)) {
                 u->prev = v->index;
