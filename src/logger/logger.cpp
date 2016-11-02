@@ -14,7 +14,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-#include <cstddef>
+
 
 #include "logger.h"
 
@@ -34,7 +34,7 @@ void logger::create(const char* name) {
         return;
     }
     
-    if(name != nullptr) {
+    if(name != NULL) {
         log_name = (char*)name;
     } else {
         log_name = DEFAULT_LOG_NAME;
@@ -117,7 +117,7 @@ void logger::set_modes_enabled(int modes) {
 // Get the current date and
 // create a formated string from it.
 char* logger::get_date_string() {
-    time_t t = time(nullptr);
+    time_t t = time(NULL);
     char* date = (char*) malloc(100 * sizeof(char));
     strftime(date, 100 * sizeof(char), "[%F %T]", localtime(&t));
     return date;
@@ -279,7 +279,7 @@ void logger::write_log(logger_mode mode, const char* str, va_list args) {
     
     // If we aren't initialized, call the create function.
     if(!initialized) {
-        create(nullptr);
+        create(NULL);
     }
     
     // Perform file writing

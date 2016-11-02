@@ -7,7 +7,7 @@
 //
 
 #include <stdlib.h>
-#include <cstddef>
+
 
 #include "event_queue.h"
 #include "../character/character.h"
@@ -16,8 +16,8 @@
 #include "../logger/logger.h"
 
 void event_queue::add_event(character* c) {
-    if(_event_queue == nullptr) {
-        _event_queue = new heap<character>((comparator<character>*)new EventQueueComparator(), nullptr);
+    if(_event_queue == NULL) {
+        _event_queue = new heap<character>((comparator<character>*)new EventQueueComparator(), NULL);
     }
     uint8_t tc;
     tc = c->_turn_count;
@@ -43,7 +43,7 @@ int event_queue::perform_event() {
         c = _event_queue->remove();
         c->perform();
         c = _event_queue->peek();
-        if(c == nullptr) {
+        if(c == NULL) {
             break;
         }
         character_ec = c->_event_count;
@@ -56,14 +56,14 @@ int event_queue::perform_event() {
 }
 
 void event_queue::teardown() {
-    if(_event_queue != nullptr) {
+    if(_event_queue != NULL) {
         delete _event_queue;
-        _event_queue = nullptr;
+        _event_queue = NULL;
     }
 }
 
 void event_queue::move_floors() {
     delete _event_queue;
-    _event_queue = nullptr;
+    _event_queue = NULL;
     EVENT_TIME = 0;
 }

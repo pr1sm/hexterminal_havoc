@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <cstddef>
+
 
 #include "pathing.h"
 #include "../graph/graph.h"
@@ -33,7 +33,7 @@ path_node* pathing::bresenham(point* end, point* start) {
     while(1) {
         if(t_start.x < 1 || t_start.x > DUNGEON_WIDTH-2 || t_start.y < 1 || t_start.y > DUNGEON_HEIGHT-2) {
             delete head;
-            return nullptr;
+            return NULL;
         }
         if(t_start.x == t_end.x && t_start.y == t_end.y) break;
         
@@ -56,14 +56,14 @@ path_node* pathing::bresenham(point* end, point* start) {
 int pathing::dijkstra(graph* g, point* a, point* b) {
     int i, j;
     int ia = util::point_to_index(a);
-    int ib = b != nullptr ? util::point_to_index(b) : -1;
+    int ib = b != NULL ? util::point_to_index(b) : -1;
     vertex* end = g->vertices[ia];
-    if(end == nullptr) {
+    if(end == NULL) {
         logger::e("start of dijkstra's algorithm isn't in this map! returning...");
         return 1;
     }
     for(i = 0; i < g->size; i++) {
-        if(g->vertices[i] == nullptr) {
+        if(g->vertices[i] == NULL) {
             continue;
         }
         vertex* v = g->vertices[i];

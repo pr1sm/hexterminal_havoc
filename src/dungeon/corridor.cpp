@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <limits.h>
-#include <cstddef>
+
 
 #include "corridor.h"
 #include "dungeon.h"
@@ -100,6 +100,6 @@ void corridor::place_path(graph* g, dungeon* d, point* b) {
             check_room_intercept(d, &p);
         }
         v = g->vertices[v->prev];
-        if(v == nullptr) break;
+        if(v == NULL) break;
     }
 }

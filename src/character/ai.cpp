@@ -7,7 +7,7 @@
 //
 
 #include <stdlib.h>
-#include <cstddef>
+
 
 #include "ai.h"
 #include "character_store.h"
@@ -21,7 +21,7 @@
 #include "character.h"
 
 void ai::setup_pc_movement() {
-    if(PLAYER_PATH == nullptr) {
+    if(PLAYER_PATH == NULL) {
         PLAYER_PATH = pathfinder::construct(dungeon::get_dungeon(), 0);
     }
     point rand_dest(0, 0);
@@ -97,13 +97,13 @@ void ai::handle_npc_move(character* c) {
         c->set_destination(pc_pos);
     } else {
         // Check line of sight
-        if(los_path != nullptr) {
+        if(los_path != NULL) {
             // path found, update destination in all cases
             c->set_destination(pc_pos);
         } else if(!(c_attrs & INTEL_VAL)) {
-            // npc is not intelligent -- destruct destination and set it to nullptr
-            if(c_dest != nullptr && (c_dest->distance_to(pc_pos) == 0)) {
-                c->set_destination(nullptr);
+            // npc is not intelligent -- destruct destination and set it to NULL
+            if(c_dest != NULL && (c_dest->distance_to(pc_pos) == 0)) {
+                c->set_destination(NULL);
             }
         }
     }
@@ -116,7 +116,7 @@ void ai::handle_npc_move(character* c) {
     // Turn Logic
     if((c_attrs & ERATC_VAL) && behave_erratically) {
         // Do random move
-        tile* tile = nullptr;
+        tile* tile = NULL;
         point random_dir(0, 0);
         get_random_dir(c, &random_dir);
         tile = d->tiles[random_dir.y][random_dir.x];
@@ -139,7 +139,7 @@ void ai::handle_npc_move(character* c) {
         // Do normal move
         if(c_attrs & INTEL_VAL) {
             // use path maps
-            if(c_dest == nullptr || c_dest->distance_to(c_pos) == 0) {
+            if(c_dest == NULL || c_dest->distance_to(c_pos) == 0) {
                 // pick new point to go to
                 point rand_dest(0, 0);
                 dungeon::rand_point(d, &rand_dest);
@@ -152,7 +152,7 @@ void ai::handle_npc_move(character* c) {
             pathing::dijkstra(map, c_dest, c_pos);
             vertex* v = map->vertices[util::point_to_index(c_pos)];
             // pathing failed, do nothing!
-            if(v != nullptr) {
+            if(v != NULL) {
                 point next(0, 0);
                 util::index_to_point(v->prev, &next);
                 tile* tile = d->tiles[next.y][next.x];
@@ -172,7 +172,7 @@ void ai::handle_npc_move(character* c) {
             }
         } else {
             // use LOS path
-            if(los_path != nullptr && los_path->next != nullptr) {
+            if(los_path != NULL && los_path->next != NULL) {
                 // use next path in los_path;
                 point* next_pos = los_path->next->curr;
                 tile* next_tile = d->tiles[next_pos->y][next_pos->x];
@@ -195,7 +195,7 @@ void ai::handle_npc_move(character* c) {
                 point p(0, 0);
                 dungeon::rand_point(d, &p);
                 path_node* new_path = pathing::bresenham(&p, c_pos);
-                if(new_path != nullptr && new_path->next != nullptr) {
+                if(new_path != NULL && new_path->next != NULL) {
                     point* next_pos = new_path->next->curr;
                     tile* next_tile = d->tiles[next_pos->y][next_pos->x];
                     if(next_tile->content != tc_ROCK) {
@@ -213,7 +213,7 @@ void ai::handle_npc_move(character* c) {
                     }
                     // next tile is rock and npc is non-tunneler, nothing can be done
                 }
-                if(new_path != nullptr) {
+                if(new_path != NULL) {
                     // Maybe?
                     delete new_path;
                 }
@@ -221,7 +221,7 @@ void ai::handle_npc_move(character* c) {
             }
         }
     }
-    if(los_path != nullptr) {
+    if(los_path != NULL) {
 //        graphAPI.destruct_path(los_path);
         delete los_path;
     }
@@ -234,9 +234,9 @@ void ai::handle_npc_move(character* c) {
 }
 
 path_node* ai::los_to_pc(point* p) {
-    if(p == nullptr) {
-        logger::w("los_to_pc called with nullptr p, returning nullptr!");
-        return nullptr;
+    if(p == NULL) {
+        logger::w("los_to_pc called with NULL p, returning NULL!");
+        return NULL;
     }
     character* pc = character::get_pc();
     point* pc_pos = pc->_position;
@@ -244,7 +244,7 @@ path_node* ai::los_to_pc(point* p) {
     path_node* temp = path;
     dungeon* d = dungeon::get_dungeon();
     int has_los = 1;
-    while(temp != nullptr) {
+    while(temp != NULL) {
         if(d->tiles[temp->curr->y][temp->curr->x]->content == tc_ROCK) {
             // found a rock, no line of sight
             has_los = 0;
@@ -256,7 +256,7 @@ path_node* ai::los_to_pc(point* p) {
         return path;
     } else {
         delete path;
-        return nullptr;
+        return NULL;
     }
 }
 

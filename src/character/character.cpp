@@ -7,7 +7,7 @@
 //
 
 #include <stdlib.h>
-#include <cstddef>
+
 
 #include "character.h"
 #include "ai.h"
@@ -16,7 +16,7 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 
-static character* gPLAYER_CHARACTER = nullptr;
+static character* gPLAYER_CHARACTER = NULL;
 
 character::character(character_type type, point* spawn) {
     _type = type;
@@ -36,34 +36,34 @@ character::character(character_type type, point* spawn) {
     _event_count = 0;
     _id = -1;
     
-    if(spawn == nullptr) {
-        logger::w("nullptr point passed into character constructor!");
+    if(spawn == NULL) {
+        logger::w("NULL point passed into character constructor!");
         _position = new point(0, 0);
     } else {
         _position = new point(spawn);
     }
-    _destination = nullptr;
+    _destination = NULL;
 }
 
 character::~character() {
     static int char_count = 0;
     logger::i("character destructor called - %d", ++char_count);
-    if(_position != nullptr) {
+    if(_position != NULL) {
         logger::i("destructing position");
         delete _position;
     }
-    if(_destination != nullptr) {
+    if(_destination != NULL) {
         logger::i("destructing destination");
         delete _destination;
     }
 }
 
 void character::set_position(point* p) {
-    if(p == nullptr) {
-        logger::w("nullptr point passed into set_position! position will remain unchanged");
+    if(p == NULL) {
+        logger::w("NULL point passed into set_position! position will remain unchanged");
         return;
     }
-    if(_position == nullptr) {
+    if(_position == NULL) {
         _position = new point(p);
     } else {
         _position->x = p->x;
@@ -72,13 +72,13 @@ void character::set_position(point* p) {
 }
 
 void character::set_destination(point* p) {
-    if(p == nullptr) {
-        logger::w("nullptr point passed into set_point! destructing point!");
+    if(p == NULL) {
+        logger::w("NULL point passed into set_point! destructing point!");
         delete _destination;
-        _destination = nullptr;
+        _destination = NULL;
         return;
     }
-    if(_destination == nullptr) {
+    if(_destination == NULL) {
         _destination = new point(p);
     } else {
         _destination->x = p->x;
@@ -101,7 +101,7 @@ void character::perform() {
 }
 
 character* character::get_pc() {
-    if(gPLAYER_CHARACTER == nullptr) {
+    if(gPLAYER_CHARACTER == NULL) {
         point spawn(0, 0);
         if(env_constants::X_START < 80 && env_constants::Y_START < 21) {
             spawn.x = env_constants::X_START;
@@ -123,9 +123,9 @@ character* character::get_pc() {
 }
 
 void character::teardown_pc() {
-    if(gPLAYER_CHARACTER != nullptr) {
+    if(gPLAYER_CHARACTER != NULL) {
         delete gPLAYER_CHARACTER;
-        gPLAYER_CHARACTER = nullptr;
+        gPLAYER_CHARACTER = NULL;
     }
 }
 

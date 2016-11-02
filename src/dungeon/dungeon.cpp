@@ -11,7 +11,7 @@
 #include <string.h>
 #include <time.h>
 #include <ncurses.h>
-#include <cstddef>
+
 
 #include "dungeon.h"
 #include "corridor.h"
@@ -34,23 +34,23 @@ void dungeon::d_log_room(room* r) {
 }
 
 dungeon* dungeon::get_dungeon() {
-    if(_base == nullptr) {
+    if(_base == NULL) {
         _base = new dungeon();
     }
     return _base;
 }
 
 void dungeon::teardown() {
-    if(_base != nullptr) {
+    if(_base != NULL) {
         delete _base;
-        _base = nullptr;
+        _base = NULL;
     }
 }
 
 dungeon::dungeon() {
     logger::i("Constructing Dungeon...");
     int i, j;
-    srand((unsigned)time(nullptr));
+    srand((unsigned)time(NULL));
     tiles = (tile***)calloc(DUNGEON_HEIGHT, sizeof(*tiles));
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -60,10 +60,10 @@ dungeon::dungeon() {
         }
     }
     
-    rooms = nullptr;
+    rooms = NULL;
     room_size = 0;
-    tunnel_map = nullptr;
-    non_tunnel_map = nullptr;
+    tunnel_map = NULL;
+    non_tunnel_map = NULL;
     logger::i("Dungeon Constructed");
 }
 
@@ -75,13 +75,13 @@ dungeon::~dungeon() {
     }
     free(rooms);
     
-    if(non_tunnel_map != nullptr) {
+    if(non_tunnel_map != NULL) {
         pathfinder::destruct(non_tunnel_map);
-        non_tunnel_map = nullptr;
+        non_tunnel_map = NULL;
     }
-    if(tunnel_map != nullptr) {
+    if(tunnel_map != NULL) {
         pathfinder::destruct(tunnel_map);
-        tunnel_map = nullptr;
+        tunnel_map = NULL;
     }
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -92,7 +92,7 @@ dungeon::~dungeon() {
     }
     free(tiles);
     if(this == _base) {
-        _base = nullptr;
+        _base = NULL;
     }
     logger::i("Dungeon Destructed");
 }
@@ -134,10 +134,10 @@ void dungeon::generate() {
 
 void dungeon::update_path_maps() {
     point* p = character::get_pc()->_position;
-    if(tunnel_map == nullptr) {
+    if(tunnel_map == NULL) {
         tunnel_map = pathfinder::construct(this, 1);
     }
-    if(non_tunnel_map == nullptr) {
+    if(non_tunnel_map == NULL) {
         non_tunnel_map = pathfinder::construct(this, 0);
     }
     
@@ -205,7 +205,7 @@ void dungeon::load() {
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(env_constants::LOAD_FILE, "rb");
-    if(f == nullptr) {
+    if(f == NULL) {
         logger::f("Dungeon save file could not be loaded: %s.  Exiting with error!", env_constants::LOAD_FILE);
         free(semantic);
         free(hardness_map);
@@ -276,7 +276,7 @@ void dungeon::save() {
     uint8_t* hardness_map = (uint8_t*)malloc(DUNGEON_WIDTH*DUNGEON_HEIGHT*sizeof(uint8_t));
     
     f = fopen(env_constants::SAVE_FILE, "wb");
-    if(f == nullptr) {
+    if(f == NULL) {
         logger::f("Dungeon save file could not be opened: %s.  Aborting now", env_constants::SAVE_FILE);
         free(hardness_map);
         fclose(f);
@@ -429,7 +429,7 @@ void dungeon::place_rooms() {
         } else {
             logger::t("Room is valid, reallocating room array and adding room...");
             room** new_room_array = (room**) realloc(rooms, (room_size + 1) * sizeof(*rooms));
-            if(new_room_array == nullptr) {
+            if(new_room_array == NULL) {
                 logger::e("Room Array Reallocation failed!");
                 break;
             }

@@ -7,7 +7,7 @@
 //
 
 #include <stdlib.h>
-#include <cstddef>
+
 
 #include "graph.h"
 #include "../point/point.h"
@@ -20,7 +20,7 @@ edge::edge(int dest, int weight) {
 }
 
 vertex::vertex(int index) {
-    edges = nullptr;
+    edges = NULL;
     edges_len = 0;
     edges_size = 0;
     dist = 0;
@@ -40,7 +40,7 @@ vertex::~vertex() {
 graph::~graph() {
     int i;
     for(i = 0; i < size; i++) {
-        if(vertices[i] != nullptr) {
+        if(vertices[i] != NULL) {
             delete vertices[i];
         }
     }
@@ -48,8 +48,8 @@ graph::~graph() {
 }
 
 void graph::add_vertex(point* p) {
-    if(p == nullptr) {
-        logger::w("point was nullptr! not adding vertex");
+    if(p == NULL) {
+        logger::w("point was NULL! not adding vertex");
     }
     
     int i = util::point_to_index(p);
@@ -58,10 +58,10 @@ void graph::add_vertex(point* p) {
         int new_size = size * 2 > i ? size * 2 : i + 4;
         vertices = (vertex**)realloc(vertices, new_size * sizeof (*vertices));
         for (j = size; j < new_size; j++)
-            vertices[j] = nullptr;
+            vertices[j] = NULL;
         size = new_size;
     }
-    if (vertices[i] == nullptr) {
+    if (vertices[i] == NULL) {
         vertices[i] = new vertex(i);
         len++;
         logger::t("Added vertex at index: %d", i);
@@ -69,8 +69,8 @@ void graph::add_vertex(point* p) {
 }
 
 void graph::add_edge(point* src, point* dest, int weight) {
-    if(src == nullptr || dest == nullptr) {
-        logger::w("src or dest point was nullptr! could not add edge");
+    if(src == NULL || dest == NULL) {
+        logger::w("src or dest point was NULL! could not add edge");
         return;
     }
     
@@ -92,19 +92,19 @@ int graph::point_to_index(point* p) {
 }
 
 path_node::path_node(point* p) {
-    if(p == nullptr) {
-        logger::w("Tried to create path node with nullptr point!");
+    if(p == NULL) {
+        logger::w("Tried to create path node with NULL point!");
         return;
     }
     curr = new point(p->x, p->y);
-    next = nullptr;
+    next = NULL;
 }
 
 path_node::~path_node() {
-    if(curr != nullptr) {
+    if(curr != NULL) {
         free(curr);
     }
-    if(next != nullptr) {
+    if(next != NULL) {
         delete next;
     }
 }

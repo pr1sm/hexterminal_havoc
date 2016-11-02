@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <cstddef>
+
 
 #include "heap.h"
 
@@ -139,14 +139,14 @@ heap_node<T>* heap<T>::insert(T* data) {
 
 template<class T>
 T* heap<T>::peek() {
-    return _size ? _array[0]->data : nullptr;
+    return _size ? _array[0]->data : NULL;
 }
 
 template<class T>
 T* heap<T>::remove() {
     T* tmp;
     if(!_size) {
-        return nullptr;
+        return NULL;
     }
     
     tmp = _array[0]->data;

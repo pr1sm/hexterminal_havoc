@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 #include <ncurses.h>
-#include <cstddef>
+
 
 #include "env.h"
 #include "../logger/logger.h"

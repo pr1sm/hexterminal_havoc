@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <ncurses.h>
-#include <cstddef>
+
 
 #include "character_store.h"
 #include "character.h"
@@ -34,7 +34,7 @@ void character_store::print_char(character* npc) {
         printf("NPC: spawn: (%2d, %2d) ",
                npc_pos->x,
                npc_pos->y);
-        if(npc_dest != nullptr) {
+        if(npc_dest != NULL) {
             printf("dest: (%2d, %2d) ",
                    npc_dest->x,
                    npc_dest->y);
@@ -46,7 +46,7 @@ void character_store::print_char(character* npc) {
     logger::d("NPC: spawn: (%2d, %2d) ",
            npc_pos->x,
            npc_pos->y);
-    if(npc_dest != nullptr) {
+    if(npc_dest != NULL) {
         logger::d("dest: (%2d, %2d) ",
                npc_dest->x,
                npc_dest->y);
@@ -95,14 +95,14 @@ void character_store::setup() {
 void character_store::teardown() {
     int i;
     for(i = 0; i < _characters_size; i++) {
-        if(_characters[i] != nullptr) {
+        if(_characters[i] != NULL) {
             delete _characters[i];
         }
     }
     character::teardown_pc();
     free(_characters);
     free(_alive_characters);
-    if(ai::PLAYER_PATH != nullptr) {
+    if(ai::PLAYER_PATH != NULL) {
         pathfinder::destruct(ai::PLAYER_PATH);
     }
 }
@@ -151,7 +151,7 @@ void character_store::setup_npc(character* npc) {
     } else {
         // check los on other npcs
         path_node* los_path = ai::los_to_pc(npc_pos);
-        if(los_path != nullptr) {
+        if(los_path != NULL) {
             npc->set_destination(pc_pos);
             delete los_path;
         }
@@ -220,7 +220,7 @@ void character_store::start_monster_list() {
     monster_list = (char**) calloc(_characters_count, sizeof(*monster_list));
     for(i = 0; i < _characters_count; i++) {
         character* npc = npc_for_id(_alive_characters[i]);
-        if(npc != nullptr) {
+        if(npc != NULL) {
             npc_pos = npc->_position;
             monster_list[i] = (char*) calloc(30, sizeof(**monster_list));
             xdiff = pc_pos->x - npc_pos->x;
@@ -260,15 +260,15 @@ void character_store::start_monster_list() {
 void character_store::move_floors() {
     int i;
     for(i = 0; i < _characters_size; i++) {
-        if(_characters[i] != nullptr) {
+        if(_characters[i] != NULL) {
             delete _characters[i];
         }
     }
     free(_characters);
     free(_alive_characters);
-    if(ai::PLAYER_PATH != nullptr) {
+    if(ai::PLAYER_PATH != NULL) {
         pathfinder::destruct(ai::PLAYER_PATH);
-        ai::PLAYER_PATH = nullptr;
+        ai::PLAYER_PATH = NULL;
     }
     
     character_store::setup();
@@ -283,5 +283,5 @@ character* character_store::npc_for_id(character_id_t id) {
             return _characters[i];
         }
     }
-    return nullptr;
+    return NULL;
 }

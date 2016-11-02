@@ -8,7 +8,7 @@
 
 #include <stdlib.h>
 #include <limits.h>
-#include <cstddef>
+
 
 #include "pathfinder.h"
 #include "dungeon.h"
@@ -77,7 +77,7 @@ void pathfinder::destruct(graph* g) {
 
 int pathfinder::generate_pathmap(graph* g, dungeon* d, point* start, int tunnel) {
     logger::i("Generating path map%s...", tunnel ? " with tunnelling" : "");
-    int error = pathing::dijkstra(g, start, nullptr);
+    int error = pathing::dijkstra(g, start, NULL);
     update_tiles(g, d, tunnel);
     logger::i("Path map Generated");
     return error;
@@ -87,7 +87,7 @@ void pathfinder::update_tiles(graph* g, dungeon* d, int tunnel) {
     int i;
     for(i = 0; i < g->size; i++) {
         vertex* v = g->vertices[i];
-        if(v == nullptr) {
+        if(v == NULL) {
             continue;
         }
         point p(0, 0);
