@@ -15,12 +15,25 @@
 #include <sys/stat.h>
 #include <ncurses.h>
 
-
 #include "env.h"
 #include "../logger/logger.h"
 #include "../character/character_store.h"
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
+
+int env_constants::DEBUG_MODE = 0;
+int env_constants::NCURSES_MODE = 0; // pc control enabled by default (so ncurses is enabled implicitly)
+int env_constants::PC_AI_MODE = 0;
+int env_constants::LOAD_DUNGEON = 0;
+int env_constants::SAVE_DUNGEON = 0;
+int env_constants::NUM_MONSTERS = 10;
+int env_constants::QUIT_FLAG = 0;
+int env_constants::STAIR_FLAG = 0;
+char* env_constants::HOME = NULL;
+char* env_constants::LOAD_FILE = NULL;
+char* env_constants::SAVE_FILE = NULL;
+uint8_t env_constants::X_START = 255;
+uint8_t env_constants::Y_START = 255;
 
 static int is_number(char* str);
 

@@ -72,7 +72,8 @@ int pathing::dijkstra(graph* g, point* a, point* b) {
         v->visited = false;
     }
     end->dist = 0;
-    heap<vertex>* h = new heap<vertex>((comparator<vertex>*)(new VertexComparator()), false);
+    VertexComparator* vc = new VertexComparator();
+    heap<vertex>* h = new heap<vertex>(vc, false);
     h->insert(end);
     while(!h->is_empty()) {
         vertex* v = h->remove();

@@ -14,21 +14,22 @@
 typedef unsigned char uint8_t;
 #endif // _UINT8_T
 
-namespace env_constants {
-    int DEBUG_MODE = 0;
-    int NCURSES_MODE = 0; // pc control enabled by default (so ncurses is enabled implicitly)
-    int PC_AI_MODE = 0;
-    int LOAD_DUNGEON = 0;
-    int SAVE_DUNGEON = 0;
-    int NUM_MONSTERS = 10;
-    int QUIT_FLAG = 0;
-    int STAIR_FLAG = 0;
-    char* HOME;
-    char* LOAD_FILE;
-    char* SAVE_FILE;
-    uint8_t X_START = 255;
-    uint8_t Y_START = 255;
-}
+class env_constants {
+public:
+    static int DEBUG_MODE;
+    static int NCURSES_MODE; // pc control enabled by default (so ncurses is enabled implicitly)
+    static int PC_AI_MODE;
+    static int LOAD_DUNGEON;
+    static int SAVE_DUNGEON;
+    static int NUM_MONSTERS;
+    static int QUIT_FLAG;
+    static int STAIR_FLAG;
+    static char* HOME;
+    static char* LOAD_FILE;
+    static char* SAVE_FILE;
+    static uint8_t X_START;
+    static uint8_t Y_START;
+};
 
 class env {
 public:

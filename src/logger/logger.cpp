@@ -15,11 +15,14 @@
 #include <time.h>
 #include <unistd.h>
 
-
 #include "logger.h"
 
 #define DEFAULT_LOG_NAME "default.log";
 #define LINE_SPACING 32
+
+bool logger::initialized = false;
+const char* logger::log_name = "";
+int logger::modes_enabled = LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F;
 
 // Create function.  This function creates
 // a log file as well as moves an existing log

@@ -23,6 +23,12 @@
 #include "../env/env.h"
 #include "../dungeon/pathfinder.h"
 
+int character_store::CHARACTER_COUNT = 0;
+int character_store::_characters_size = 0;
+int character_store::_characters_count = 0;
+character_id_t* character_store::_alive_characters = NULL;
+character** character_store::_characters = NULL;
+
 void character_store::print_char(character* npc) {
     point* npc_pos;
     point* npc_dest;

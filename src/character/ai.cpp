@@ -1,13 +1,12 @@
 //
-//  ai.c
+//  ai.cpp
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/16/16.
+//  Created by Srinivas Dhanwada on 11/2/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
 #include <stdlib.h>
-
 
 #include "ai.h"
 #include "character_store.h"
@@ -19,6 +18,8 @@
 #include "../pathing/pathing.h"
 #include "../util/util.h"
 #include "character.h"
+
+graph* ai::PLAYER_PATH = NULL;
 
 void ai::setup_pc_movement() {
     if(PLAYER_PATH == NULL) {

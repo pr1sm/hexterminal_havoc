@@ -12,7 +12,6 @@
 #include <time.h>
 #include <ncurses.h>
 
-
 #include "dungeon.h"
 #include "corridor.h"
 #include "pathfinder.h"
@@ -25,6 +24,8 @@
 #include "../character/character.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
+
+dungeon* dungeon::_base = NULL;
 
 void dungeon::d_log_room(room* r) {
     if(env_constants::DEBUG_MODE && !env_constants::NCURSES_MODE) {

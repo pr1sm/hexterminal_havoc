@@ -60,10 +60,11 @@ public:
     ~path_node();
 };
 
-class VertexComparator : comparator<vertex> {
+class VertexComparator : public comparator<vertex> {
     virtual int compare(const vertex* v1, const vertex* v2) {
         return v1->dist - v2->dist;
     }
+    virtual ~VertexComparator() {}
 };
 
 #endif /* graph_h */

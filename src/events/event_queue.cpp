@@ -15,6 +15,9 @@
 #include "../heap/heap.h"
 #include "../logger/logger.h"
 
+event_counter_t event_queue::EVENT_TIME = 0;
+heap<character>* event_queue::_event_queue = NULL;
+
 void event_queue::add_event(character* c) {
     if(_event_queue == NULL) {
         _event_queue = new heap<character>((comparator<character>*)new EventQueueComparator(), NULL);
