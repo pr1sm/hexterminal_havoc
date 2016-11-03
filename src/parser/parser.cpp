@@ -38,7 +38,7 @@ int parser::parse_monsters() {
     std::string file_name(env_constants::HOME);
     file_name.append("/.rlg327/");
     file_name.append(default_monster_file);
-    fin.open(file_name);
+    fin.open(file_name, std::fstream::in);
     if(!fin.good()) {
         logger::e("Monster Description file could not be found!");
         return 1;
