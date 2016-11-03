@@ -62,12 +62,10 @@ public:
     parser();
     ~parser();
     
-    void parse_items();
-    int parse_monsters();
-    
-    // 0 - sucess
+    // 0 - success
     // 1 - description file not found
     // 2 - file is not correct type
+    int parse_monsters();
 };
 
 #endif /* parser_h */

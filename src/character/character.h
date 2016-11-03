@@ -15,6 +15,7 @@
 #define TELEP_BIT 1
 #define TUNNL_BIT 2
 #define ERATC_BIT 3
+#define PASS_BIT  4
 #define INTEL_VAL (1 << INTEL_BIT)
 #define TELEP_VAL (1 << TELEP_BIT)
 #define TUNNL_VAL (1 << TUNNL_BIT)

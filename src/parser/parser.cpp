@@ -82,9 +82,10 @@ int parser::parse_monsters() {
                 // description has started, check for unknown or end
                 if(type == pt_DESC_END) {
                     mon->check |= PDESCE_CHECK;
+                    mon->parse_desc(mon->raw_desc);
                 } else if(type == pt_UNKNOWN) {
-                    mon->desc.append("\n");
-                    mon->desc.append(line);
+                    mon->raw_desc.append("\n");
+                    mon->raw_desc.append(line);
                 } else {
                     // error another type was found during description parsing
                     std::cout << "parsing error, starting over" << std::endl;
@@ -93,30 +94,30 @@ int parser::parse_monsters() {
                     state = ps_LOOKING;
                 }
             } else if(type == pt_NAME) {
-                mon->name = line;
+                mon->parse_name(line);
                 mon->check |= PNAME_CHECK;
             } else if(type == pt_SYMB) {
-                mon->symb = line;
+                mon->parse_symb(line);
                 mon->check |= PSYMB_CHECK;
             } else if(type == pt_DESC) {
-                mon->desc = line;
+                mon->raw_desc = line;
                 mon->check |= PDESCS_CHECK;
             } else if(type == pt_DESC_END) {
                 mon->check |= PDESCE_CHECK;
             } else if(type == pt_COLOR) {
-                mon->color = line;
+                mon->parse_color(line);
                 mon->check |= PCOLOR_CHECK;
             } else if(type == pt_SPEED) {
-                mon->speed = line;
+                mon->parse_speed(line);
                 mon->check |= PSPEED_CHECK;
             } else if(type == pt_ABIL) {
-                mon->abilities = line;
+                mon->parse_attrs(line);
                 mon->check |= PABIL_CHECK;
             } else if(type == pt_HP) {
-                mon->hitpoints = line;
+                mon->parse_hp(line);
                 mon->check |= PHP_CHECK;
             } else if(type == pt_DAM) {
-                mon->damage = line;
+                mon->parse_damage(line);
                 mon->check |= PDAM_CHECK;
             } else if(type == pt_END) {
                 if(mon->check != PCOMPLETE) {

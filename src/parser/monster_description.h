@@ -10,24 +10,38 @@
 #define monster_description_h
 
 #include <string>
+#include "dice.h"
 
 class monster_description {
+private:
+    dice* speed;
+    dice* hitpoints;
+    dice* damage;
+    char symb;
+    std::string desc;
+    std::string name;
+    std::string color;
+    int attributes;
+    
+    std::string print_attributes();
 public:
     
     monster_description();
     ~monster_description();
     
-    std::string name;
-    std::string symb;
-    std::string desc;
-    std::string color;
-    std::string speed;
-    std::string abilities;
-    std::string hitpoints;
-    std::string damage;
+    std::string raw_desc;
     int check;
     
     void print();
+    
+    void parse_speed(std::string str);
+    void parse_hp(std::string str);
+    void parse_damage(std::string str);
+    void parse_attrs(std::string str);
+    void parse_name(std::string str);
+    void parse_symb(std::string str);
+    void parse_desc(std::string str);
+    void parse_color(std::string str);
 };
 
 
