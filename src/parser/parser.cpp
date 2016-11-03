@@ -9,6 +9,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <stdlib.h>
 
 #include "parser.h"
 #include "monster_description.h"
