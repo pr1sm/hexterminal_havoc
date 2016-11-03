@@ -21,6 +21,7 @@
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
 
+int env_constants::PARSE_MODE = 0;
 int env_constants::DEBUG_MODE = 0;
 int env_constants::NCURSES_MODE = 0; // pc control enabled by default (so ncurses is enabled implicitly)
 int env_constants::PC_AI_MODE = 0;
@@ -63,6 +64,10 @@ void env::setup_environment() {
     
     if(!env_constants::PC_AI_MODE) {
         env_constants::NCURSES_MODE = 1; // pc control means we must use NCURSES_MODE
+    }
+    
+    if(env_constants::PARSE_MODE) {
+        env_constants::NCURSES_MODE = 0;
     }
     
     if(env_constants::DEBUG_MODE) {

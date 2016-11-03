@@ -20,6 +20,7 @@
 #include "tile/tile.h"
 #include "character/character_store.h"
 #include "events/event_queue.h"
+#include "parser/parser.h"
 
 int main(int argc, char * argv[]) {
  
@@ -36,6 +37,8 @@ int main(int argc, char * argv[]) {
     }
 #endif // DEBUG
     
+    env_constants::PARSE_MODE = 1; // parse only
+    
     env::parse_args(argc, argv);
     env::setup_environment();
     
@@ -43,6 +46,13 @@ int main(int argc, char * argv[]) {
         logger::set_modes_enabled(LOG_T | LOG_D | LOG_I | LOG_W | LOG_E | LOG_F);
     } else {
         logger::set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
+    }
+    
+    parser p;
+    p.parse_monsters();
+    
+    if(env_constants::PARSE_MODE) {
+        return 0;
     }
     
     dungeon* d = dungeon::get_dungeon();
