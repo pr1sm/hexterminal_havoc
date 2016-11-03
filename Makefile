@@ -74,7 +74,7 @@ cxx: ${CXXTARGET}
 
 $(CXXTARGET): $(CXXOBJECTS)
 	@$(ECHO) Linking $@
-	$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS) -v
+	@$(CXX) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 #  C Target Build Rule
 c: ${CTARGET}

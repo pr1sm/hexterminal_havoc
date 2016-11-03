@@ -127,7 +127,6 @@ int parser::parse_monsters() {
                     mon = NULL;
                     state = ps_LOOKING;
                 } else {
-                    std::cout << "Monster found and sucessfully parsed!" << std::endl;
                     add_monster(mon);
                     mon = NULL;
                     state = ps_LOOKING;
@@ -143,7 +142,7 @@ int parser::parse_monsters() {
     fin.close();
     
     int i;
-    std::cout << "Found " << monster_len << " monsters" << std::endl;
+    std::cout << "Found " << monster_len << " monsters" << std::endl << std::endl;
     for(i = 0; i < monster_len; i++) {
         monster_list[i]->print();
     }
