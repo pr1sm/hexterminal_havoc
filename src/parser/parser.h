@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include <string>
 
+#include "monster_description.h"
+
 #define default_monster_file "monster_desc.txt"
 
 #define PNAME_CHECK  0x1
@@ -50,7 +52,13 @@ public:
     
 private:
     parsed_type parse_for_type(std::string line);
+    void add_monster(monster_description* monster);
 public:
+    
+    monster_description** monster_list;
+    int monster_size;
+    int monster_len;
+    
     parser();
     ~parser();
     

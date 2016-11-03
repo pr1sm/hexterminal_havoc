@@ -15,11 +15,21 @@
 #include "../logger/logger.h"
 
 parser::parser() {
-    
+    monster_len = 0;
+    monster_size = 0;
+    monster_list = NULL;
 }
 
 parser::~parser() {
-    
+    int i;
+    if(monster_list != NULL) {
+        for(i = 0; i < monster_size; i++) {
+            if(monster_list[i] != NULL) {
+                delete monster_list[i];
+            }
+        }
+        free(monster_list);
+    }
 }
 
 int parser::parse_monsters() {
@@ -117,20 +127,26 @@ int parser::parse_monsters() {
                     state = ps_LOOKING;
                 } else {
                     std::cout << "Monster found and sucessfully parsed!" << std::endl;
-                    mon->print();
-                    delete mon;
+                    add_monster(mon);
                     mon = NULL;
                     state = ps_LOOKING;
                 }
             } else {
                 // possible error
-                std::cout << "error?" << std::endl;
+                logger::w("Possible error with parsing?");
             }
         }
         
     }
     
     fin.close();
+    
+    int i;
+    std::cout << "Found " << monster_len << " monsters" << std::endl;
+    for(i = 0; i < monster_len; i++) {
+        monster_list[i]->print();
+    }
+    
     return 0;
 }
 
@@ -160,4 +176,29 @@ parser::parsed_type parser::parse_for_type(std::string line) {
     }
     
     return pt_UNKNOWN;
+}
+
+void parser::add_monster(monster_description* monster) {
+    if(monster == NULL) {
+        logger::w("Attempt to add NULL monster to list");
+    }
+    if(monster_len > monster_size-1) {
+        int new_size = monster_size == 0 ? 4 : monster_size*2;
+        // realloc monster list;
+        monster_description** new_list = (monster_description**)realloc(monster_list, new_size*sizeof(*monster_list));
+        if(new_list == NULL) {
+            // DEAL WITH ERROR!
+            logger::e("Could not allocate enough space to add monster! monster not added");
+            delete monster;
+            return;
+        }
+        int i;
+        for(i = monster_size; i < new_size; i++) {
+            new_list[i] = NULL;
+        }
+        monster_list = new_list;
+        monster_size = new_size;
+    }
+    
+    monster_list[monster_len++] = monster;
 }

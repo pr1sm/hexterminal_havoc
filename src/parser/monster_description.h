@@ -13,6 +13,10 @@
 
 class monster_description {
 public:
+    
+    monster_description();
+    ~monster_description();
+    
     std::string name;
     std::string symb;
     std::string desc;

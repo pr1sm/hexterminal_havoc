@@ -21,3 +21,6 @@ void monster_description::print() {
     std::cout << abilities << std::endl;
     std::cout << hitpoints << std::endl << std::endl;
 }
+
+monster_description::monster_description() {}
+monster_description::~monster_description() {}
