@@ -132,10 +132,6 @@ int parser::parse_monsters() {
                     mon = NULL;
                     state = ps_LOOKING;
                 }
-            } else {
-                // possible error
-                logger::w("Possible error with parsing?");
-                logger::w("%s", line.c_str());
             }
         }
         

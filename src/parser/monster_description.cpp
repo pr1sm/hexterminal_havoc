@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <ncurses.h>
 
 #include "monster_description.h"
 #include "../character/character.h"
@@ -18,7 +19,7 @@ void monster_description::print() {
     std::cout << "Name ~> " << name << std::endl;
     std::cout << "Symbol ~> " << symb << std::endl;
     std::cout << "Desc ~> " << std::endl << desc << std::endl;
-    std::cout << "Color ~> " << color << std::endl;
+    std::cout << "Color ~> " << print_color() << std::endl;
     std::cout << "Speed ~> " << speed->to_string() << std::endl;
     std::cout << "Abilities ~> " << print_attributes() << std::endl;
     std::cout << "Hitpoints ~> " << hitpoints->to_string() << std::endl;
@@ -44,6 +45,27 @@ std::string monster_description::print_attributes() {
     }
     
     return ss.str();
+}
+
+std::string monster_description::print_color() {
+    if(color == COLOR_BLACK) {
+        return "BLACK";
+    } else if(color == COLOR_RED) {
+        return "RED";
+    } else if(color == COLOR_GREEN) {
+        return "GREEN";
+    } else if(color == COLOR_YELLOW) {
+        return "YELLOW";
+    } else if(color == COLOR_BLUE) {
+        return "BLUE";
+    } else if(color == COLOR_MAGENTA) {
+        return "MAGENTA";
+    } else if(color == COLOR_CYAN) {
+        return "CYAN";
+    } else if(color == COLOR_WHITE) {
+        return "WHITE";
+    }
+    return "N/A";
 }
 
 void monster_description::parse_speed(std::string str) {
@@ -82,8 +104,26 @@ void monster_description::parse_name(std::string str) {
 }
 
 void monster_description::parse_color(std::string str) {
-    // assuming NAME is first...
-    color = str.substr(str.find_first_of(" \t")+1);
+    // assuming COLOR is first...
+    std::string color = str.substr(str.find_first_of(" \t")+1);
+    // only care about first color
+    if(color.compare(0, 5, "BLACK") == 0) {
+        this->color = COLOR_BLACK;
+    } else if(color.compare(0, 3, "RED") == 0) {
+        this->color = COLOR_RED;
+    } else if(color.compare(0, 5, "GREEN") == 0) {
+        this->color = COLOR_GREEN;
+    } else if(color.compare(0, 6, "YELLOW") == 0) {
+        this->color = COLOR_YELLOW;
+    } else if(color.compare(0, 4, "BLUE") == 0) {
+        this->color = COLOR_BLUE;
+    } else if(color.compare(0, 7, "MAGENTA") == 0) {
+        this->color = COLOR_MAGENTA;
+    } else if(color.compare(0, 4, "CYAN") == 0) {
+        this->color = COLOR_CYAN;
+    } else if(color.compare(0, 5, "WHITE") == 0) {
+        this->color = COLOR_WHITE;
+    }
 }
 
 void monster_description::parse_attrs(std::string str) {
@@ -111,6 +151,11 @@ monster_description::monster_description() {
     speed = NULL;
     hitpoints = NULL;
     damage = NULL;
+    color = COLOR_WHITE;
+    attributes = 0;
+    symb = '0';
+    desc = "";
+    name = "";
 }
 
 monster_description::~monster_description() {

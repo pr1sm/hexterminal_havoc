@@ -20,10 +20,11 @@ private:
     char symb;
     std::string desc;
     std::string name;
-    std::string color;
+    int color;
     int attributes;
     
     std::string print_attributes();
+    std::string print_color();
 public:
     
     monster_description();
