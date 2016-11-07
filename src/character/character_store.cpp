@@ -1,8 +1,8 @@
 //
-//  character_store.c
+//  character_store.cpp
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/5/16.
+//  Created by Srinivas Dhanwada on 11/2/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
