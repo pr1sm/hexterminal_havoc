@@ -123,7 +123,7 @@ int parser::parse_monsters() {
             } else if(type == pt_END) {
                 if(mon->check != PCOMPLETE) {
                     // error
-                    std::cout << "we had an error parsing this monster, deleting it and starting over!" << std::endl;
+                    logger::e("we had an error parsing this monster, deleting it and starting over!");
                     delete mon;
                     mon = NULL;
                     state = ps_LOOKING;
@@ -135,6 +135,7 @@ int parser::parse_monsters() {
             } else {
                 // possible error
                 logger::w("Possible error with parsing?");
+                logger::w("%s", line.c_str());
             }
         }
         

@@ -20,6 +20,7 @@
 #define TELEP_VAL (1 << TELEP_BIT)
 #define TUNNL_VAL (1 << TUNNL_BIT)
 #define ERATC_VAL (1 << ERATC_BIT)
+#define PASS_VAL  (1 << PASS_BIT)
 
 typedef enum character_type {
     NONE, PC, NPC
