@@ -47,6 +47,22 @@ Usage: hexterm_havoc [options]
 
 ## Assignments
 
+### Assignment 1.07 - Parsing Monster Definitions
+
+For this assignment, we had to build a parser that would parse monster descriptions.
+These descriptions had specific attributes and we were to parse them if all attributes
+were specificied or move onto the next monster.  Using C++ I built a class that parses
+the monster file and prints out the descriptions to the console.  I have temporarily
+disabled the rest of the game for this assignment, but it is controlled by an interal
+switch that can be set to '0' and upon recompilation, the game will run as it did in 
+1.06.  
+
+I also refactored the entire codebase to move to C++.  This included moving all my
+implementation over to Classes instead of Structs, and making use of the `new` and
+`delete` keywords for memory management when applicable.  This was relatively
+simple, however it was very time consuming.  The C code as of 1.06 has been saved
+to another folder and can still be built using the `make c` rule.  
+
 ### Assignment 1.06 - "Fog of War" and interfacing with C and C++
 
 For this assignment, we had to start switching our codebase over to C++ and write

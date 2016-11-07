@@ -4,6 +4,20 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.07] - 2016-11-2
+
+### Added
+- parser class to parse monster description file
+- monster_description class to hold all parsed monster attributes
+- dice class to hold dice information (will be fully implemented later)
+
+## Changed
+- split codebase into C and C++ files
+  - `csrc/` now contains all C files and is a snapshot of version 1.06.1
+  - `src/` now contains all C++ filese and will be where updates are
+- refactored codebase form structs to classes
+- Makefile changed to accomodate file structure change
+
 ## [1.06.1] - 2016-10-29
 
 ### Added

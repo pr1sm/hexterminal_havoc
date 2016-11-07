@@ -14,35 +14,31 @@
 typedef unsigned char uint8_t;
 #endif // _UINT8_T
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+class env_constants {
+public:
+    static int PARSE_MODE;
+    static int DEBUG_MODE;
+    static int NCURSES_MODE; // pc control enabled by default (so ncurses is enabled implicitly)
+    static int PC_AI_MODE;
+    static int LOAD_DUNGEON;
+    static int SAVE_DUNGEON;
+    static int NUM_MONSTERS;
+    static int QUIT_FLAG;
+    static int STAIR_FLAG;
+    static char* HOME;
+    static char* LOAD_FILE;
+    static char* SAVE_FILE;
+    static uint8_t X_START;
+    static uint8_t Y_START;
+};
 
-extern int DEBUG_MODE;
-extern int NCURSES_MODE;
-extern int PC_AI_MODE;
-extern int LOAD_DUNGEON;
-extern int SAVE_DUNGEON;
-extern int NUM_MONSTERS;
-extern int QUIT_FLAG;
-extern int STAIR_FLAG;
-extern char* HOME;
-extern char* LOAD_FILE;
-extern char* SAVE_FILE;
-extern uint8_t X_START;
-extern uint8_t Y_START;
-
-typedef struct env_namespace {
-    void (*const parse_args)(int argc, char** argv);
-    void (*const setup_environment)();
-    void (*const exit_gracefully)();
-    void (*const cleanup)();
-    void (*const move_floors)();
-} env_namespace;
-extern const env_namespace envAPI;
-    
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+class env {
+public:
+    static void parse_args(int argc, char** argv);
+    static void setup_environment();
+    static void exit_gracefully();
+    static void cleanup();
+    static void move_floors();
+};
 
 #endif /* env_h */

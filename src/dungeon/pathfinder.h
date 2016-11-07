@@ -2,7 +2,7 @@
 //  pathfinder.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 9/20/16.
+//  Created by Srinivas Dhanwada on 11/2/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
@@ -13,19 +13,15 @@
 #include "../point/point.h"
 #include "dungeon.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
-
-typedef struct pathfinder_namespace {
-    graph_t* (*const construct)(dungeon_t* d, int tunnel);
-    void     (*const destruct)(graph_t* g);
-    int      (*const generate_pathmap)(graph_t* g, dungeon_t* d, point_t* start, int tunnel);
-} pathfinder_namespace;
-extern pathfinder_namespace const pathfinderAPI;
+class pathfinder {
+private:
+    static int hardness_to_weight(int hardness);
+    static void update_tiles(graph* g, dungeon* d, int tunnel);
     
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+public:
+    static graph* construct(dungeon* d, int tunnel);
+    static void   destruct(graph* g);
+    static int    generate_pathmap(graph* g, dungeon* d, point* start, int tunnel);
+};
 
 #endif /* pathfinder_h */
