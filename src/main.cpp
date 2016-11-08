@@ -50,8 +50,13 @@ int main(int argc, char * argv[]) {
     
     parser p;
     p.parse_monsters();
+    p.parse_items();
     
     if(env_constants::PARSE_MODE) {
+        
+        p.print_monsters();
+        p.print_items();
+        
         return 0;
     }
     

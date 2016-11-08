@@ -10,6 +10,7 @@
 #define monster_description_h
 
 #include <string>
+
 #include "dice.h"
 
 class monster_description {
