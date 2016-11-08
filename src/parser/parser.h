@@ -79,10 +79,17 @@ public:
     } parser_state;
     
 private:
+    static parser* _parser;
+    
     parsed_type parse_for_type(std::string line);
     void add_monster(monster_description* monster);
     void add_item(item_description* item);
+    
+    parser();
+    ~parser();
 public:
+    static parser* get_parser();
+    static void    destroy_parser();
     
     monster_description** monster_list;
     int monster_size;
@@ -91,9 +98,6 @@ public:
     item_description** item_list;
     int item_size;
     int item_len;
-    
-    parser();
-    ~parser();
     
     // 0 - success
     // 1 - description file not found

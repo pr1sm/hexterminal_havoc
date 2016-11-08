@@ -20,6 +20,7 @@
 #include "../character/character_store.h"
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
+#include "../parser/parser.h"
 
 int env_constants::PARSE_MODE = 0;
 int env_constants::DEBUG_MODE = 0;
@@ -44,6 +45,7 @@ static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
                                "-l<name>, --load=<name> | Load dungeon with name <name> (in save directory).\n"
                                "-m<val> , --nummon=<val>| Set the number of monsters in the dungeon\n"
                                "-n      , --ncurses     | Use Ncurses to render game\n"
+                               "-p      , --parse-only  | Parse Objects and Monsters, then print them out\n"
                                "-s<name>, --save=<name> | Save the dungeon after loading/generating it with\n"
                                "                        |   name <name> (in save directory).\n"
                                "-x<val> , --xpos <val>  | Start the player at a specified x coord\n"
@@ -110,19 +112,20 @@ void env::parse_args(int argc, char** argv) {
     while(1) {
         // Setup options
         static struct option long_options[] = {
-            {"ai",      no_argument,       0, 'a'},
-            {"load",    optional_argument, 0, 'l'},
-            {"save",    optional_argument, 0, 's'},
-            {"nummon",  required_argument, 0, 'm'},
-            {"ncurses", no_argument,       0, 'n'},
-            {"help",    no_argument,       0, 'h'},
-            {"xpos",    required_argument, 0, 'x'},
-            {"ypos",    required_argument, 0, 'y'},
+            {"ai",         no_argument,       0, 'a'},
+            {"parse-only", no_argument,       0, 'p'},
+            {"load",       optional_argument, 0, 'l'},
+            {"save",       optional_argument, 0, 's'},
+            {"nummon",     required_argument, 0, 'm'},
+            {"ncurses",    no_argument,       0, 'n'},
+            {"help",       no_argument,       0, 'h'},
+            {"xpos",       required_argument, 0, 'x'},
+            {"ypos",       required_argument, 0, 'y'},
             {0, 0, 0, 0}
         };
         
         int option_index = 0;
-        flag = getopt_long(argc, argv, "ahnm:x:y:s::l::", long_options, &option_index);
+        flag = getopt_long(argc, argv, "pahnm:x:y:s::l::", long_options, &option_index);
         
         if(flag == -1) {
             break;
@@ -176,6 +179,10 @@ void env::parse_args(int argc, char** argv) {
                 
             case 'n':
                 env_constants::NCURSES_MODE = 1;
+                break;
+                
+            case 'p':
+                env_constants::PARSE_MODE = 1;
                 break;
                 
             case 'l':
@@ -249,6 +256,7 @@ void env::cleanup() {
     character_store::teardown();
     event_queue::teardown();
     dungeon::teardown();
+    parser::destroy_parser();
     
     if(env_constants::NCURSES_MODE) {
         endwin();

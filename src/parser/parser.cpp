@@ -15,6 +15,8 @@
 #include "monster_description.h"
 #include "../logger/logger.h"
 
+ parser* parser::_parser = NULL;
+
 parser::parser() {
     monster_len = 0;
     monster_size = 0;
@@ -41,6 +43,20 @@ parser::~parser() {
                 delete item_list[i];
             }
         }
+    }
+}
+
+parser* parser::get_parser() {
+    if(_parser == NULL) {
+        _parser = new parser();
+    }
+    return _parser;
+}
+
+void parser::destroy_parser() {
+    if(_parser != NULL) {
+        delete _parser;
+        _parser = NULL;
     }
 }
 

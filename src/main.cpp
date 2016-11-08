@@ -37,8 +37,6 @@ int main(int argc, char * argv[]) {
     }
 #endif // DEBUG
     
-    env_constants::PARSE_MODE = 1; // parse only
-    
     env::parse_args(argc, argv);
     env::setup_environment();
     
@@ -48,14 +46,15 @@ int main(int argc, char * argv[]) {
         logger::set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
     }
     
-    parser p;
-    p.parse_monsters();
-    p.parse_items();
+    parser* p = parser::get_parser();
+    p->parse_monsters();
+    p->parse_items();
     
     if(env_constants::PARSE_MODE) {
         
-        p.print_monsters();
-        p.print_items();
+        p->print_monsters();
+        p->print_items();
+        env::cleanup();
         
         return 0;
     }
