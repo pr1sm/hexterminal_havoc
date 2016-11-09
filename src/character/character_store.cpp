@@ -22,6 +22,8 @@
 #include "../events/event_queue.h"
 #include "../env/env.h"
 #include "../dungeon/pathfinder.h"
+#include "../parser/parser.h"
+#include "../parser/monster_description.h"
 
 int character_store::CHARACTER_COUNT = 0;
 int character_store::_characters_size = 0;
@@ -65,26 +67,19 @@ void character_store::print_char(character* npc) {
 void character_store::setup() {
     int nummon = env_constants::NUM_MONSTERS;
     int i;
-    dungeon* d = dungeon::get_dungeon();
     _characters_size = nummon; // num of monsters
     _characters = (character**) calloc(_characters_size, sizeof(*_characters));
     _characters_count = _characters_size;
     CHARACTER_COUNT = _characters_count;
     _alive_characters = (character_id_t*) calloc(_characters_count, sizeof(*_alive_characters));
-    character* pc = character::get_pc();
-    point* pc_pos = pc->position;
     if(env_constants::PC_AI_MODE) {
         ai::setup_pc_movement();
     } else {
         pc_control::setup_control_movement();
     }
     for(i = 0; i < _characters_size; i++) {
-        point* spawn = new point(0, 0);
-        do {
-            dungeon::rand_point(d, spawn);
-        } while(spawn->distance_to(pc_pos) <= 3); // have a radius of 3 blocks
         
-        character* npc = new character(NPC, spawn);
+        character* npc = gen_npc(true);
         npc->id = i+1;
         
         setup_npc(npc);
@@ -93,7 +88,6 @@ void character_store::setup() {
         _characters[i] = npc;
         _alive_characters[i] = i+1;
         
-        free(spawn);
         print_char(npc);
     }
 }
@@ -295,4 +289,25 @@ character* character_store::npc_for_id(character_id_t id) {
         }
     }
     return NULL;
+}
+
+character* character_store::gen_npc(bool use_descriptor) {
+    character* pc = character::get_pc();
+    point* pc_pos = pc->position;
+    dungeon* d = dungeon::get_dungeon();
+    point spawn(0, 0);
+    do {
+        dungeon::rand_point(d, &spawn);
+    } while(spawn.distance_to(pc_pos) <= 3); // have a radius of 3 blocks
+    
+    monster_description** monster_list = parser::get_parser()->monster_list;
+    
+    if(!use_descriptor || monster_list == NULL) {
+        return new character(NPC, &spawn);
+    }
+    
+    int rand_idx = rand() % parser::get_parser()->monster_len;
+    monster_description* descriptor = monster_list[rand_idx];
+    
+    return new character(NPC, &spawn, descriptor);
 }

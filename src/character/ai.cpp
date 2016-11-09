@@ -60,6 +60,8 @@ void ai::handle_pc_move() {
         if(pc_pos->distance_to(npc_pos) == 0) {
             characters[i]->is_dead = 1;
         }
+        // Check if pc can see the npc
+        characters[i]->is_seen = (pc_pos->distance_to(npc_pos) <= 3);
     }
     if(pc_pos->distance_to(pc_dest) == 0) {
         setup_pc_movement();
@@ -223,9 +225,11 @@ void ai::handle_npc_move(character* c) {
         }
     }
     if(los_path != NULL) {
-//        graphAPI.destruct_path(los_path);
         delete los_path;
     }
+    
+    // Update if the npc is within the pc's light
+    c->is_seen = (pc_pos->distance_to(c_pos) <= 3);
     
     if(dungeon_updated) {
         d->update_path_maps();

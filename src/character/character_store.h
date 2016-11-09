@@ -21,6 +21,8 @@ private:
     static void print_char(character* npc);
     static void setup_npc(character* npc);
     
+    static character* gen_npc(bool use_descriptor);
+    
 public:
     static int CHARACTER_COUNT;
     

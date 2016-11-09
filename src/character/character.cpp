@@ -57,6 +57,7 @@ character::character(character_type type, point* spawn) {
     is_dead = 0;
     event_count = 0;
     id = -1;
+    is_seen = true;
     
     if(spawn == NULL) {
         logger::w("NULL point passed into character constructor!");
@@ -115,6 +116,7 @@ character::character(character_type type, point* spawn, monster_description* des
     is_dead = 0;
     event_count = 0;
     id = -1;
+    is_seen = true;
     
     if(spawn == NULL) {
         logger::w("NULL point passed into character constructor!");
@@ -218,4 +220,13 @@ char character::char_for_npc_type() {
         return '0' + attrs;
     }
     return 'a' + attrs - 10;
+}
+
+char character::get_print_symb(int mode) {
+    dungeon* d = dungeon::get_dungeon();
+    tile* t = d->tiles[position->y][position->x];
+    if(is_seen) {
+        return symb;
+    }
+    return t->char_for_content(mode);
 }

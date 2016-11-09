@@ -53,12 +53,15 @@ public:
     char symb;
     dice* damage;
     
+    bool is_seen; // is the character within the light of the pc
+    
     character(character_type type, point* spawn);
     character(character_type type, point* spawn, monster_description* descriptor);
     ~character();
     void set_position(point* p);
     void set_destination(point* p);
     void perform();
+    char get_print_symb(int mode);
     
     static character* get_pc();
     static void       teardown_pc();

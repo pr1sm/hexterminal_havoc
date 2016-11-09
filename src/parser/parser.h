@@ -112,8 +112,6 @@ public:
     
     void print_monsters();
     void print_items();
-    
-    character* gen_npc();
 };
 
 #endif /* parser_h */
