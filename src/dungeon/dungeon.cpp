@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <ncurses.h>
 
 #include "dungeon.h"
@@ -52,7 +51,6 @@ void dungeon::teardown() {
 dungeon::dungeon() {
     logger::i("Constructing Dungeon...");
     int i, j;
-    srand((unsigned)time(NULL));
     tiles = (tile***)calloc(DUNGEON_HEIGHT, sizeof(*tiles));
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -135,7 +133,7 @@ void dungeon::generate() {
 }
 
 void dungeon::update_path_maps() {
-    point* p = character::get_pc()->_position;
+    point* p = character::get_pc()->position;
     if(tunnel_map == NULL) {
         tunnel_map = pathfinder::construct(this, 1);
     }
@@ -196,14 +194,14 @@ void dungeon::printn(int mode) {
     character_id_t* alive_npcs = character_store::get_alive_characters();
     for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
         character* c = character_store::npc_for_id(alive_npcs[i]);
-        char content = tiles[c->_position->y][c->_position->x]->char_for_content(mode);
+        char content = tiles[c->position->y][c->position->x]->char_for_content(mode);
         if(content == tc_PATH || content == tc_ROOM || content == tc_DNSTR || content == tc_UPSTR) {
             attron(COLOR_PAIR(COLOR_BLACK));
-            mvaddch(c->_position->y + 1, c->_position->x, content);
+            mvaddch(c->position->y + 1, c->position->x, content);
             attroff(COLOR_PAIR(COLOR_BLACK));
         } else {
             attron(COLOR_PAIR(COLOR_CYAN));
-            mvaddch(c->_position->y + 1, c->_position->x, content);
+            mvaddch(c->position->y + 1, c->position->x, content);
             attroff(COLOR_PAIR(COLOR_CYAN));
         }
     }

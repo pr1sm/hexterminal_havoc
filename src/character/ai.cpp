@@ -31,8 +31,8 @@ void ai::setup_pc_movement() {
     point* pc_pos;
     point* pc_dest;
     pc->set_destination(&rand_dest);
-    pc_dest = pc->_destination;
-    pc_pos = pc->_position;
+    pc_dest = pc->destination;
+    pc_pos = pc->position;
     logger::i("Setting player path from (%2d, %2d) to (%2d, %2d)",
              pc_pos->x,
              pc_dest->y,
@@ -47,18 +47,18 @@ void ai::handle_pc_move() {
     character* pc = character::get_pc();
     point* pc_pos;
     point* pc_dest;
-    pc_pos = pc->_position;
-    pc_dest = pc->_destination;
+    pc_pos = pc->position;
+    pc_dest = pc->destination;
     vertex* v = PLAYER_PATH->vertices[util::point_to_index(pc_pos)];
     point next(0, 0);
     util::index_to_point(v->prev, &next);
     pc->set_position(&next);
-    pc_pos = pc->_position;
+    pc_pos = pc->position;
     int i;
     for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
-        point* npc_pos = characters[i]->_position;
+        point* npc_pos = characters[i]->position;
         if(pc_pos->distance_to(npc_pos) == 0) {
-            characters[i]->_is_dead = 1;
+            characters[i]->is_dead = 1;
         }
     }
     if(pc_pos->distance_to(pc_dest) == 0) {
@@ -77,12 +77,12 @@ void ai::handle_npc_move(character* c) {
     
     character* pc = character::get_pc();
     point* pc_pos;
-    c_type    = c->_type;
-    c_is_dead = c->_is_dead;
-    c_pos     = c->_position;
-    c_attrs   = c->_attrs;
-    c_dest    = c->_destination;
-    pc_pos    = pc->_position;
+    c_type    = c->type;
+    c_is_dead = c->is_dead;
+    c_pos     = c->position;
+    c_attrs   = c->attrs;
+    c_dest    = c->destination;
+    pc_pos    = pc->position;
     if(c_type == PC) {
         return;
     }
@@ -110,7 +110,7 @@ void ai::handle_npc_move(character* c) {
     }
     
     // refresh c_dest
-    c_dest = c->_destination;
+    c_dest = c->destination;
     
     dungeon* d = dungeon::get_dungeon();
     
@@ -146,7 +146,7 @@ void ai::handle_npc_move(character* c) {
                 dungeon::rand_point(d, &rand_dest);
                 c->set_destination(&rand_dest);
                 // refresh c_dest
-                c_dest = c->_destination;
+                c_dest = c->destination;
             }
             // choose correct map and use dijkstras
             graph* map = (c_attrs & TUNNL_VAL) ? d->tunnel_map : d->non_tunnel_map;
@@ -240,7 +240,7 @@ path_node* ai::los_to_pc(point* p) {
         return NULL;
     }
     character* pc = character::get_pc();
-    point* pc_pos = pc->_position;
+    point* pc_pos = pc->position;
     path_node* path = pathing::bresenham(pc_pos, p);
     path_node* temp = path;
     dungeon* d = dungeon::get_dungeon();
@@ -266,8 +266,8 @@ void ai::get_random_dir(character* c, point* new_pos) {
     tile* tile;
     point* c_pos;
     uint8_t c_attrs;
-    c_pos = c->_position;
-    c_attrs = c->_attrs;
+    c_pos = c->position;
+    c_attrs = c->attrs;
     int is_valid = 0;
     int new_x = c_pos->x;
     int new_y = c_pos->y;

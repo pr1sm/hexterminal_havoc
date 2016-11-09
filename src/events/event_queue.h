@@ -29,7 +29,7 @@ public:
 
 class EventQueueComparator : comparator<character> {
     virtual int compare(const character* c1, const character* c2) {
-        return c1->_event_count - c2->_event_count;
+        return c1->event_count - c2->event_count;
     }
 };
 

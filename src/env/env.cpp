@@ -12,6 +12,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <errno.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <ncurses.h>
 
@@ -53,6 +54,8 @@ static const char* help_text = "Usage: hexterm_havoc [options]\n\n"
 
 void env::setup_environment() {
     logger::i("%%%% SETTING ENVIRONMENT %%%%");
+    srand((unsigned)time(NULL));
+    
     char* env;
     if((env = getenv("ENV"))) {
         if(!strcmp(env, "DEBUG")) {

@@ -25,7 +25,7 @@ void pc_control::handle_control_move() {
     point* pc_pos;
     point* npc_pos;
     pc = character::get_pc();
-    pc_pos = pc->_position;
+    pc_pos = pc->position;
     pc_move_t move = mv_NONE;
     point* dest = new point(pc_pos);
     int i;
@@ -169,13 +169,13 @@ void pc_control::handle_control_move() {
         logger::i("Moving to point (%2d, %2d)", dest->x, dest->y);
         // move pc
         pc->set_position(dest);
-        pc_pos = pc->_position;
+        pc_pos = pc->position;
         
         // check for collision
         for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
-            npc_pos = characters[i]->_position;
+            npc_pos = characters[i]->position;
             if(pc_pos->distance_to(npc_pos) == 0) {
-                characters[i]->_is_dead = 1;
+                characters[i]->is_dead = 1;
             }
         }
     } else if(move == mv_RS) {

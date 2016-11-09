@@ -19,42 +19,69 @@
 static character* gPLAYER_CHARACTER = NULL;
 
 character::character(character_type type, point* spawn) {
-    _type = type;
-    if(_type == PC) {
-        _speed = 10;
-        _attrs = 0;
+    type = type;
+    if(type== PC) {
+        speed = 10;
+        attrs = 0;
     } else if(type == NPC) {
-        _speed = (rand() & 0xf) + 5;
-        _attrs = rand() & 0xf;
+        speed = (rand() & 0xf) + 5;
+        attrs = rand() & 0xf;
     } else {
         logger::w("Invalid type passed into character constructor!");
-        _speed = 1;
-        _attrs = 0;
+        speed = 1;
+        attrs = 0;
     }
-    _turn_count = 100 / _speed;
-    _is_dead = 0;
-    _event_count = 0;
-    _id = -1;
+    turn_count = 100 / speed;
+    is_dead = 0;
+    event_count = 0;
+    id = -1;
     
     if(spawn == NULL) {
         logger::w("NULL point passed into character constructor!");
-        _position = new point(0, 0);
+        position = new point(0, 0);
     } else {
-        _position = new point(spawn);
+        position = new point(spawn);
     }
-    _destination = NULL;
+    destination = NULL;
+}
+
+character::character(character_type type, point* spawn, monster_description* descriptor) {
+    type = type;
+    if(type == PC) {
+        speed = 10;
+        attrs = 0;
+    } else if(type == NPC) {
+        // Use descriptor
+        
+    } else {
+        logger::w("Invalid type passed into character constructor!");
+        speed = 1;
+        attrs = 0;
+    }
+    turn_count = 100 / speed;
+    is_dead = 0;
+    event_count = 0;
+    id = -1;
+    
+    if(spawn == NULL) {
+        logger::w("NULL point passed into character constructor!");
+        position = new point(0, 0);
+    } else {
+        position = new point(spawn);
+    }
+    destination = NULL;
 }
 
 character::~character() {
     static int char_count = 0;
     logger::i("character destructor called - %d", ++char_count);
-    if(_position != NULL) {
+    if(position != NULL) {
         logger::i("destructing position");
-        delete _position;
+        delete position;
     }
-    if(_destination != NULL) {
+    if(destination != NULL) {
         logger::i("destructing destination");
-        delete _destination;
+        delete destination;
     }
 }
 
@@ -63,37 +90,37 @@ void character::set_position(point* p) {
         logger::w("NULL point passed into set_position! position will remain unchanged");
         return;
     }
-    if(_position == NULL) {
-        _position = new point(p);
+    if(position == NULL) {
+        position = new point(p);
     } else {
-        _position->x = p->x;
-        _position->y = p->y;
+        position->x = p->x;
+        position->y = p->y;
     }
 }
 
 void character::set_destination(point* p) {
     if(p == NULL) {
         logger::w("NULL point passed into set_point! destructing point!");
-        delete _destination;
-        _destination = NULL;
+        delete destination;
+        destination = NULL;
         return;
     }
-    if(_destination == NULL) {
-        _destination = new point(p);
+    if(destination == NULL) {
+        destination = new point(p);
     } else {
-        _destination->x = p->x;
-        _destination->y = p->y;
+        destination->x = p->x;
+        destination->y = p->y;
     }
 }
 
 void character::perform() {
-    if(_type == PC) {
+    if(type == PC) {
         if(env_constants::PC_AI_MODE) {
             ai::handle_pc_move();
         } else {
             pc_control::handle_control_move();
         }
-    } else if(_type == NPC) {
+    } else if(type == NPC) {
         ai::handle_npc_move(this);
     } else {
         logger::w("performed called on character with invalid type! doing nothing");
@@ -117,7 +144,7 @@ character* character::get_pc() {
             dungeon::rand_point(dungeon::get_dungeon(), &spawn);
         }
         gPLAYER_CHARACTER = new character(PC, &spawn);
-        gPLAYER_CHARACTER->_id = 0;
+        gPLAYER_CHARACTER->id = 0;
     }
     return gPLAYER_CHARACTER;
 }
@@ -130,11 +157,11 @@ void character::teardown_pc() {
 }
 
 char character::char_for_npc_type() {
-    if(_type == PC) {
+    if(type == PC) {
         return '@';
     }
-    if(_attrs < 10) {
-        return '0' + _attrs;
+    if(attrs < 10) {
+        return '0' + attrs;
     }
-    return 'a' + _attrs - 10;
+    return 'a' + attrs - 10;
 }

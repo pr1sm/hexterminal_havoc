@@ -23,8 +23,8 @@ void event_queue::add_event(character* c) {
         _event_queue = new heap<character>((comparator<character>*)new EventQueueComparator(), NULL);
     }
     uint8_t tc;
-    tc = c->_turn_count;
-    c->_event_count = EVENT_TIME + tc;
+    tc = c->turn_count;
+    c->event_count = EVENT_TIME + tc;
     _event_queue->insert(c);
 }
 
@@ -35,13 +35,13 @@ int event_queue::perform_event() {
         return 0;
     }
     character* c = _event_queue->remove();
-    EVENT_TIME = c->_event_count;
+    EVENT_TIME = c->event_count;
     
     c->perform();
     
     // check if anything else should be moved
     c = _event_queue->peek();
-    character_ec = c->_event_count;
+    character_ec = c->event_count;
     while(character_ec == EVENT_TIME) {
         c = _event_queue->remove();
         c->perform();
@@ -49,7 +49,7 @@ int event_queue::perform_event() {
         if(c == NULL) {
             break;
         }
-        character_ec = c->_event_count;
+        character_ec = c->event_count;
     }
     character_store::npc_cleanup();
     if(env_constants::QUIT_FLAG == 1) {

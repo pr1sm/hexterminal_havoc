@@ -33,9 +33,9 @@ void character_store::print_char(character* npc) {
     point* npc_pos;
     point* npc_dest;
     uint8_t  npc_attrs;
-    npc_pos   = npc->_position;
-    npc_dest  = npc->_destination;
-    npc_attrs = npc->_attrs;
+    npc_pos   = npc->position;
+    npc_dest  = npc->destination;
+    npc_attrs = npc->attrs;
     if(env_constants::DEBUG_MODE && !env_constants::NCURSES_MODE) {
         printf("NPC: spawn: (%2d, %2d) ",
                npc_pos->x,
@@ -72,7 +72,7 @@ void character_store::setup() {
     CHARACTER_COUNT = _characters_count;
     _alive_characters = (character_id_t*) calloc(_characters_count, sizeof(*_alive_characters));
     character* pc = character::get_pc();
-    point* pc_pos = pc->_position;
+    point* pc_pos = pc->position;
     if(env_constants::PC_AI_MODE) {
         ai::setup_pc_movement();
     } else {
@@ -85,7 +85,7 @@ void character_store::setup() {
         } while(spawn->distance_to(pc_pos) <= 3); // have a radius of 3 blocks
         
         character* npc = new character(NPC, spawn);
-        npc->_id = i+1;
+        npc->id = i+1;
         
         setup_npc(npc);
         
@@ -118,11 +118,11 @@ int character_store::contains_npc(point* p) {
     point* npc_pos;
     point* pc_pos;
     uint8_t  npc_is_dead;
-    pc_pos = character::get_pc()->_position;
+    pc_pos = character::get_pc()->position;
     // check npcs first, then player
     for(i = 0; i < _characters_count; i++) {
-        npc_pos = _characters[i]->_position;
-        npc_is_dead = _characters[i]->_is_dead;
+        npc_pos = _characters[i]->position;
+        npc_is_dead = _characters[i]->is_dead;
         if(p->distance_to(npc_pos) == 0 && !npc_is_dead) {
             return i+1;
         }
@@ -152,9 +152,9 @@ void character_store::setup_npc(character* npc) {
     point* pc_pos;
     point* npc_pos;
     uint8_t npc_attrs;
-    pc_pos = character::get_pc()->_position;
-    npc_pos = npc->_position;
-    npc_attrs = npc->_attrs;
+    pc_pos = character::get_pc()->position;
+    npc_pos = npc->position;
+    npc_attrs = npc->attrs;
     // telepathic npcs get the pc position
     if(npc_attrs & TELEP_VAL) {
         npc->set_destination(pc_pos);
@@ -173,15 +173,15 @@ int character_store::is_finished() {
     point* pc_pos;
     point* npc_pos;
     uint8_t  npc_is_dead;
-    pc_pos = character::get_pc()->_position;
+    pc_pos = character::get_pc()->position;
     // only 1 character left (pc) so pc has won
     if(_characters_count == 0) {
         return 2;
     }
     // check all npcs that ARE NOT the pc for collision
     for(i = 0; i < _characters_size; i++) {
-        npc_pos = _characters[i]->_position;
-        npc_is_dead = _characters[i]->_is_dead;
+        npc_pos = _characters[i]->position;
+        npc_is_dead = _characters[i]->is_dead;
         if(pc_pos->distance_to(npc_pos) == 0 && !npc_is_dead) {
             return 1;
         }
@@ -198,7 +198,7 @@ void character_store::npc_cleanup() {
     for(i = 0; i < _characters_count; i++) {
         npc_is_dead = 0;
         character* npc = npc_for_id(_alive_characters[i]);
-        npc_is_dead = npc->_is_dead;
+        npc_is_dead = npc->is_dead;
         if(npc_is_dead) {
             logger::d("npc %d is dead, shifting over", _alive_characters[i]);
             // shift over other npcs
@@ -227,12 +227,12 @@ void character_store::start_monster_list() {
         return; // this can only be shown when using pc control, which requires NCURSES_MODE to be active.
     }
     
-    pc_pos = character::get_pc()->_position;
+    pc_pos = character::get_pc()->position;
     monster_list = (char**) calloc(_characters_count, sizeof(*monster_list));
     for(i = 0; i < _characters_count; i++) {
         character* npc = npc_for_id(_alive_characters[i]);
         if(npc != NULL) {
-            npc_pos = npc->_position;
+            npc_pos = npc->position;
             monster_list[i] = (char*) calloc(30, sizeof(**monster_list));
             xdiff = pc_pos->x - npc_pos->x;
             ydiff = pc_pos->y - npc_pos->y;
@@ -289,7 +289,7 @@ character* character_store::npc_for_id(character_id_t id) {
     int i;
     uint8_t npc_id;
     for(i = 0; i < _characters_size; i++) {
-        npc_id = _characters[i]->_id;
+        npc_id = _characters[i]->id;
         if(id == npc_id) {
             return _characters[i];
         }

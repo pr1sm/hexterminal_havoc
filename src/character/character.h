@@ -10,6 +10,7 @@
 #define character_h
 
 #include "../point/point.h"
+#include "../parser/monster_description.h"
 
 #define INTEL_BIT 0
 #define TELEP_BIT 1
@@ -30,17 +31,18 @@ typedef int character_id_t;
 
 class character {
 public:
-    character_id_t _id;
-    character_type _type;
-    point* _position;
-    point* _destination;
-    int _event_count;
-    uint8_t _attrs;
-    uint8_t _speed;
-    uint8_t _turn_count;
-    uint8_t _is_dead;
+    character_id_t id;
+    character_type type;
+    point* position;
+    point* destination;
+    int event_count;
+    uint8_t attrs;
+    uint8_t speed;
+    uint8_t turn_count;
+    uint8_t is_dead;
     
     character(character_type type, point* spawn);
+    character(character_type type, point* spawn, monster_description* descriptor);
     ~character();
     void set_position(point* p);
     void set_destination(point* p);

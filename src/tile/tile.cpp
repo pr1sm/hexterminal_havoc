@@ -136,7 +136,7 @@ int tile::are_changes_proposed() {
 char tile::char_for_content(int mode) {
     if(mode == PM_DUNGEON) {
         character* pc = character::get_pc();
-        point* pc_pos = pc->_position;
+        point* pc_pos = pc->position;
         // tile is outside of pc's light
         if(location->distance_to(pc_pos) > 3) {
             return last_known_content;
