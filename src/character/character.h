@@ -27,7 +27,7 @@
 #define PASS_VAL  (1 << PASS_BIT)
 
 typedef enum character_type {
-    NONE, PC, NPC
+    NONE = 0, PC, NPC
 } character_type;
 
 typedef int character_id_t;

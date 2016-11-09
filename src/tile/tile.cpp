@@ -140,17 +140,13 @@ char tile::char_for_content(int mode) {
         if(location->distance_to(pc_pos) > 3) {
             return last_known_content;
         }
-        int npc_idx = character_store::contains_npc(location);
         last_known_content = content == tc_BORDER ? BORDER_CHAR :
                              content == tc_ROCK   ? ROCK_CHAR   :
                              content == tc_ROOM   ? ROOM_CHAR   :
                              content == tc_PATH   ? PATH_CHAR   :
                              content == tc_UPSTR  ? UPSTR_CHAR  :
                              content == tc_DNSTR  ? DNSTR_CHAR  : DEFAULT_CHAR ;
-        if(npc_idx != -1) {
-            return character_store::get_char_for_npc_at_index(npc_idx) | A_BOLD;
-        }
-        return last_known_content | A_BOLD;
+        return last_known_content;
     } else if(mode == PM_ROOM_PATH_MAP || mode == PM_TUNN_PATH_MAP) {
         uint8_t val = (mode == 1 ? dist : dist_tunnel);
         if(val < 10) {

@@ -127,11 +127,11 @@ int character_store::contains_npc(point* p) {
     return -1;
 }
 
-char character_store::get_char_for_npc_at_index(int i) {
+char character_store::get_char_for_npc_at_index(int i, int mode) {
     if(i == 0) {
-        return character::get_pc()->symb;
+        return character::get_pc()->get_print_symb(mode);
     }
-    return _characters[i-1]->symb;
+    return _characters[i-1]->get_print_symb(mode);
 }
 
 character** character_store::get_characters() {

@@ -34,16 +34,11 @@ int event_queue::perform_event() {
         logger::t("perform event called, but there are no events in the event queue!");
         return 0;
     }
-    character* c = _event_queue->remove();
-    EVENT_TIME = c->event_count;
-    
-    c->perform();
-    
-    // check if anything else should be moved
-    c = _event_queue->peek();
-    character_ec = c->event_count;
+    character_ec = EVENT_TIME;
+    // perform move
     while(character_ec == EVENT_TIME) {
-        c = _event_queue->remove();
+        character* c = _event_queue->remove();
+        EVENT_TIME = c->event_count;
         c->perform();
         c = _event_queue->peek();
         if(c == NULL) {

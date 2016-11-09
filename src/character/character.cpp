@@ -23,7 +23,7 @@
 static character* gPLAYER_CHARACTER = NULL;
 
 character::character(character_type type, point* spawn) {
-    type = type;
+    this->type = type;
     if(type== PC) {
         speed = 10;
         attrs = 0;
@@ -33,6 +33,7 @@ character::character(character_type type, point* spawn) {
         hitpoints = 100;
         damage = new dice("100+0d0"); // constant damage
         symb = PC_CHAR;
+        is_seen = true;
     } else if(type == NPC) {
         speed = (rand() & 0xf) + 5;
         attrs = rand() & 0xf;
@@ -42,6 +43,7 @@ character::character(character_type type, point* spawn) {
         hitpoints = 50;
         damage = new dice("50+0d0"); // constant damage
         symb = char_for_npc_type();
+        is_seen = false;
     } else {
         logger::w("Invalid type passed into character constructor!");
         speed = 1;
@@ -52,12 +54,12 @@ character::character(character_type type, point* spawn) {
         hitpoints = 10000;
         damage = new dice("1+0d0"); // constant damage
         symb = 'z';
+        is_seen = true;
     }
     turn_count = 100 / speed;
     is_dead = 0;
     event_count = 0;
     id = -1;
-    is_seen = true;
     
     if(spawn == NULL) {
         logger::w("NULL point passed into character constructor!");
@@ -69,7 +71,7 @@ character::character(character_type type, point* spawn) {
 }
 
 character::character(character_type type, point* spawn, monster_description* descriptor) {
-    type = type;
+    this->type = type;
     if(type == PC) {
         speed = 10;
         attrs = 0;
@@ -79,6 +81,7 @@ character::character(character_type type, point* spawn, monster_description* des
         hitpoints = 100;
         damage = new dice("100+0d0"); // constant damage
         symb = PC_CHAR;
+        is_seen = true;
     } else if(type == NPC) {
         // Use descriptor
         if(descriptor == NULL) {
@@ -101,6 +104,7 @@ character::character(character_type type, point* spawn, monster_description* des
             damage    = new dice(descriptor->damage);
             symb      = descriptor->symb;
         }
+        is_seen = false;
     } else {
         logger::w("Invalid type passed into character constructor!");
         speed = 1;
@@ -111,12 +115,12 @@ character::character(character_type type, point* spawn, monster_description* des
         hitpoints = 10000;
         damage = new dice("50+0d0"); // constant damage
         symb = 'z';
+        is_seen = true;
     }
     turn_count = 100 / speed;
     is_dead = 0;
     event_count = 0;
     id = -1;
-    is_seen = true;
     
     if(spawn == NULL) {
         logger::w("NULL point passed into character constructor!");

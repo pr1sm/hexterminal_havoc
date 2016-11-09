@@ -190,21 +190,23 @@ void dungeon::printn(int mode) {
             mvaddch(i+1, j, c);
         }
     }
-    attron(COLOR_PAIR(COLOR_BLACK));
+    attroff(COLOR_PAIR(COLOR_BLACK));
     character_id_t* alive_npcs = character_store::get_alive_characters();
     for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
         character* c = character_store::npc_for_id(alive_npcs[i]);
-        char content = tiles[c->position->y][c->position->x]->char_for_content(mode);
-        if(content == tc_PATH || content == tc_ROOM || content == tc_DNSTR || content == tc_UPSTR) {
+        char content = c->get_print_symb(mode);
+        if(content != c->symb) {
             attron(COLOR_PAIR(COLOR_BLACK));
             mvaddch(c->position->y + 1, c->position->x, content);
             attroff(COLOR_PAIR(COLOR_BLACK));
         } else {
-            attron(COLOR_PAIR(COLOR_CYAN));
+            attron(COLOR_PAIR(c->color));
             mvaddch(c->position->y + 1, c->position->x, content);
-            attroff(COLOR_PAIR(COLOR_CYAN));
+            attroff(COLOR_PAIR(c->color));
         }
     }
+    character* pc = character::get_pc();
+    mvaddch(pc->position->y+1, pc->position->x, pc->symb);
     mvaddch(0, 0, ' ');
     refresh();
     logger::i("Dungeon Printed");
