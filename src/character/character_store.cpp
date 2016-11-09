@@ -135,9 +135,9 @@ int character_store::contains_npc(point* p) {
 
 char character_store::get_char_for_npc_at_index(int i) {
     if(i == 0) {
-        return character::get_pc()->char_for_npc_type();
+        return character::get_pc()->symb;
     }
-    return _characters[i-1]->char_for_npc_type();
+    return _characters[i-1]->symb;
 }
 
 character** character_store::get_characters() {
@@ -238,7 +238,7 @@ void character_store::start_monster_list() {
             ydiff = pc_pos->y - npc_pos->y;
             sprintf(monster_list[i], "%2d. %c, %2d %s and %2d %s",
                     i+1,
-                    npc->char_for_npc_type(),
+                    npc->symb,
                     abs(ydiff),
                     ydiff > 0 ? "north" : "south",
                     abs(xdiff),

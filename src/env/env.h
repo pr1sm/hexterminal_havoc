@@ -25,6 +25,8 @@ public:
     static int NUM_MONSTERS;
     static int QUIT_FLAG;
     static int STAIR_FLAG;
+    static int USE_MON_DESC;
+    static int USE_OBJ_DESC;
     static char* HOME;
     static char* LOAD_FILE;
     static char* SAVE_FILE;

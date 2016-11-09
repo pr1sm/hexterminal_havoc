@@ -7,7 +7,7 @@
 //
 
 #include <stdlib.h>
-
+#include <ncurses.h>
 
 #include "character.h"
 #include "ai.h"
@@ -15,6 +15,10 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
+#include "../parser/monster_description.h"
+#include "../parser/dice.h"
+
+#define PC_CHAR '@'
 
 static character* gPLAYER_CHARACTER = NULL;
 
@@ -23,13 +27,31 @@ character::character(character_type type, point* spawn) {
     if(type== PC) {
         speed = 10;
         attrs = 0;
+        name = "player";
+        desc = "the player character";
+        color = COLOR_BLACK;
+        hitpoints = 100;
+        damage = new dice("100+0d0"); // constant damage
+        symb = PC_CHAR;
     } else if(type == NPC) {
         speed = (rand() & 0xf) + 5;
         attrs = rand() & 0xf;
+        name = "Random Monster";
+        desc = "a monster with random abilities";
+        color = COLOR_BLACK;
+        hitpoints = 50;
+        damage = new dice("50+0d0"); // constant damage
+        symb = char_for_npc_type();
     } else {
         logger::w("Invalid type passed into character constructor!");
         speed = 1;
         attrs = 0;
+        name = "Software bug";
+        desc = "something is wrong";
+        color = COLOR_RED;
+        hitpoints = 10000;
+        damage = new dice("1+0d0"); // constant damage
+        symb = 'z';
     }
     turn_count = 100 / speed;
     is_dead = 0;
@@ -50,13 +72,44 @@ character::character(character_type type, point* spawn, monster_description* des
     if(type == PC) {
         speed = 10;
         attrs = 0;
+        name = "player";
+        desc = "the player character";
+        color = COLOR_BLACK;
+        hitpoints = 100;
+        damage = new dice("100+0d0"); // constant damage
+        symb = PC_CHAR;
     } else if(type == NPC) {
         // Use descriptor
-        
+        if(descriptor == NULL) {
+            logger::w("character constructor with NULL descriptor! generating random monster");
+            speed = (rand() & 0xf) + 5;
+            attrs = rand() & 0xf;
+            name = "Random Monster";
+            desc = "a monster with random abilities";
+            color = COLOR_BLACK;
+            hitpoints = 50;
+            damage = new dice("50+0d0"); // constant damage
+            symb = char_for_npc_type();
+        } else {
+            speed     = descriptor->speed->roll();
+            attrs     = descriptor->attributes;
+            name      = descriptor->name;
+            desc      = descriptor->desc;
+            color     = descriptor->color;
+            hitpoints = descriptor->hitpoints->roll();
+            damage    = new dice(descriptor->damage);
+            symb      = descriptor->symb;
+        }
     } else {
         logger::w("Invalid type passed into character constructor!");
         speed = 1;
         attrs = 0;
+        name = "Software bug";
+        desc = "something is wrong";
+        color = COLOR_RED;
+        hitpoints = 10000;
+        damage = new dice("50+0d0"); // constant damage
+        symb = 'z';
     }
     turn_count = 100 / speed;
     is_dead = 0;
@@ -76,12 +129,13 @@ character::~character() {
     static int char_count = 0;
     logger::i("character destructor called - %d", ++char_count);
     if(position != NULL) {
-        logger::i("destructing position");
         delete position;
     }
     if(destination != NULL) {
-        logger::i("destructing destination");
         delete destination;
+    }
+    if(damage != NULL) {
+        delete damage;
     }
 }
 

@@ -9,8 +9,11 @@
 #ifndef character_h
 #define character_h
 
+#include <string>
+
 #include "../point/point.h"
 #include "../parser/monster_description.h"
+#include "../parser/dice.h"
 
 #define INTEL_BIT 0
 #define TELEP_BIT 1
@@ -30,6 +33,8 @@ typedef enum character_type {
 typedef int character_id_t;
 
 class character {
+private:
+    char char_for_npc_type();
 public:
     character_id_t id;
     character_type type;
@@ -41,13 +46,19 @@ public:
     uint8_t turn_count;
     uint8_t is_dead;
     
+    std::string name;
+    std::string desc;
+    int color;
+    int hitpoints;
+    char symb;
+    dice* damage;
+    
     character(character_type type, point* spawn);
     character(character_type type, point* spawn, monster_description* descriptor);
     ~character();
     void set_position(point* p);
     void set_destination(point* p);
     void perform();
-    char char_for_npc_type();
     
     static character* get_pc();
     static void       teardown_pc();

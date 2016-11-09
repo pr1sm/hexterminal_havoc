@@ -27,7 +27,6 @@
 #define ROCK_CHAR ' '
 #define ROOM_CHAR '.'
 #define PATH_CHAR '#'
-#define PC_CHAR '@'
 #define UPSTR_CHAR '<'
 #define DNSTR_CHAR '>'
 

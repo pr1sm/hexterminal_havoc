@@ -23,6 +23,8 @@
 #include "../events/event_queue.h"
 #include "../parser/parser.h"
 
+int env_constants::USE_OBJ_DESC = 1; // use parsed objects by default
+int env_constants::USE_MON_DESC = 1; // use parsed monsters by default
 int env_constants::PARSE_MODE = 0;
 int env_constants::DEBUG_MODE = 0;
 int env_constants::NCURSES_MODE = 0; // pc control enabled by default (so ncurses is enabled implicitly)

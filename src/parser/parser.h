@@ -14,6 +14,7 @@
 
 #include "monster_description.h"
 #include "item_description.h"
+#include "../character/character.h"
 
 #define default_monster_file "monster_desc.txt"
 #define default_item_file "object_desc.txt"
@@ -111,6 +112,8 @@ public:
     
     void print_monsters();
     void print_items();
+    
+    character* gen_npc();
 };
 
 #endif /* parser_h */
