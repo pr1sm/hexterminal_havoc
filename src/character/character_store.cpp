@@ -144,6 +144,10 @@ character** character_store::get_characters() {
     return _characters;
 }
 
+character_id_t* character_store::get_alive_characters() {
+    return _alive_characters;
+}
+
 void character_store::setup_npc(character* npc) {
     point* pc_pos;
     point* npc_pos;
@@ -204,6 +208,7 @@ void character_store::npc_cleanup() {
             _characters_count--;
         }
     }
+    CHARACTER_COUNT = _characters_count;
     logger::d("NPC cleanup: %d ~> %d", old_count, _characters_count);
 }
 

@@ -22,6 +22,7 @@
 #include "../logger/logger.h"
 #include "../env/env.h"
 #include "../character/character.h"
+#include "../character/character_store.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
@@ -181,6 +182,7 @@ void dungeon::printn(int mode) {
     logger::i("NCURSES: Printing Dungeon mode: %d...", mode);
     clear();
     int i, j;
+    attron(COLOR_PAIR(COLOR_BLACK));
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             char c = tiles[i][j]->char_for_content(mode);
@@ -190,6 +192,22 @@ void dungeon::printn(int mode) {
             mvaddch(i+1, j, c);
         }
     }
+    attron(COLOR_PAIR(COLOR_BLACK));
+    character_id_t* alive_npcs = character_store::get_alive_characters();
+    for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
+        character* c = character_store::npc_for_id(alive_npcs[i]);
+        char content = tiles[c->_position->y][c->_position->x]->char_for_content(mode);
+        if(content == tc_PATH || content == tc_ROOM || content == tc_DNSTR || content == tc_UPSTR) {
+            attron(COLOR_PAIR(COLOR_BLACK));
+            mvaddch(c->_position->y + 1, c->_position->x, content);
+            attroff(COLOR_PAIR(COLOR_BLACK));
+        } else {
+            attron(COLOR_PAIR(COLOR_CYAN));
+            mvaddch(c->_position->y + 1, c->_position->x, content);
+            attroff(COLOR_PAIR(COLOR_CYAN));
+        }
+    }
+    mvaddch(0, 0, ' ');
     refresh();
     logger::i("Dungeon Printed");
 }
