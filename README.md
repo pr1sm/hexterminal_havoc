@@ -47,6 +47,16 @@ Usage: hexterm_havoc [options]
 
 ## Assignments
 
+### Assignment 1.08 - Loading Monsters and Objects
+
+For this assignment, we had to use our parser to generate monsters and items within
+the dungeon.  Rather than have random attributes, we picked specific attributes from
+a random description in our parser.  Because I already had a factory implementation 
+in the `character_store` class, I simply created a `gen_npc()` method and used that.
+I also implemented an item parser and used that to generate items and place them in
+the dungeon.  I also added colors to the dungeon and the monsters and items are the
+color of their description.  
+
 ### Assignment 1.07 - Parsing Monster Definitions
 
 For this assignment, we had to build a parser that would parse monster descriptions.
