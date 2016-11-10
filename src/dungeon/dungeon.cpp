@@ -180,7 +180,7 @@ void dungeon::printn(int mode) {
     logger::i("NCURSES: Printing Dungeon mode: %d...", mode);
     clear();
     int i, j;
-    attron(COLOR_PAIR(COLOR_BLACK));
+    attrset(A_NORMAL);
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             char c = tiles[i][j]->char_for_content(mode);
@@ -190,7 +190,22 @@ void dungeon::printn(int mode) {
             mvaddch(i+1, j, c);
         }
     }
-    attroff(COLOR_PAIR(COLOR_BLACK));
+    
+    character* pc = character::get_pc();
+    
+    attron(A_BOLD);
+    for(i = -3; i <= 3; i++) {
+        for(j = -3; j <= 3; j++) {
+            int x_off = pc->position->x + j;
+            int y_off = pc->position->y + i;
+            if(x_off < 1 || x_off > 78 || y_off < 1 || y_off > 19) {
+                continue;
+            }
+            mvaddch(y_off+1, x_off, tiles[y_off][x_off]->char_for_content(mode));
+        }
+    }
+    attroff(A_BOLD);
+    
     character_id_t* alive_npcs = character_store::get_alive_characters();
     for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
         character* c = character_store::npc_for_id(alive_npcs[i]);
@@ -205,7 +220,8 @@ void dungeon::printn(int mode) {
             attroff(COLOR_PAIR(c->color));
         }
     }
-    character* pc = character::get_pc();
+    
+    
     mvaddch(pc->position->y+1, pc->position->x, pc->symb);
     mvaddch(0, 0, ' ');
     refresh();

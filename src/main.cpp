@@ -47,10 +47,16 @@ int main(int argc, char * argv[]) {
     }
     
     parser* p = parser::get_parser();
-    p->parse_monsters();
-    p->parse_items();
+    int pmon = p->parse_monsters();
+    int pobj = p->parse_items();
+    if(pmon > 0) {
+        env_constants::USE_MPARSE = 0;
+    }
+    if(pobj) {
+        env_constants::USE_IPARSE = 0;
+    }
     
-    if(env_constants::PARSE_MODE) {
+    if(env_constants::PARSE_ONLY_MODE) {
         
         p->print_monsters();
         p->print_items();

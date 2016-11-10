@@ -23,9 +23,11 @@
 #include "../events/event_queue.h"
 #include "../parser/parser.h"
 
+int env_constants::USE_IPARSE = 1;
+int env_constants::USE_MPARSE = 1;
 int env_constants::USE_OBJ_DESC = 1; // use parsed objects by default
 int env_constants::USE_MON_DESC = 1; // use parsed monsters by default
-int env_constants::PARSE_MODE = 0;
+int env_constants::PARSE_ONLY_MODE = 0;
 int env_constants::DEBUG_MODE = 0;
 int env_constants::NCURSES_MODE = 0; // pc control enabled by default (so ncurses is enabled implicitly)
 int env_constants::PC_AI_MODE = 0;
@@ -73,7 +75,7 @@ void env::setup_environment() {
         env_constants::NCURSES_MODE = 1; // pc control means we must use NCURSES_MODE
     }
     
-    if(env_constants::PARSE_MODE) {
+    if(env_constants::PARSE_ONLY_MODE) {
         env_constants::NCURSES_MODE = 0;
     }
     
@@ -196,7 +198,7 @@ void env::parse_args(int argc, char** argv) {
                 break;
                 
             case 'p':
-                env_constants::PARSE_MODE = 1;
+                env_constants::PARSE_ONLY_MODE = 1;
                 break;
                 
             case 'l':

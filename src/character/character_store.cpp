@@ -79,7 +79,7 @@ void character_store::setup() {
     }
     for(i = 0; i < _characters_size; i++) {
         
-        character* npc = gen_npc(true);
+        character* npc = gen_npc(env_constants::USE_MPARSE);
         npc->id = i+1;
         
         setup_npc(npc);

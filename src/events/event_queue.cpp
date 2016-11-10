@@ -29,23 +29,31 @@ void event_queue::add_event(character* c) {
 }
 
 int event_queue::perform_event() {
-    int character_ec;
     if(_event_queue->is_empty()) {
         logger::t("perform event called, but there are no events in the event queue!");
         return 0;
     }
-    character_ec = EVENT_TIME;
     // perform move
-    while(character_ec == EVENT_TIME) {
-        character* c = _event_queue->remove();
+    character* c;
+    do {
+        c = _event_queue->remove();
         EVENT_TIME = c->event_count;
         c->perform();
         c = _event_queue->peek();
         if(c == NULL) {
             break;
         }
-        character_ec = c->event_count;
-    }
+    } while(c->event_count == EVENT_TIME);
+    
+//    while(c->event_count == EVENT_TIME) {
+//        EVENT_TIME = c->event_count;
+//        c->perform();
+//        c = _event_queue->peek();
+//        if(c == NULL) {
+//            break;
+//        }
+//        c = _event_queue->remove();
+//    }
     character_store::npc_cleanup();
     if(env_constants::QUIT_FLAG == 1) {
         return 0;

@@ -16,7 +16,9 @@ typedef unsigned char uint8_t;
 
 class env_constants {
 public:
-    static int PARSE_MODE;
+    static int USE_IPARSE;
+    static int USE_MPARSE;
+    static int PARSE_ONLY_MODE;
     static int DEBUG_MODE;
     static int NCURSES_MODE; // pc control enabled by default (so ncurses is enabled implicitly)
     static int PC_AI_MODE;
