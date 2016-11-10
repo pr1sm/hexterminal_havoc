@@ -13,6 +13,7 @@
 #include "../events/event_queue.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
+#include "../items/item_store.h"
 
 void pc_control::setup_control_movement() {
     event_queue::add_event(character::get_pc());
@@ -181,6 +182,11 @@ void pc_control::handle_control_move() {
         }
     } else if(move == mv_RS) {
         logger::i("Resting 1 turn");
+    }
+    
+    // check items
+    if(item_store::contains_item(pc->position)) {
+        item_store::pickup_item(pc->position);
     }
     
     delete dest;

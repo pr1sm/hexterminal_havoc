@@ -19,6 +19,7 @@
 #include "logger/logger.h"
 #include "tile/tile.h"
 #include "character/character_store.h"
+#include "items/item_store.h"
 #include "events/event_queue.h"
 #include "parser/parser.h"
 
@@ -76,6 +77,7 @@ int main(int argc, char * argv[]) {
     d->update_path_maps();
     
     character_store::setup();
+    item_store::setup();
     
     if(env_constants::DEBUG_MODE) {
         d->print(PM_ROOM_PATH_MAP);

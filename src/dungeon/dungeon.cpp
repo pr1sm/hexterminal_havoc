@@ -22,6 +22,7 @@
 #include "../env/env.h"
 #include "../character/character.h"
 #include "../character/character_store.h"
+#include "../items/item_store.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
@@ -218,6 +219,19 @@ void dungeon::printn(int mode) {
             attron(COLOR_PAIR(c->color));
             mvaddch(c->position->y + 1, c->position->x, content);
             attroff(COLOR_PAIR(c->color));
+        }
+    }
+    
+    item** items = item_store::get_items();
+    for(i = 0; i < item_store::ITEM_COUNT; i++) {
+        item* item = items[i];
+        if(item->position->distance_to(pc->position) > 3) {
+            continue;
+        }
+        if(!item->picked_up) {
+            attron(COLOR_PAIR(item->color));
+            mvaddch(item->position->y+1, item->position->x, item->symb);
+            attroff(COLOR_PAIR(item->color));
         }
     }
     

@@ -22,6 +22,7 @@
 #include "../dungeon/dungeon.h"
 #include "../events/event_queue.h"
 #include "../parser/parser.h"
+#include "../items/item_store.h"
 
 int env_constants::USE_IPARSE = 1;
 int env_constants::USE_MPARSE = 1;
@@ -270,6 +271,7 @@ void env::cleanup() {
     }
     
     character_store::teardown();
+    item_store::teardown();
     event_queue::teardown();
     dungeon::teardown();
     parser::destroy_parser();

@@ -38,6 +38,10 @@ typedef enum object_type {
 
 class item_description {
 private:
+    std::string print_color();
+    std::string print_type();
+    
+public:
     object_type type;
     std::string name;
     std::string desc;
@@ -51,11 +55,6 @@ private:
     dice* speed;
     dice* attribute;
     dice* value;
-    
-    std::string print_color();
-    std::string print_type();
-    
-public:
     
     item_description();
     ~item_description();
