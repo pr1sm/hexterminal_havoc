@@ -61,6 +61,7 @@ public:
 };
 
 class VertexComparator : public comparator<vertex> {
+public:
     virtual int compare(const vertex* v1, const vertex* v2) {
         return v1->dist - v2->dist;
     }

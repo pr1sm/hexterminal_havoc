@@ -43,6 +43,7 @@ parser::~parser() {
                 delete item_list[i];
             }
         }
+        free(item_list);
     }
 }
 

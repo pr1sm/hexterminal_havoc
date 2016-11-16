@@ -17,10 +17,12 @@
 
 event_counter_t event_queue::EVENT_TIME = 0;
 heap<character>* event_queue::_event_queue = NULL;
+EventQueueComparator* event_queue::_eqc = NULL;
 
 void event_queue::add_event(character* c) {
     if(_event_queue == NULL) {
-        _event_queue = new heap<character>((comparator<character>*)new EventQueueComparator(), false);
+        _eqc = new EventQueueComparator();
+        _event_queue = new heap<character>((comparator<character>*)_eqc, false);
     }
     uint8_t tc;
     tc = c->turn_count;
@@ -63,8 +65,10 @@ int event_queue::perform_event() {
 
 void event_queue::teardown() {
     if(_event_queue != NULL) {
+        delete _eqc;
         delete _event_queue;
         _event_queue = NULL;
+        _eqc = NULL;
     }
 }
 
