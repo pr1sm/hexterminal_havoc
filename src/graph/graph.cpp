@@ -102,7 +102,7 @@ path_node::path_node(point* p) {
 
 path_node::~path_node() {
     if(curr != NULL) {
-        free(curr);
+        delete curr;
     }
     if(next != NULL) {
         delete next;

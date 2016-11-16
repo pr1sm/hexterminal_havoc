@@ -19,7 +19,9 @@ public:
     int sides;
     
     dice(std::string str);
+    dice(dice* dice);
     
+    int roll();
     std::string to_string();
 };
 

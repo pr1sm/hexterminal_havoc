@@ -9,7 +9,11 @@
 #ifndef character_h
 #define character_h
 
+#include <string>
+
 #include "../point/point.h"
+#include "../parser/monster_description.h"
+#include "../parser/dice.h"
 
 #define INTEL_BIT 0
 #define TELEP_BIT 1
@@ -23,29 +27,41 @@
 #define PASS_VAL  (1 << PASS_BIT)
 
 typedef enum character_type {
-    NONE, PC, NPC
+    NONE = 0, PC, NPC
 } character_type;
 
 typedef int character_id_t;
 
 class character {
+private:
+    char char_for_npc_type();
 public:
-    character_id_t _id;
-    character_type _type;
-    point* _position;
-    point* _destination;
-    int _event_count;
-    uint8_t _attrs;
-    uint8_t _speed;
-    uint8_t _turn_count;
-    uint8_t _is_dead;
+    character_id_t id;
+    character_type type;
+    point* position;
+    point* destination;
+    int event_count;
+    uint8_t attrs;
+    uint8_t speed;
+    uint8_t turn_count;
+    uint8_t is_dead;
+    
+    std::string name;
+    std::string desc;
+    int color;
+    int hitpoints;
+    char symb;
+    dice* damage;
+    
+    bool is_seen; // is the character within the light of the pc
     
     character(character_type type, point* spawn);
+    character(character_type type, point* spawn, monster_description* descriptor);
     ~character();
     void set_position(point* p);
     void set_destination(point* p);
     void perform();
-    char char_for_npc_type();
+    char get_print_symb(int mode);
     
     static character* get_pc();
     static void       teardown_pc();

@@ -92,6 +92,7 @@ int pathing::dijkstra(graph* g, point* a, point* b) {
             }
         }
     }
+    delete vc;
     delete h;
     return 0;
 }

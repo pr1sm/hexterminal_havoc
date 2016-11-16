@@ -17,40 +17,45 @@
 
 event_counter_t event_queue::EVENT_TIME = 0;
 heap<character>* event_queue::_event_queue = NULL;
+EventQueueComparator* event_queue::_eqc = NULL;
 
 void event_queue::add_event(character* c) {
     if(_event_queue == NULL) {
-        _event_queue = new heap<character>((comparator<character>*)new EventQueueComparator(), NULL);
+        _eqc = new EventQueueComparator();
+        _event_queue = new heap<character>((comparator<character>*)_eqc, false);
     }
     uint8_t tc;
-    tc = c->_turn_count;
-    c->_event_count = EVENT_TIME + tc;
+    tc = c->turn_count;
+    c->event_count = EVENT_TIME + tc;
     _event_queue->insert(c);
 }
 
 int event_queue::perform_event() {
-    int character_ec;
     if(_event_queue->is_empty()) {
         logger::t("perform event called, but there are no events in the event queue!");
         return 0;
     }
-    character* c = _event_queue->remove();
-    EVENT_TIME = c->_event_count;
-    
-    c->perform();
-    
-    // check if anything else should be moved
-    c = _event_queue->peek();
-    character_ec = c->_event_count;
-    while(character_ec == EVENT_TIME) {
+    // perform move
+    character* c;
+    do {
         c = _event_queue->remove();
+        EVENT_TIME = c->event_count;
         c->perform();
         c = _event_queue->peek();
         if(c == NULL) {
             break;
         }
-        character_ec = c->_event_count;
-    }
+    } while(c->event_count == EVENT_TIME);
+    
+//    while(c->event_count == EVENT_TIME) {
+//        EVENT_TIME = c->event_count;
+//        c->perform();
+//        c = _event_queue->peek();
+//        if(c == NULL) {
+//            break;
+//        }
+//        c = _event_queue->remove();
+//    }
     character_store::npc_cleanup();
     if(env_constants::QUIT_FLAG == 1) {
         return 0;
@@ -60,8 +65,10 @@ int event_queue::perform_event() {
 
 void event_queue::teardown() {
     if(_event_queue != NULL) {
+        delete _eqc;
         delete _event_queue;
         _event_queue = NULL;
+        _eqc = NULL;
     }
 }
 

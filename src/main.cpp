@@ -19,6 +19,7 @@
 #include "logger/logger.h"
 #include "tile/tile.h"
 #include "character/character_store.h"
+#include "items/item_store.h"
 #include "events/event_queue.h"
 #include "parser/parser.h"
 
@@ -37,8 +38,6 @@ int main(int argc, char * argv[]) {
     }
 #endif // DEBUG
     
-    env_constants::PARSE_MODE = 1; // parse only
-    
     env::parse_args(argc, argv);
     env::setup_environment();
     
@@ -48,10 +47,22 @@ int main(int argc, char * argv[]) {
         logger::set_modes_enabled(LOG_I | LOG_W | LOG_E | LOG_F);
     }
     
-    parser p;
-    p.parse_monsters();
+    parser* p = parser::get_parser();
+    int pmon = p->parse_monsters();
+    int pobj = p->parse_items();
+    if(pmon > 0) {
+        env_constants::USE_MPARSE = 0;
+    }
+    if(pobj) {
+        env_constants::USE_IPARSE = 0;
+    }
     
-    if(env_constants::PARSE_MODE) {
+    if(env_constants::PARSE_ONLY_MODE) {
+        
+        p->print_monsters();
+        p->print_items();
+        env::cleanup();
+        
         return 0;
     }
     
@@ -66,6 +77,7 @@ int main(int argc, char * argv[]) {
     d->update_path_maps();
     
     character_store::setup();
+    item_store::setup();
     
     if(env_constants::DEBUG_MODE) {
         d->print(PM_ROOM_PATH_MAP);

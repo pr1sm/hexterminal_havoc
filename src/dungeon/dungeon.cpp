@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 #include <ncurses.h>
 
 #include "dungeon.h"
@@ -22,6 +21,8 @@
 #include "../logger/logger.h"
 #include "../env/env.h"
 #include "../character/character.h"
+#include "../character/character_store.h"
+#include "../items/item_store.h"
 
 #define POINT_LIMIT (DUNGEON_HEIGHT*DUNGEON_WIDTH/25)
 
@@ -51,7 +52,6 @@ void dungeon::teardown() {
 dungeon::dungeon() {
     logger::i("Constructing Dungeon...");
     int i, j;
-    srand((unsigned)time(NULL));
     tiles = (tile***)calloc(DUNGEON_HEIGHT, sizeof(*tiles));
     
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
@@ -134,7 +134,7 @@ void dungeon::generate() {
 }
 
 void dungeon::update_path_maps() {
-    point* p = character::get_pc()->_position;
+    point* p = character::get_pc()->position;
     if(tunnel_map == NULL) {
         tunnel_map = pathfinder::construct(this, 1);
     }
@@ -181,6 +181,7 @@ void dungeon::printn(int mode) {
     logger::i("NCURSES: Printing Dungeon mode: %d...", mode);
     clear();
     int i, j;
+    attrset(A_NORMAL);
     for(i = 0; i < DUNGEON_HEIGHT; i++) {
         for(j = 0; j < DUNGEON_WIDTH; j++) {
             char c = tiles[i][j]->char_for_content(mode);
@@ -190,6 +191,53 @@ void dungeon::printn(int mode) {
             mvaddch(i+1, j, c);
         }
     }
+    
+    character* pc = character::get_pc();
+    
+    attron(A_BOLD);
+    for(i = -3; i <= 3; i++) {
+        for(j = -3; j <= 3; j++) {
+            int x_off = pc->position->x + j;
+            int y_off = pc->position->y + i;
+            if(x_off < 1 || x_off > 78 || y_off < 1 || y_off > 19) {
+                continue;
+            }
+            mvaddch(y_off+1, x_off, tiles[y_off][x_off]->char_for_content(mode));
+        }
+    }
+    attroff(A_BOLD);
+    
+    character_id_t* alive_npcs = character_store::get_alive_characters();
+    for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
+        character* c = character_store::npc_for_id(alive_npcs[i]);
+        char content = c->get_print_symb(mode);
+        if(content != c->symb) {
+            attron(COLOR_PAIR(COLOR_BLACK));
+            mvaddch(c->position->y + 1, c->position->x, content);
+            attroff(COLOR_PAIR(COLOR_BLACK));
+        } else {
+            attron(COLOR_PAIR(c->color));
+            mvaddch(c->position->y + 1, c->position->x, content);
+            attroff(COLOR_PAIR(c->color));
+        }
+    }
+    
+    item** items = item_store::get_items();
+    for(i = 0; i < item_store::ITEM_COUNT; i++) {
+        item* item = items[i];
+        if(item->position->distance_to(pc->position) > 3) {
+            continue;
+        }
+        if(!item->picked_up) {
+            attron(COLOR_PAIR(item->color));
+            mvaddch(item->position->y+1, item->position->x, item->symb);
+            attroff(COLOR_PAIR(item->color));
+        }
+    }
+    
+    
+    mvaddch(pc->position->y+1, pc->position->x, pc->symb);
+    mvaddch(0, 0, ' ');
     refresh();
     logger::i("Dungeon Printed");
 }

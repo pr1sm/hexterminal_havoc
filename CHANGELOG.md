@@ -4,6 +4,14 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.08] - 2016-11-9
+
+### Added
+- added item parser
+- implemented monster factory
+- implemented item factory
+- added colors to dungeon!
+
 ## [1.07] - 2016-11-2
 
 ### Added

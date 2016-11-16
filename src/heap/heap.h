@@ -155,7 +155,7 @@ heap<T>::~heap() {
         }
         delete _array[i];
     }
-    delete _array;
+    free(_array);
 }
 
 template<class T>

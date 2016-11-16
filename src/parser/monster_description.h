@@ -10,10 +10,15 @@
 #define monster_description_h
 
 #include <string>
+
 #include "dice.h"
 
 class monster_description {
 private:
+    std::string print_attributes();
+    std::string print_color();
+    
+public:
     dice* speed;
     dice* hitpoints;
     dice* damage;
@@ -22,10 +27,6 @@ private:
     std::string name;
     int color;
     int attributes;
-    
-    std::string print_attributes();
-    std::string print_color();
-public:
     
     monster_description();
     ~monster_description();

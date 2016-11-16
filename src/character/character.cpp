@@ -7,7 +7,7 @@
 //
 
 #include <stdlib.h>
-
+#include <ncurses.h>
 
 #include "character.h"
 #include "ai.h"
@@ -15,46 +15,133 @@
 #include "../point/point.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
+#include "../parser/monster_description.h"
+#include "../parser/dice.h"
+
+#define PC_CHAR '@'
 
 static character* gPLAYER_CHARACTER = NULL;
 
 character::character(character_type type, point* spawn) {
-    _type = type;
-    if(_type == PC) {
-        _speed = 10;
-        _attrs = 0;
+    this->type = type;
+    if(type== PC) {
+        speed = 10;
+        attrs = 0;
+        name = "player";
+        desc = "the player character";
+        color = COLOR_BLACK;
+        hitpoints = 100;
+        damage = new dice("100+0d0"); // constant damage
+        symb = PC_CHAR;
+        is_seen = true;
     } else if(type == NPC) {
-        _speed = (rand() & 0xf) + 5;
-        _attrs = rand() & 0xf;
+        speed = (rand() & 0xf) + 5;
+        attrs = rand() & 0xf;
+        name = "Random Monster";
+        desc = "a monster with random abilities";
+        color = COLOR_BLACK;
+        hitpoints = 50;
+        damage = new dice("50+0d0"); // constant damage
+        symb = char_for_npc_type();
+        is_seen = false;
     } else {
         logger::w("Invalid type passed into character constructor!");
-        _speed = 1;
-        _attrs = 0;
+        speed = 1;
+        attrs = 0;
+        name = "Software bug";
+        desc = "something is wrong";
+        color = COLOR_RED;
+        hitpoints = 10000;
+        damage = new dice("1+0d0"); // constant damage
+        symb = 'z';
+        is_seen = true;
     }
-    _turn_count = 100 / _speed;
-    _is_dead = 0;
-    _event_count = 0;
-    _id = -1;
+    turn_count = 100 / speed;
+    is_dead = 0;
+    event_count = 0;
+    id = -1;
     
     if(spawn == NULL) {
         logger::w("NULL point passed into character constructor!");
-        _position = new point(0, 0);
+        position = new point(0, 0);
     } else {
-        _position = new point(spawn);
+        position = new point(spawn);
     }
-    _destination = NULL;
+    destination = NULL;
+}
+
+character::character(character_type type, point* spawn, monster_description* descriptor) {
+    this->type = type;
+    if(type == PC) {
+        speed = 10;
+        attrs = 0;
+        name = "player";
+        desc = "the player character";
+        color = COLOR_BLACK;
+        hitpoints = 100;
+        damage = new dice("100+0d0"); // constant damage
+        symb = PC_CHAR;
+        is_seen = true;
+    } else if(type == NPC) {
+        // Use descriptor
+        if(descriptor == NULL) {
+            logger::w("character constructor with NULL descriptor! generating random monster");
+            speed = (rand() & 0xf) + 5;
+            attrs = rand() & 0xf;
+            name = "Random Monster";
+            desc = "a monster with random abilities";
+            color = COLOR_BLACK;
+            hitpoints = 50;
+            damage = new dice("50+0d0"); // constant damage
+            symb = char_for_npc_type();
+        } else {
+            speed     = descriptor->speed->roll();
+            attrs     = descriptor->attributes;
+            name      = descriptor->name;
+            desc      = descriptor->desc;
+            color     = descriptor->color;
+            hitpoints = descriptor->hitpoints->roll();
+            damage    = new dice(descriptor->damage);
+            symb      = descriptor->symb;
+        }
+        is_seen = false;
+    } else {
+        logger::w("Invalid type passed into character constructor!");
+        speed = 1;
+        attrs = 0;
+        name = "Software bug";
+        desc = "something is wrong";
+        color = COLOR_RED;
+        hitpoints = 10000;
+        damage = new dice("50+0d0"); // constant damage
+        symb = 'z';
+        is_seen = true;
+    }
+    turn_count = 100 / speed;
+    is_dead = 0;
+    event_count = 0;
+    id = -1;
+    
+    if(spawn == NULL) {
+        logger::w("NULL point passed into character constructor!");
+        position = new point(0, 0);
+    } else {
+        position = new point(spawn);
+    }
+    destination = NULL;
 }
 
 character::~character() {
     static int char_count = 0;
     logger::i("character destructor called - %d", ++char_count);
-    if(_position != NULL) {
-        logger::i("destructing position");
-        delete _position;
+    if(position != NULL) {
+        delete position;
     }
-    if(_destination != NULL) {
-        logger::i("destructing destination");
-        delete _destination;
+    if(destination != NULL) {
+        delete destination;
+    }
+    if(damage != NULL) {
+        delete damage;
     }
 }
 
@@ -63,37 +150,37 @@ void character::set_position(point* p) {
         logger::w("NULL point passed into set_position! position will remain unchanged");
         return;
     }
-    if(_position == NULL) {
-        _position = new point(p);
+    if(position == NULL) {
+        position = new point(p);
     } else {
-        _position->x = p->x;
-        _position->y = p->y;
+        position->x = p->x;
+        position->y = p->y;
     }
 }
 
 void character::set_destination(point* p) {
     if(p == NULL) {
         logger::w("NULL point passed into set_point! destructing point!");
-        delete _destination;
-        _destination = NULL;
+        delete destination;
+        destination = NULL;
         return;
     }
-    if(_destination == NULL) {
-        _destination = new point(p);
+    if(destination == NULL) {
+        destination = new point(p);
     } else {
-        _destination->x = p->x;
-        _destination->y = p->y;
+        destination->x = p->x;
+        destination->y = p->y;
     }
 }
 
 void character::perform() {
-    if(_type == PC) {
+    if(type == PC) {
         if(env_constants::PC_AI_MODE) {
             ai::handle_pc_move();
         } else {
             pc_control::handle_control_move();
         }
-    } else if(_type == NPC) {
+    } else if(type == NPC) {
         ai::handle_npc_move(this);
     } else {
         logger::w("performed called on character with invalid type! doing nothing");
@@ -117,7 +204,7 @@ character* character::get_pc() {
             dungeon::rand_point(dungeon::get_dungeon(), &spawn);
         }
         gPLAYER_CHARACTER = new character(PC, &spawn);
-        gPLAYER_CHARACTER->_id = 0;
+        gPLAYER_CHARACTER->id = 0;
     }
     return gPLAYER_CHARACTER;
 }
@@ -130,11 +217,20 @@ void character::teardown_pc() {
 }
 
 char character::char_for_npc_type() {
-    if(_type == PC) {
+    if(type == PC) {
         return '@';
     }
-    if(_attrs < 10) {
-        return '0' + _attrs;
+    if(attrs < 10) {
+        return '0' + attrs;
     }
-    return 'a' + _attrs - 10;
+    return 'a' + attrs - 10;
+}
+
+char character::get_print_symb(int mode) {
+    dungeon* d = dungeon::get_dungeon();
+    tile* t = d->tiles[position->y][position->x];
+    if(is_seen) {
+        return symb;
+    }
+    return t->char_for_content(mode);
 }
