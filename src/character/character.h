@@ -14,6 +14,7 @@
 #include "../point/point.h"
 #include "../parser/monster_description.h"
 #include "../parser/dice.h"
+#include "../items/item.h"
 
 #define INTEL_BIT 0
 #define TELEP_BIT 1
@@ -35,6 +36,7 @@ typedef int character_id_t;
 class character {
 private:
     char char_for_npc_type();
+    void update_stats();
 public:
     character_id_t id;
     character_type type;
@@ -42,6 +44,7 @@ public:
     point* destination;
     int event_count;
     uint8_t attrs;
+    uint8_t base_speed;
     uint8_t speed;
     uint8_t turn_count;
     uint8_t is_dead;
@@ -55,6 +58,11 @@ public:
     
     bool is_seen; // is the character within the light of the pc
     
+    // PC only attributes
+    item** inventory;
+    int inventory_size;
+    int inventory_len;
+    
     character(character_type type, point* spawn);
     character(character_type type, point* spawn, monster_description* descriptor);
     ~character();
@@ -63,6 +71,11 @@ public:
     void perform();
     char get_print_symb(int mode);
     
+    static int        pc_expunge_item(item* i);
+    static int        pc_drop_item(item* i);
+    static int        pc_equip_item(item* i);
+    static int        pc_unequip_item(item* i);
+    static int        pc_pickup_item(item* i);
     static character* get_pc();
     static void       teardown_pc();
 };

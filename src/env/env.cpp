@@ -285,6 +285,7 @@ void env::move_floors() {
     event_queue::move_floors();
     dungeon::move_floors();
     character_store::move_floors();
+    item_store::move_floors();
     env_constants::STAIR_FLAG = 0; // reset flag
 }
 

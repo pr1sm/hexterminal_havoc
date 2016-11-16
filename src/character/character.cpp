@@ -17,6 +17,8 @@
 #include "../dungeon/dungeon.h"
 #include "../parser/monster_description.h"
 #include "../parser/dice.h"
+#include "../items/item.h"
+#include "../items/item_store.h"
 
 #define PC_CHAR '@'
 
@@ -26,6 +28,7 @@ character::character(character_type type, point* spawn) {
     this->type = type;
     if(type== PC) {
         speed = 10;
+        base_speed = speed;
         attrs = 0;
         name = "player";
         desc = "the player character";
@@ -36,6 +39,7 @@ character::character(character_type type, point* spawn) {
         is_seen = true;
     } else if(type == NPC) {
         speed = (rand() & 0xf) + 5;
+        base_speed = speed;
         attrs = rand() & 0xf;
         name = "Random Monster";
         desc = "a monster with random abilities";
@@ -47,6 +51,7 @@ character::character(character_type type, point* spawn) {
     } else {
         logger::w("Invalid type passed into character constructor!");
         speed = 1;
+        base_speed = speed;
         attrs = 0;
         name = "Software bug";
         desc = "something is wrong";
@@ -56,6 +61,9 @@ character::character(character_type type, point* spawn) {
         symb = 'z';
         is_seen = true;
     }
+    inventory = NULL;
+    inventory_size = 0;
+    inventory_len = 0;
     turn_count = 100 / speed;
     is_dead = 0;
     event_count = 0;
@@ -74,6 +82,7 @@ character::character(character_type type, point* spawn, monster_description* des
     this->type = type;
     if(type == PC) {
         speed = 10;
+        base_speed = speed;
         attrs = 0;
         name = "player";
         desc = "the player character";
@@ -87,6 +96,7 @@ character::character(character_type type, point* spawn, monster_description* des
         if(descriptor == NULL) {
             logger::w("character constructor with NULL descriptor! generating random monster");
             speed = (rand() & 0xf) + 5;
+            base_speed = speed;
             attrs = rand() & 0xf;
             name = "Random Monster";
             desc = "a monster with random abilities";
@@ -96,6 +106,7 @@ character::character(character_type type, point* spawn, monster_description* des
             symb = char_for_npc_type();
         } else {
             speed     = descriptor->speed->roll();
+            base_speed = speed;
             attrs     = descriptor->attributes;
             name      = descriptor->name;
             desc      = descriptor->desc;
@@ -108,6 +119,7 @@ character::character(character_type type, point* spawn, monster_description* des
     } else {
         logger::w("Invalid type passed into character constructor!");
         speed = 1;
+        base_speed = speed;
         attrs = 0;
         name = "Software bug";
         desc = "something is wrong";
@@ -117,6 +129,9 @@ character::character(character_type type, point* spawn, monster_description* des
         symb = 'z';
         is_seen = true;
     }
+    inventory = NULL;
+    inventory_size = 0;
+    inventory_len = 0;
     turn_count = 100 / speed;
     is_dead = 0;
     event_count = 0;
@@ -216,6 +231,166 @@ void character::teardown_pc() {
     }
 }
 
+int character::pc_pickup_item(item* i) {
+    if(i == NULL) {
+        logger::w("PC pickup called with NULL item");
+        return 1;
+    }
+    
+    character* pc = get_pc();
+    if(pc->inventory == NULL) {
+        pc->inventory_size = 10;
+        pc->inventory_len = 0;
+        pc->inventory = (item**)calloc(pc->inventory_size, sizeof(*pc->inventory));
+    }
+    
+    if(pc->inventory_size == pc->inventory_len) {
+        logger::w("PC has full inventory already");
+        return 2;
+    }
+    
+    i->state = is_picked_up;
+    pc->inventory[pc->inventory_len++] = i;
+    return 0;
+}
+
+int character::pc_drop_item(item* i) {
+    if(i == NULL) {
+        logger::w("PC drop called with NULL item");
+        return 1;
+    }
+    
+    int c;
+    int idx = -1;
+    character* pc = get_pc();
+    bool in_inventory = false;
+    for(c = 0; c < pc->inventory_len; c++) {
+        if(pc->inventory[c] == i) {
+            in_inventory = true;
+            idx = c;
+            break;
+        }
+    }
+    
+    if(in_inventory == false) {
+        logger::w("PC drop called with item not in inventory");
+        return 2;
+    }
+    
+    if(i->state != is_picked_up) {
+        logger::w("PC drop called with item that is equipped");
+        return 3;
+    }
+    
+    // remove item from the inventory (shift others over it
+    for(c = idx; c < pc->inventory_len-1; c++) {
+        pc->inventory[c] = pc->inventory[c+1];
+    }
+    // last item in list will always be duplicate after shifting
+    pc->inventory[--pc->inventory_len] = NULL;
+    item_store::drop_item(i);
+    return 0;
+}
+
+int character::pc_equip_item(item* i) {
+    if(i == NULL) {
+        logger::w("PC equip called with NULL item");
+        return 1;
+    }
+    
+    int c;
+    character* pc = get_pc();
+    bool in_inventory = false;
+    for(c = 0; c < pc->inventory_len; c++) {
+        if(pc->inventory[c] == i) {
+            in_inventory = true;
+            break;
+        }
+    }
+    
+    if(in_inventory == false) {
+        logger::w("PC equip called with item not in inventory");
+        return 2;
+    }
+    
+    if(i->state != is_picked_up) {
+        logger::w("PC equip called with item that is already equipped");
+        return 3;
+    }
+    
+    i->state = is_equipped;
+    pc->update_stats();
+    return 0;
+}
+
+int character::pc_unequip_item(item* i) {
+    if(i == NULL) {
+        logger::w("PC unequip called with NULL item");
+        return 1;
+    }
+    
+    int c;
+    character* pc = get_pc();
+    bool in_inventory = false;
+    for(c = 0; c < pc->inventory_len; c++) {
+        if(pc->inventory[c] == i) {
+            in_inventory = true;
+            break;
+        }
+    }
+    
+    if(in_inventory == false) {
+        logger::w("PC unequip called with item not in inventory");
+        return 2;
+    }
+    
+    if(i->state != is_equipped) {
+        logger::w("PC unequip called with item that is already not equipped");
+        return 3;
+    }
+    
+    i->state = is_picked_up;
+    pc->update_stats();
+    return 0;
+}
+
+int character::pc_expunge_item(item* i) {
+    if(i == NULL) {
+        logger::w("PC expunge called with NULL item");
+        return 1;
+    }
+    int c;
+    int idx = -1;
+    character* pc = get_pc();
+    bool in_inventory = false;
+    for(c = 0; c < pc->inventory_len; c++) {
+        if(pc->inventory[c] == i) {
+            in_inventory = true;
+            idx = c;
+            break;
+        }
+    }
+    
+    if(in_inventory == false) {
+        logger::w("PC expunge called with item not in inventory");
+        return 2;
+    }
+    
+    if(i->state != is_picked_up) {
+        logger::w("PC expunge called with item that is equipped");
+        return 3;
+    }
+    
+    // remove item from the inventory (shift others over it
+    for(c = idx; c < pc->inventory_len-1; c++) {
+        pc->inventory[c] = pc->inventory[c+1];
+    }
+    // last item in list will always be duplicate after shifting
+    pc->inventory[--pc->inventory_len] = NULL;
+    delete i;
+    return 0;
+}
+
 char character::char_for_npc_type() {
     if(type == PC) {
         return '@';
@@ -233,4 +408,19 @@ char character::get_print_symb(int mode) {
         return symb;
     }
     return t->char_for_content(mode);
+}
+
+void character::update_stats() {
+    int i;
+    int new_speed = base_speed;
+    if(inventory != NULL) {
+        for(i = 0; i < inventory_len; i++) {
+            if(inventory[i]->state == is_equipped) {
+                new_speed += inventory[i]->speed;
+            }
+        }
+    }
+    
+    speed = new_speed <= 0 ? 1 : new_speed;
+    turn_count = 100 / speed;
 }
