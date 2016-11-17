@@ -12,6 +12,7 @@
 #include "character.h"
 #include "ai.h"
 #include "pc_control.h"
+#include "equip_list.h"
 #include "../point/point.h"
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
@@ -64,6 +65,7 @@ character::character(character_type type, point* spawn) {
     inventory = NULL;
     inventory_size = 0;
     inventory_len = 0;
+    equipment = new equip_list();
     turn_count = 100 / speed;
     is_dead = 0;
     event_count = 0;
@@ -132,6 +134,7 @@ character::character(character_type type, point* spawn, monster_description* des
     inventory = NULL;
     inventory_size = 0;
     inventory_len = 0;
+    equipment = new equip_list();
     turn_count = 100 / speed;
     is_dead = 0;
     event_count = 0;
@@ -148,6 +151,7 @@ character::character(character_type type, point* spawn, monster_description* des
 
 character::~character() {
     static int char_count = 0;
+    int i;
     logger::i("character destructor called - %d", ++char_count);
     if(position != NULL) {
         delete position;
@@ -157,6 +161,17 @@ character::~character() {
     }
     if(damage != NULL) {
         delete damage;
+    }
+    if(equipment != NULL) {
+        delete equipment;
+    }
+    if(inventory != NULL) {
+        for(i = 0; i < inventory_size; i++) {
+            if(inventory[i] != NULL) {
+                delete inventory[i];
+            }
+        }
+        free(inventory);
     }
 }
 
@@ -299,10 +314,12 @@ int character::pc_equip_item(item* i) {
     }
     
     int c;
+    int idx = 0;
     character* pc = get_pc();
     bool in_inventory = false;
     for(c = 0; c < pc->inventory_len; c++) {
         if(pc->inventory[c] == i) {
+            idx = c;
             in_inventory = true;
             break;
         }
@@ -319,6 +336,16 @@ int character::pc_equip_item(item* i) {
     }
     
     i->state = is_equipped;
+    item* swapped = pc->equipment->equip(i);
+    if(swapped != NULL) {
+        swapped->state = is_picked_up;
+    }
+    // remove item from the inventory (shift others over it
+    for(c = idx; c < pc->inventory_len-1; c++) {
+        pc->inventory[c] = pc->inventory[c+1];
+    }
+    // last item in list will always be duplicate after shifting, put swapped item in that place
+    pc->inventory[pc->inventory_len-1] = swapped;
     pc->update_stats();
     return 0;
 }
@@ -329,27 +356,30 @@ int character::pc_unequip_item(item* i) {
         return 1;
     }
     
-    int c;
     character* pc = get_pc();
-    bool in_inventory = false;
-    for(c = 0; c < pc->inventory_len; c++) {
-        if(pc->inventory[c] == i) {
-            in_inventory = true;
-            break;
-        }
-    }
     
-    if(in_inventory == false) {
-        logger::w("PC unequip called with item not in inventory");
+    if(i->state != is_equipped) {
+        logger::w("PC unequip called with item not equipped");
         return 2;
     }
     
-    if(i->state != is_equipped) {
-        logger::w("PC unequip called with item that is already not equipped");
+    item* swapped = pc->equipment->unequip(i->type);
+    
+    if(swapped == NULL) {
+        // deal with error
+        logger::w("PC unequip call returned NULL value!");
         return 3;
     }
     
-    i->state = is_picked_up;
+    // if we are at max carrying, drop the item
+    if(pc->inventory_len == pc->inventory_size) {
+        item_store::drop_item(swapped);
+        return 0;
+    }
+    
+    // add it to inventory
+    swapped->state = is_picked_up;
+    pc->inventory[pc->inventory_len++] = swapped;
     pc->update_stats();
     return 0;
 }
@@ -413,10 +443,12 @@ char character::get_print_symb(int mode) {
 void character::update_stats() {
     int i;
     int new_speed = base_speed;
-    if(inventory != NULL) {
-        for(i = 0; i < inventory_len; i++) {
-            if(inventory[i]->state == is_equipped) {
-                new_speed += inventory[i]->speed;
+    item** equipped_items = equipment->equipped_items();
+    if(equipped_items != NULL) {
+        for(i = 0; i < equipment->equip_list_length; i++) {
+            item* itm = equipped_items[i];
+            if(itm != NULL) {
+                new_speed += itm->speed;
             }
         }
     }

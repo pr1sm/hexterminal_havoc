@@ -11,6 +11,7 @@
 
 #include <string>
 
+#include "equip_list.h"
 #include "../point/point.h"
 #include "../parser/monster_description.h"
 #include "../parser/dice.h"
@@ -62,6 +63,7 @@ public:
     item** inventory;
     int inventory_size;
     int inventory_len;
+    equip_list* equipment;
     
     character(character_type type, point* spawn);
     character(character_type type, point* spawn, monster_description* descriptor);

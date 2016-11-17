@@ -14,6 +14,7 @@
 #include "../logger/logger.h"
 #include "../dungeon/dungeon.h"
 #include "../items/item_store.h"
+#include "../items/item.h"
 
 void pc_control::setup_control_movement() {
     event_queue::add_event(character::get_pc());
@@ -102,6 +103,11 @@ void pc_control::handle_control_move() {
                 move = mv_UPSTR;
                 break;
                 
+            case PC_INV_LIST:
+                move = mv_IL;
+                is_valid = 1;
+                break;
+                
             default:
                 mvprintw(0, 0, "INVALID COMMAND: %3d                            ", ch);
                 refresh();
@@ -153,6 +159,12 @@ void pc_control::handle_control_move() {
             mvprintw(0, 0, "ENTER COMMAND:                          ");
             refresh();
             is_valid = 0;
+        } else if(move == mv_IL) {
+            pc_control::show_inventory();
+            dungeon::get_dungeon()->print(PM_DUNGEON);
+            mvprintw(0, 0, "ENTER COMMAND:                          ");
+            refresh();
+            is_valid = 0;
         }
     } while(!is_valid);
     
@@ -193,3 +205,70 @@ void pc_control::handle_control_move() {
     event_queue::add_event(pc);
 }
 
+void pc_control::show_inventory() {
+    if(!env_constants::NCURSES_MODE) {
+        return;
+    }
+    character* pc = character::get_pc();
+    int i;
+    clear();
+    mvprintw(0, 0, "Press ESC to close...");
+    if(pc->inventory_size > 0) {
+        mvprintw(1, 1, "Inventory List");
+        for(i = 0; i < pc->inventory_size; i++) {
+            item* item = pc->inventory[i];
+            if(item == NULL) {
+                mvprintw(i+2, 3, "%d) EMPTY", i);
+            } else if(item->state == is_picked_up) {
+                attron(COLOR_PAIR(item->color));
+                mvprintw(i+2, 3, "%d) %c - %s (sp: %d, dmg: %s)", i, item->symb, item->name.c_str(), item->speed, item->damage->to_string().c_str());
+                attroff(COLOR_PAIR(item->color));
+            } else {
+                mvprintw(i+2, 3, "%d) EMPTY", i);
+            }
+        }
+    } else {
+       mvprintw(1, 1, "Inventory List - EMPTY! (pickup some items around the dungeon!)");
+    }
+    refresh();
+    int next_cmd = 0;
+    do {
+        next_cmd = getch();
+    } while(next_cmd != PC_ML_CLOSE);
+}
+
+void pc_control::show_equipment() {
+    if(!env_constants::NCURSES_MODE) {
+        return;
+    }
+    character* pc = character::get_pc();
+    int i;
+    clear();
+    mvprintw(0, 0, "Press ESC to close...");
+    if(pc->inventory_size > 0) {
+        mvprintw(1, 1, "Inventory List");
+        for(i = 0; i < pc->inventory_size; i++) {
+            item* item = pc->inventory[i];
+            if(item == NULL) {
+                mvprintw(i+2, 3, "%d) EMPTY", i);
+            } else if(item->state == is_picked_up) {
+                attron(COLOR_PAIR(item->color));
+                mvprintw(i+2, 3, "%d) %c - %s (sp: %d, dmg: %s)", i, item->symb, item->name.c_str(), item->speed, item->damage->to_string().c_str());
+                attroff(COLOR_PAIR(item->color));
+            } else {
+                mvprintw(i+2, 3, "%d) EMPTY", i);
+            }
+        }
+    } else {
+        mvprintw(1, 1, "Inventory List - EMPTY! (pickup some items around the dungeon!)");
+    }
+    refresh();
+    int next_cmd = 0;
+    do {
+        next_cmd = getch();
+    } while(next_cmd != PC_ML_CLOSE);
+}
+
+void pc_control::inspect_inventory() {
+    
+}

@@ -34,14 +34,24 @@
 #define PC_ML_SCRL_UP   259
 #define PC_ML_SCRL_DOWN 258
 #define PC_ML_CLOSE      27
+#define PC_INV_LIST     105
+#define PC_EQP_LIST     101
+#define PC_INV_INSPECT   73
+#define PC_EQUIP        119
+#define PC_UNEQUIP      116
+#define PC_DROP         100
+#define PC_EXPUNGE      120
 
 typedef enum pc_move_t {
-    mv_NONE, mv_UL, mv_UP, mv_UR, mv_LT, mv_RT, mv_DL, mv_DN, mv_DR, mv_RS, mv_UPSTR, mv_DNSTR, mv_ML, mv_ML_UP, mv_ML_DN, mv_ML_CL
+    mv_NONE, mv_UL, mv_UP, mv_UR, mv_LT, mv_RT, mv_DL, mv_DN, mv_DR, mv_RS, mv_UPSTR, mv_DNSTR, mv_ML, mv_ML_UP, mv_ML_DN, mv_ML_CL, mv_IL, mv_EL, mv_ILI, mv_EQP, mv_UEQP, mv_DRP, mv_EX
 } pc_move_t;
     
 namespace pc_control {
     void setup_control_movement();
     void handle_control_move();
+    void show_inventory();
+    void inspect_inventory();
+    void show_equipment();
 }
 
 #endif /* pc_control_h */
