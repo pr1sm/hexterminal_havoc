@@ -4,6 +4,23 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.09] - 2016-11-17
+
+### Added
+- UI screen for inventory
+- UI screen for equipment
+- UI screen for inspecting items
+- action for equipping items
+- action for dropping items
+- action for unequipping items
+- action for expunging items
+- player health now shows up on the bottom left
+
+### Changed
+- dealing damage now uses damage dices
+- speed is not affected by items equipped
+- npcs will displace other npcs when they move to a position
+
 ## [1.08] - 2016-11-9
 
 ### Added
