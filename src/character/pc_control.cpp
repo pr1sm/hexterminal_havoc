@@ -131,6 +131,16 @@ void pc_control::handle_control_move() {
                 is_valid = 1;
                 break;
                 
+            case PC_DROP:
+                move = mv_DRP;
+                is_valid = 1;
+                break;
+                
+            case PC_EXPUNGE:
+                move = mv_EX;
+                is_valid = 1;
+                break;
+                
             default:
                 mvprintw(0, 0, "INVALID COMMAND: %3d                            ", ch);
                 refresh();
@@ -212,6 +222,18 @@ void pc_control::handle_control_move() {
             mvprintw(0, 0, "ENTER COMMAND:                          ");
             refresh();
             is_valid = 0;
+        } else if(move == mv_DRP) {
+            pc_control::show_inventory(PC_DROP);
+            dungeon::get_dungeon()->print(PM_DUNGEON);
+            mvprintw(0, 0, "ENTER COMMAND:                          ");
+            refresh();
+            is_valid = 0;
+        } else if(move == mv_EX) {
+            pc_control::show_inventory(PC_EXPUNGE);
+            dungeon::get_dungeon()->print(PM_DUNGEON);
+            mvprintw(0, 0, "ENTER COMMAND:                          ");
+            refresh();
+            is_valid = 0;
         }
     } while(!is_valid);
     
@@ -276,6 +298,28 @@ void pc_control::show_inventory(int mode) {
             } else if(mode == PC_INV_INSPECT && (next_cmd >= 48 && next_cmd <= 57)) {
                 print_detailed_item(next_cmd-48);
                 print_inventory(mode);
+            } else if(mode == PC_DROP && (next_cmd >= 48 && next_cmd <= 57)) {
+                item* itm = pc->inventory[next_cmd-48];
+                if(itm == NULL) {
+                    // print error message
+                } else {
+                    int res = character::pc_drop_item(itm);
+                    if(res != 0) {
+                        // print error message
+                    }
+                }
+                print_inventory(mode);
+            } else if(mode == PC_EXPUNGE && (next_cmd >= 48 && next_cmd <= 57)) {
+                item* itm = pc->inventory[next_cmd-48];
+                if(itm == NULL) {
+                    // print error message
+                } else {
+                    int res = character::pc_expunge_item(itm);
+                    if(res != 0) {
+                        // print error message
+                    }
+                }
+                print_inventory(mode);
             }
         }
     } while(next_cmd != PC_ML_CLOSE);
@@ -307,6 +351,10 @@ void pc_control::print_inventory(int mode) {
             mvprintw(0, 0, "Enter the item [0-9] you want to equip: ");
         } else if(mode == PC_INV_INSPECT) {
             mvprintw(0, 0, "Enter the item [0-9] you want to inspect: ");
+        } else if(mode == PC_DROP) {
+            mvprintw(0, 0, "Enter the item [0-9] you want to drop: ");
+        } else if(mode == PC_EXPUNGE) {
+            mvprintw(0, 0, "Enter the item [0-9] you want to delete: ");
         }
     } else {
         mvprintw(1, 1, "Inventory List - EMPTY! (pickup some items around the dungeon!)");
