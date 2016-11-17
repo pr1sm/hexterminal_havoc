@@ -38,6 +38,7 @@ class character {
 private:
     char char_for_npc_type();
     void update_stats();
+    int  calc_damage();
 public:
     character_id_t id;
     character_type type;

@@ -256,9 +256,6 @@ void pc_control::handle_control_move() {
         // check for collision
         for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
             npc_pos = characters[i]->position;
-            if(pc_pos->distance_to(npc_pos) == 0) {
-                characters[i]->is_dead = 1;
-            }
             characters[i]->is_seen = (pc_pos->distance_to(npc_pos) <= 3);
         }
     } else if(move == mv_RS) {

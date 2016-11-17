@@ -207,6 +207,24 @@ void dungeon::printn(int mode) {
     }
     attroff(A_BOLD);
     
+    item** items = item_store::get_items();
+    for(i = 0; i < item_store::ITEM_COUNT; i++) {
+        item* item = items[i];
+        if(item == NULL) {
+            continue;
+        }
+        if(env_constants::USE_FOW && item->position->distance_to(pc->position) > 3) {
+            continue;
+        }
+        if(item->state == is_dropped) {
+            attron(A_BOLD);
+            attron(COLOR_PAIR(item->color));
+            mvaddch(item->position->y+1, item->position->x, item->symb);
+            attroff(COLOR_PAIR(item->color));
+            attroff(A_BOLD);
+        }
+    }
+    
     character_id_t* alive_npcs = character_store::get_alive_characters();
     for(i = 0; i < character_store::CHARACTER_COUNT; i++) {
         character* c = character_store::npc_for_id(alive_npcs[i]);
@@ -222,27 +240,12 @@ void dungeon::printn(int mode) {
         }
     }
     
-    item** items = item_store::get_items();
-    for(i = 0; i < item_store::ITEM_COUNT; i++) {
-        item* item = items[i];
-        if(item == NULL) {
-            continue;
-        }
-        if(item->position->distance_to(pc->position) > 3) {
-            continue;
-        }
-        if(item->state == is_dropped) {
-            attron(A_BOLD);
-            attron(COLOR_PAIR(item->color));
-            mvaddch(item->position->y+1, item->position->x, item->symb);
-            attroff(COLOR_PAIR(item->color));
-            attroff(A_BOLD);
-        }
-    }
-    
     attron(A_BOLD);
     mvaddch(pc->position->y+1, pc->position->x, pc->symb);
     attroff(A_BOLD);
+    
+    env::print_status();
+    
     mvaddch(0, 0, ' ');
     refresh();
     logger::i("Dungeon Printed");

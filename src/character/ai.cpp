@@ -231,6 +231,9 @@ void ai::handle_npc_move(character* c) {
     // Update if the npc is within the pc's light
     c->is_seen = (pc_pos->distance_to(c_pos) <= 3);
     
+    // Update position of other NPC's if they are in the current NPC's target position
+    character_store::update_position(c);
+    
     if(dungeon_updated) {
         d->update_path_maps();
     }

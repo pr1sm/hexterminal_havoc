@@ -19,6 +19,7 @@ dice::dice(std::string str) {
     sides = 0;
     char buf[70]; // large enough to capture all beginning space;
     sscanf(str.c_str(), "%s%d+%dd%d", buf, &base, &num_dice, &sides);
+    sides = (sides <= 0) ? 1 : sides;
 }
 
 dice::dice(dice* dice) {

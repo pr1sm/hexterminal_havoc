@@ -16,6 +16,7 @@ typedef unsigned char uint8_t;
 
 class env_constants {
 public:
+    static int USE_FOW;
     static int USE_IPARSE;
     static int USE_MPARSE;
     static int PARSE_ONLY_MODE;
@@ -43,6 +44,7 @@ public:
     static void exit_gracefully();
     static void cleanup();
     static void move_floors();
+    static void print_status();
 };
 
 #endif /* env_h */

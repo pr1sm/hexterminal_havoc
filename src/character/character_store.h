@@ -37,6 +37,7 @@ public:
     static void npc_cleanup();
     static void start_monster_list();
     static void move_floors();
+    static void update_position(character* c);
 };
 
 #endif /* character_store_h */

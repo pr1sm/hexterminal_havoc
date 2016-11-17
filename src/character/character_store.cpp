@@ -163,23 +163,16 @@ void character_store::setup_npc(character* npc) {
 }
 
 int character_store::is_finished() {
-    int i;
-    point* pc_pos;
-    point* npc_pos;
-    uint8_t  npc_is_dead;
-    pc_pos = character::get_pc()->position;
+    character* pc = character::get_pc();
     // only 1 character left (pc) so pc has won
     if(_characters_count == 0) {
         return 2;
     }
-    // check all npcs that ARE NOT the pc for collision
-    for(i = 0; i < _characters_size; i++) {
-        npc_pos = _characters[i]->position;
-        npc_is_dead = _characters[i]->is_dead;
-        if(pc_pos->distance_to(npc_pos) == 0 && !npc_is_dead) {
-            return 1;
-        }
+    // check pc health
+    if(pc->hitpoints <= 0) {
+        return 1; 
     }
+    
     return 0;
 }
 
@@ -277,6 +270,36 @@ void character_store::move_floors() {
     }
     
     character_store::setup();
+}
+
+void character_store::update_position(character* c) {
+    int i, j;
+    character* npc = NULL;
+    for(i = 0; i < _characters_count; i++) {
+        npc = npc_for_id(_alive_characters[i]);
+        if(npc == c) {
+            continue;
+        }
+        if(npc->position->distance_to(c->position) == 0) { // c and npc's position are the same
+            int offsets[] = {-1, -1, -1,  0,  1,  1,  1,  0, -1, -1, -1,  0,  1,  1,  1,  0, -1};
+            int x_start = rand() % 8;
+            int y_start = rand() % 8;
+            dungeon* d = dungeon::get_dungeon();
+            for(j = 0; j < 8; j++) {
+                int new_x = offsets[x_start + j + 2] + c->position->x;
+                int new_y = offsets[y_start + j] + c->position->y;
+                point new_p(new_x, new_y);
+                if(new_x < 1 || new_x > DUNGEON_WIDTH-2 || new_y < 1 || new_y > DUNGEON_HEIGHT-2) {
+                    continue; // out of bounds
+                }
+                tile* t = d->tiles[new_y][new_x];
+                if(t->content != tc_ROCK && t->content != tc_BORDER && (contains_npc(&new_p) == -1)) {
+                    npc->set_position(&new_p);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 character* character_store::npc_for_id(character_id_t id) {

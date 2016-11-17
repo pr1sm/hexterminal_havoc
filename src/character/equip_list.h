@@ -15,7 +15,7 @@ class equip_list {
 private:
     item** all_items;
     
-    item* swap(item* i1, int index);
+    item* swap(item* i1, int index, int ring_idx);
 public:
     int equip_list_length;
     
@@ -23,7 +23,7 @@ public:
     ~equip_list();
     
     item* equip(item* i);
-    item* unequip(object_type type);
+    item* unequip(item* i);
     item** equipped_items();
 };
 
