@@ -69,7 +69,6 @@ void item_store::pickup_item(point* p) {
     for(i = 0; i < _items_len; i++) {
         item* item = _items[i];
         if(p->distance_to(item->position) == 0 && item->state == is_dropped) {
-            item->state = is_picked_up;
             int res = character::pc_pickup_item(item);
             if(res == 0) {
                 idx = i;
