@@ -234,7 +234,7 @@ void item_description::parse_value(std::string str) {
 
 void item_description::print() {
     std::cout << "Name ~> " << name << std::endl;
-    std::cout << "Type ~> " << print_type() << " (" << symb << ")" << std::endl;
+    std::cout << "Type ~> " << print_type(type) << " (" << symb << ")" << std::endl;
     std::cout << "Weight ~> " << weight->to_string() << std::endl;
     std::cout << "Color ~> " << print_color() << std::endl;
     std::cout << "Dodge ~> " << dodge->to_string() << std::endl;
@@ -268,7 +268,7 @@ std::string item_description::print_color() {
     return "N/A";
 }
 
-std::string item_description::print_type() {
+std::string item_description::print_type(object_type type) {
     if(type == ot_AMMUNITION) {
         return "AMMUNITION";
     } else if(type == ot_AMULET) {

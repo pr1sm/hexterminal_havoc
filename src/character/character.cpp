@@ -346,6 +346,9 @@ int character::pc_equip_item(item* i) {
     }
     // last item in list will always be duplicate after shifting, put swapped item in that place
     pc->inventory[pc->inventory_len-1] = swapped;
+    if(swapped == NULL) {
+        pc->inventory_len--;
+    }
     pc->update_stats();
     return 0;
 }
