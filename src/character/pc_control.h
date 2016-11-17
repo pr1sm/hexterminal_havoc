@@ -50,9 +50,10 @@ namespace pc_control {
     void setup_control_movement();
     void handle_control_move();
     void show_inventory(int mode);
-    void inspect_inventory();
+    void print_inventory(int mode);
     void print_detailed_item(int index);
-    void show_equipment();
+    void show_equipment(int mode);
+    void print_equipment(int mode);
 }
 
 #endif /* pc_control_h */

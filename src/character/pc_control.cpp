@@ -124,6 +124,12 @@ void pc_control::handle_control_move() {
             case PC_EQUIP:
                 move = mv_EQP;
                 is_valid = 1;
+                break;
+                
+            case PC_UNEQUIP:
+                move = mv_UEQP;
+                is_valid = 1;
+                break;
                 
             default:
                 mvprintw(0, 0, "INVALID COMMAND: %3d                            ", ch);
@@ -183,19 +189,25 @@ void pc_control::handle_control_move() {
             refresh();
             is_valid = 0;
         } else if(move == mv_EL) {
-            pc_control::show_equipment();
+            pc_control::show_equipment(PC_EQP_LIST);
             dungeon::get_dungeon()->print(PM_DUNGEON);
             mvprintw(0, 0, "ENTER COMMAND:                          ");
             refresh();
             is_valid = 0;
         } else if(move == mv_ILI) {
-            pc_control::inspect_inventory();
+            pc_control::show_inventory(PC_INV_INSPECT);
             dungeon::get_dungeon()->print(PM_DUNGEON);
             mvprintw(0, 0, "ENTER COMMAND:                          ");
             refresh();
             is_valid = 0;
         } else if(move == mv_EQP) {
             pc_control::show_inventory(PC_EQUIP);
+            dungeon::get_dungeon()->print(PM_DUNGEON);
+            mvprintw(0, 0, "ENTER COMMAND:                          ");
+            refresh();
+            is_valid = 0;
+        } else if(move == mv_UEQP) {
+            pc_control::show_equipment(PC_UNEQUIP);
             dungeon::get_dungeon()->print(PM_DUNGEON);
             mvprintw(0, 0, "ENTER COMMAND:                          ");
             refresh();
@@ -244,6 +256,35 @@ void pc_control::show_inventory(int mode) {
     if(!env_constants::NCURSES_MODE) {
         return;
     }
+    print_inventory(mode);
+    character* pc = character::get_pc();
+    int next_cmd = 0;
+    do {
+        next_cmd = getch();
+        if(pc->inventory_size > 0) {
+            if(mode == PC_EQUIP && (next_cmd >= 48 && next_cmd <= 57)) {
+                item* itm = pc->inventory[next_cmd-48];
+                if(itm == NULL) {
+                    // print error message
+                } else {
+                    int res = character::pc_equip_item(itm);
+                    if(res != 0) {
+                        // print error message
+                    }
+                }
+                print_inventory(mode);
+            } else if(mode == PC_INV_INSPECT && (next_cmd >= 48 && next_cmd <= 57)) {
+                print_detailed_item(next_cmd-48);
+                print_inventory(mode);
+            }
+        }
+    } while(next_cmd != PC_ML_CLOSE);
+}
+
+void pc_control::print_inventory(int mode) {
+    if(!env_constants::NCURSES_MODE) {
+        return;
+    }
     character* pc = character::get_pc();
     int i;
     clear();
@@ -264,32 +305,37 @@ void pc_control::show_inventory(int mode) {
         }
         if(mode == PC_EQUIP) {
             mvprintw(0, 0, "Enter the item [0-9] you want to equip: ");
+        } else if(mode == PC_INV_INSPECT) {
+            mvprintw(0, 0, "Enter the item [0-9] you want to inspect: ");
         }
     } else {
-       mvprintw(1, 1, "Inventory List - EMPTY! (pickup some items around the dungeon!)");
+        mvprintw(1, 1, "Inventory List - EMPTY! (pickup some items around the dungeon!)");
     }
+    refresh();
+}
+
+void pc_control::show_equipment(int mode) {
+    if(!env_constants::NCURSES_MODE) {
+        return;
+    }
+    character* pc = character::get_pc();
+    print_equipment(mode);
     refresh();
     int next_cmd = 0;
     do {
         next_cmd = getch();
-        if(pc->inventory_size > 0) {
-            if(mode == PC_EQUIP && (next_cmd >= 48 || next_cmd <= 57)) {
-                item* itm = pc->inventory[next_cmd-48];
-                if(itm == NULL) {
-                    // print error message
-                } else {
-                    int res = character::pc_equip_item(itm);
-                    if(res != 0) {
-                        // print error message
-                    }
-                }
-                break;
+        if(mode == PC_UNEQUIP && (next_cmd >= 97 && next_cmd <= 108)) {
+            item* itm = pc->equipment->equipped_items()[next_cmd-97];
+            int res = character::pc_unequip_item(itm);
+            if(res == 0) {
+                // print success
             }
+            print_equipment(mode);
         }
     } while(next_cmd != PC_ML_CLOSE);
 }
 
-void pc_control::show_equipment() {
+void pc_control::print_equipment(int mode) {
     if(!env_constants::NCURSES_MODE) {
         return;
     }
@@ -312,55 +358,13 @@ void pc_control::show_equipment() {
                 mvprintw(i+2, 3, "%c) EMPTY", 'a'+i);
             }
         }
+        if(mode == PC_UNEQUIP) {
+            mvprintw(0, 0, "Enter the item [a-l] you want to unequip: ");
+        }
     } else {
         mvprintw(1, 1, "Equipment List - EMPTY! (pickup some items around the dungeon and equip them!)");
     }
     refresh();
-    int next_cmd = 0;
-    do {
-        next_cmd = getch();
-    } while(next_cmd != PC_ML_CLOSE);
-}
-
-void pc_control::inspect_inventory() {
-    if(!env_constants::NCURSES_MODE) {
-        return;
-    }
-    character* pc = character::get_pc();
-    int i;
-    int next_cmd = 0;
-    do {
-        clear();
-        mvprintw(20, 1, "Press ESC to close...");
-        if(pc->inventory_size > 0) {
-            mvprintw(1, 1, "Inventory List");
-            for(i = 0; i < pc->inventory_size; i++) {
-                item* item = pc->inventory[i];
-                if(item == NULL) {
-                    mvprintw(i+2, 3, "%d) EMPTY", i);
-                } else if(item->state == is_picked_up) {
-                    attron(COLOR_PAIR(item->color));
-                    mvprintw(i+2, 3, "%d) %c - %s (sp: %d, dmg: %s)", i, item->symb, item->name.c_str(), item->speed, item->damage->to_string().c_str());
-                    attroff(COLOR_PAIR(item->color));
-                } else {
-                    mvprintw(i+2, 3, "%d) EMPTY", i);
-                }
-            }
-            mvprintw(0, 0, "Enter the item [0-9] you want to inspect: ");
-        } else {
-            mvprintw(1, 1, "Inventory List - EMPTY! (pickup some items around the dungeon!)");
-        }
-        refresh();
-        do {
-            next_cmd = getch();
-            if(pc->inventory_size > 0) {
-                if(next_cmd != PC_ML_CLOSE && (next_cmd >= 48 || next_cmd <= 57)) { // not escape and within [0-9]
-                    print_detailed_item(next_cmd-48);
-                    break;
-                }
-            }
-        } while(next_cmd != PC_ML_CLOSE);
-    } while(next_cmd != PC_ML_CLOSE);
 }
 
 void pc_control::print_detailed_item(int index) {
