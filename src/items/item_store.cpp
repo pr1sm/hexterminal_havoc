@@ -68,10 +68,14 @@ void item_store::pickup_item(point* p) {
     int idx = -1;
     for(i = 0; i < _items_len; i++) {
         item* item = _items[i];
+        if(item == NULL) {
+            continue;
+        }
         if(p->distance_to(item->position) == 0 && item->state == is_dropped) {
             int res = character::pc_pickup_item(item);
             if(res == 0) {
                 idx = i;
+                break;
             } else if(res == 2) {
                 // TODO: Inventory is full, deal with error
             }
@@ -83,6 +87,7 @@ void item_store::pickup_item(point* p) {
             _items[i] = _items[i+1];
         }
         _items[--_items_len] = NULL;
+        logger::i("Picked up item at index %d", idx);
     }
 }
 
