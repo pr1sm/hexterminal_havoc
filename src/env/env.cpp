@@ -270,9 +270,8 @@ void env::cleanup() {
     if(env_constants::LOAD_FILE) {
         free(env_constants::LOAD_FILE);
     }
-    
-    character_store::teardown();
     item_store::teardown();
+    character_store::teardown();
     event_queue::teardown();
     dungeon::teardown();
     parser::destroy_parser();
@@ -285,8 +284,8 @@ void env::cleanup() {
 void env::move_floors() {
     event_queue::move_floors();
     dungeon::move_floors();
-    character_store::move_floors();
     item_store::move_floors();
+    character_store::move_floors();
     env_constants::STAIR_FLAG = 0; // reset flag
 }
 

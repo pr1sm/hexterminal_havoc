@@ -96,7 +96,6 @@ int main(int argc, char * argv[]) {
         }
         win_status = character_store::is_finished();
         d->print(PM_DUNGEON);
-        usleep(100000);
     }
     
     if(env_constants::SAVE_DUNGEON) {

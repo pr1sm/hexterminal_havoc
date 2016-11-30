@@ -15,6 +15,10 @@
 equip_list::equip_list() {
     equip_list_length = 12; // Weapon, Offhand, Ranged, Armor, Helmet, Cloak, Gloves, Boots, Amulet, Light, Ring, Ring
     all_items = (item**) calloc(equip_list_length, sizeof(*all_items));
+    int i;
+    for(i = 0; i < equip_list_length; i++) {
+        all_items[i] = NULL;
+    }
 }
 
 equip_list::~equip_list() {
@@ -62,6 +66,7 @@ item* equip_list::unequip(item* i) {
     for(j = 0; j < equip_list_length; j++) {
         if(i == all_items[j]) {
             idx = j;
+            break;
         }
     }
     
