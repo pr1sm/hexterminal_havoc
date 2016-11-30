@@ -24,7 +24,7 @@
 #include "../parser/parser.h"
 #include "../items/item_store.h"
 
-int env_constants::USE_FOW    = 1;
+int env_constants::USE_FOW    = 0;
 int env_constants::USE_IPARSE = 1;
 int env_constants::USE_MPARSE = 1;
 int env_constants::USE_OBJ_DESC = 1; // use parsed objects by default
@@ -264,6 +264,7 @@ void env::exit_gracefully() {
 }
 
 void env::cleanup() {
+    logger::i("Cleaning up environment...");
     if(env_constants::SAVE_FILE) {
         free(env_constants::SAVE_FILE);
     }
@@ -279,6 +280,7 @@ void env::cleanup() {
     if(env_constants::NCURSES_MODE) {
         endwin();
     }
+    logger::i("Environment cleaned up");
 }
 
 void env::move_floors() {

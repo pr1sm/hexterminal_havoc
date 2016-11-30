@@ -74,10 +74,10 @@ public:
     void perform();
     char get_print_symb(int mode);
     
-    static int        pc_expunge_item(item* i);
-    static int        pc_drop_item(item* i);
-    static int        pc_equip_item(item* i);
-    static int        pc_unequip_item(item* i);
+    static int        pc_expunge_item(item* i, int index);
+    static int        pc_drop_item(item* i, int index);
+    static int        pc_equip_item(item* i, int index);
+    static int        pc_unequip_item(item* i, int index);
     static int        pc_pickup_item(item* i);
     static character* get_pc();
     static void       teardown_pc();

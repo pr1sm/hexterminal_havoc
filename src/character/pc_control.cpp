@@ -286,7 +286,7 @@ void pc_control::show_inventory(int mode) {
                 if(itm == NULL) {
                     // print error message
                 } else {
-                    int res = character::pc_equip_item(itm);
+                    int res = character::pc_equip_item(itm, next_cmd-48);
                     if(res != 0) {
                         // print error message
                     }
@@ -300,7 +300,7 @@ void pc_control::show_inventory(int mode) {
                 if(itm == NULL) {
                     // print error message
                 } else {
-                    int res = character::pc_drop_item(itm);
+                    int res = character::pc_drop_item(itm, next_cmd-48);
                     if(res != 0) {
                         // print error message
                     }
@@ -311,7 +311,7 @@ void pc_control::show_inventory(int mode) {
                 if(itm == NULL) {
                     // print error message
                 } else {
-                    int res = character::pc_expunge_item(itm);
+                    int res = character::pc_expunge_item(itm, next_cmd-48);
                     if(res != 0) {
                         // print error message
                     }
@@ -371,7 +371,7 @@ void pc_control::show_equipment(int mode) {
         next_cmd = getch();
         if(mode == PC_UNEQUIP && (next_cmd >= 97 && next_cmd <= 108)) {
             item* itm = pc->equipment->equipped_items()[next_cmd-97];
-            int res = character::pc_unequip_item(itm);
+            int res = character::pc_unequip_item(itm, next_cmd-97);
             if(res == 0) {
                 // print success
             }

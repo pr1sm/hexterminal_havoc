@@ -301,7 +301,7 @@ int character::pc_pickup_item(item* i) {
     return 0;
 }
 
-int character::pc_drop_item(item* i) {
+int character::pc_drop_item(item* i, int index) {
     if(i == NULL) {
         logger::w("PC drop called with NULL item");
         return 1;
@@ -317,6 +317,10 @@ int character::pc_drop_item(item* i) {
             idx = c;
             break;
         }
+    }
+    
+    if(idx != index) {
+        logger::w("Passed in index was not the same as found index!");
     }
     
     if(in_inventory == false) {
@@ -339,7 +343,7 @@ int character::pc_drop_item(item* i) {
     return 0;
 }
 
-int character::pc_equip_item(item* i) {
+int character::pc_equip_item(item* i, int index) {
     if(i == NULL) {
         logger::w("PC equip called with NULL item");
         return 1;
@@ -355,6 +359,10 @@ int character::pc_equip_item(item* i) {
             in_inventory = true;
             break;
         }
+    }
+    
+    if(idx != index) {
+        logger::w("Passed in index was not the same as found index!");
     }
     
     if(in_inventory == false) {
@@ -385,7 +393,7 @@ int character::pc_equip_item(item* i) {
     return 0;
 }
 
-int character::pc_unequip_item(item* i) {
+int character::pc_unequip_item(item* i, int index) {
     if(i == NULL) {
         logger::w("PC unequip called with NULL item");
         return 1;
@@ -419,7 +427,7 @@ int character::pc_unequip_item(item* i) {
     return 0;
 }
 
-int character::pc_expunge_item(item* i) {
+int character::pc_expunge_item(item* i, int index) {
     if(i == NULL) {
         logger::w("PC expunge called with NULL item");
         return 1;
