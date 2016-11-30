@@ -74,6 +74,7 @@ void event_queue::teardown() {
 
 void event_queue::move_floors() {
     delete _event_queue;
+    delete _eqc;
     _event_queue = NULL;
     EVENT_TIME = 0;
 }
