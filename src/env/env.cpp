@@ -24,6 +24,7 @@
 #include "../parser/parser.h"
 #include "../items/item_store.h"
 
+int env_constants::USE_FOW    = 0;
 int env_constants::USE_IPARSE = 1;
 int env_constants::USE_MPARSE = 1;
 int env_constants::USE_OBJ_DESC = 1; // use parsed objects by default
@@ -263,15 +264,15 @@ void env::exit_gracefully() {
 }
 
 void env::cleanup() {
+    logger::i("Cleaning up environment...");
     if(env_constants::SAVE_FILE) {
         free(env_constants::SAVE_FILE);
     }
     if(env_constants::LOAD_FILE) {
         free(env_constants::LOAD_FILE);
     }
-    
-    character_store::teardown();
     item_store::teardown();
+    character_store::teardown();
     event_queue::teardown();
     dungeon::teardown();
     parser::destroy_parser();
@@ -279,13 +280,23 @@ void env::cleanup() {
     if(env_constants::NCURSES_MODE) {
         endwin();
     }
+    logger::i("Environment cleaned up");
 }
 
 void env::move_floors() {
     event_queue::move_floors();
     dungeon::move_floors();
+    item_store::move_floors();
     character_store::move_floors();
     env_constants::STAIR_FLAG = 0; // reset flag
+}
+
+void env::print_status() {
+    if(!env_constants::NCURSES_MODE) {
+        return;
+    }
+    character* pc = character::get_pc();
+    mvprintw(22, 1, "%3d/%3d", pc->hitpoints, 100);
 }
 
 static int is_number(char* str) {

@@ -30,6 +30,8 @@ public:
     static bool contains_item(point* p);
     static item** get_items();
     static void pickup_item(point* p);
+    static void drop_item(item* i);
+    static void move_floors();
 };
 
 

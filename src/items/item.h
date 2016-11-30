@@ -15,6 +15,10 @@
 #include "../parser/item_description.h"
 #include "../point/point.h"
 
+typedef enum {
+    is_unknown = 0, is_dropped, is_picked_up, is_equipped
+} inventory_state;
+
 class item {
 public:
     object_type type;
@@ -31,7 +35,7 @@ public:
     int value;
     dice* damage;
     bool is_equipment;
-    bool picked_up;
+    inventory_state state;
     
     point* position;
     

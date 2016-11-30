@@ -248,7 +248,7 @@ void logger::write_log(logger_mode mode, const char* str, va_list args) {
     mode == LOG_E ? "ERROR : " : "FATAL : ";
     
     // Max size of [str] and a stack trace if there is one.
-    int max_va_list_size = 4146;
+    int max_va_list_size = 1024;
     
     // Create the message from the variable argument list.
     char* va_msg = (char*) malloc(strlen(str) + max_va_list_size);

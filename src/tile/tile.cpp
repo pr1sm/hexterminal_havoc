@@ -136,6 +136,16 @@ char tile::char_for_content(int mode) {
     if(mode == PM_DUNGEON) {
         character* pc = character::get_pc();
         point* pc_pos = pc->position;
+        
+        if(!env_constants::USE_FOW) {
+            return content == tc_BORDER ? BORDER_CHAR :
+                   content == tc_ROCK   ? ROCK_CHAR   :
+                   content == tc_ROOM   ? ROOM_CHAR   :
+                   content == tc_PATH   ? PATH_CHAR   :
+                   content == tc_UPSTR  ? UPSTR_CHAR  :
+                   content == tc_DNSTR  ? DNSTR_CHAR  : DEFAULT_CHAR ;
+        }
+        
         // tile is outside of pc's light
         if(location->distance_to(pc_pos) > 3) {
             return last_known_content;

@@ -47,6 +47,25 @@ Usage: hexterm_havoc [options]
 
 ## Assignments
 
+### Assignment 1.09 - PC Equipment and Updated Combat 
+
+For this assignment, we had to implement a way for players to equip the items in the
+game as well as manage their equipment/inventory when picking things up.  The 
+equipment moves between floors now that the player has picked up and new items are 
+generated.  I added new UI screens to view the items in your inventory, the items
+equipped, and a detailed view of each item.  These help when manipulating the actions
+associated with items, which include picking them up (automatic), dropping them, 
+expunging them (removing them permanently), and (un)equipping them.  
+
+We also had to change the combat mechanics to make use of the damage and speed attributes.
+My implementation updates the speed everytime you equip/unequip an item.  The damage
+is now used when you try to attack an npc.  The damage dice is rolled (along with the 
+other damage dices of equipped items) and this damage is applied to the npcs.  The npcs
+follow the same suit when dealing damage.  Npcs are now considered dead when they have
+less than 0 hitpoints, as well as the player.  The win conditions remain the same (all 
+enemies are dead), but the detection for the loss condition becomes considerably easier
+since we only have to check the hitpoints of the pc.  
+
 ### Assignment 1.08 - Loading Monsters and Objects
 
 For this assignment, we had to use our parser to generate monsters and items within

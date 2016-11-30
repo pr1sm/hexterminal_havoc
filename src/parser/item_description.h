@@ -39,7 +39,6 @@ typedef enum object_type {
 class item_description {
 private:
     std::string print_color();
-    std::string print_type();
     
 public:
     object_type type;
@@ -77,6 +76,8 @@ public:
     void parse_speed(std::string str);
     void parse_attr(std::string str);
     void parse_value(std::string str);
+    
+    static std::string print_type(object_type type);
 };
 
 

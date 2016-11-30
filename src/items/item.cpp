@@ -33,7 +33,7 @@ item::item(item_description* descriptor) {
         damage = NULL;
         position = NULL;
         is_equipment = false;
-        picked_up = false;
+        state = is_unknown;
         return;
     }
     
@@ -52,7 +52,7 @@ item::item(item_description* descriptor) {
     value = descriptor->value->roll();
     is_equipment = descriptor->is_equipment;
     position = NULL;
-    picked_up = false;
+    state = is_dropped;
 }
 
 item::~item() {
