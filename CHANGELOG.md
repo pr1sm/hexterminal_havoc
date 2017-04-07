@@ -4,6 +4,45 @@ this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.09] - 2016-11-17
+
+### Added
+- UI screen for inventory
+- UI screen for equipment
+- UI screen for inspecting items
+- action for equipping items
+- action for dropping items
+- action for unequipping items
+- action for expunging items
+- player health now shows up on the bottom left
+
+### Changed
+- dealing damage now uses damage dices
+- speed is not affected by items equipped
+- npcs will displace other npcs when they move to a position
+
+## [1.08] - 2016-11-9
+
+### Added
+- added item parser
+- implemented monster factory
+- implemented item factory
+- added colors to dungeon!
+
+## [1.07] - 2016-11-2
+
+### Added
+- parser class to parse monster description file
+- monster_description class to hold all parsed monster attributes
+- dice class to hold dice information (will be fully implemented later)
+
+## Changed
+- split codebase into C and C++ files
+  - `csrc/` now contains all C files and is a snapshot of version 1.06.1
+  - `src/` now contains all C++ filese and will be where updates are
+- refactored codebase form structs to classes
+- Makefile changed to accomodate file structure change
+
 ## [1.06.1] - 2016-10-29
 
 ### Added

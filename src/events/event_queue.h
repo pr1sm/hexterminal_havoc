@@ -9,30 +9,29 @@
 #ifndef event_queue_h
 #define event_queue_h
 
-#ifdef __cplusplus
 #include "../character/character.h"
-#else
-#include "../character/character_t.h"
-#endif // __cplusplus
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
+#include "../heap/heap.h"
 
 typedef int event_counter_t;
 
-extern event_counter_t EVENT_TIME;
+class EventQueueComparator : comparator<character> {
+    virtual int compare(const character* c1, const character* c2) {
+        return c1->event_count - c2->event_count;
+    }
+};
 
-typedef struct event_queue_namespace {
-    void (*const add_event)(character_t* c);
-    int  (*const perform_event)();
-    void (*const teardown)();
-    void (*const move_floors)();
-} event_queue_namespace;
-extern event_queue_namespace const eventQueueAPI;
+class event_queue {
+private:
+    static heap<character>* _event_queue;
+    static EventQueueComparator* _eqc;
     
-#ifdef __cplusplus
-}
-#endif // __cplusplus
+public:
+    static event_counter_t EVENT_TIME;
+    
+    static void add_event(character* c);
+    static int  perform_event();
+    static void teardown();
+    static void move_floors();
+};
 
 #endif /* event_queue_h */

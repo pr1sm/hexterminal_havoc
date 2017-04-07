@@ -47,6 +47,51 @@ Usage: hexterm_havoc [options]
 
 ## Assignments
 
+### Assignment 1.09 - PC Equipment and Updated Combat 
+
+For this assignment, we had to implement a way for players to equip the items in the
+game as well as manage their equipment/inventory when picking things up.  The 
+equipment moves between floors now that the player has picked up and new items are 
+generated.  I added new UI screens to view the items in your inventory, the items
+equipped, and a detailed view of each item.  These help when manipulating the actions
+associated with items, which include picking them up (automatic), dropping them, 
+expunging them (removing them permanently), and (un)equipping them.  
+
+We also had to change the combat mechanics to make use of the damage and speed attributes.
+My implementation updates the speed everytime you equip/unequip an item.  The damage
+is now used when you try to attack an npc.  The damage dice is rolled (along with the 
+other damage dices of equipped items) and this damage is applied to the npcs.  The npcs
+follow the same suit when dealing damage.  Npcs are now considered dead when they have
+less than 0 hitpoints, as well as the player.  The win conditions remain the same (all 
+enemies are dead), but the detection for the loss condition becomes considerably easier
+since we only have to check the hitpoints of the pc.  
+
+### Assignment 1.08 - Loading Monsters and Objects
+
+For this assignment, we had to use our parser to generate monsters and items within
+the dungeon.  Rather than have random attributes, we picked specific attributes from
+a random description in our parser.  Because I already had a factory implementation 
+in the `character_store` class, I simply created a `gen_npc()` method and used that.
+I also implemented an item parser and used that to generate items and place them in
+the dungeon.  I also added colors to the dungeon and the monsters and items are the
+color of their description.  
+
+### Assignment 1.07 - Parsing Monster Definitions
+
+For this assignment, we had to build a parser that would parse monster descriptions.
+These descriptions had specific attributes and we were to parse them if all attributes
+were specificied or move onto the next monster.  Using C++ I built a class that parses
+the monster file and prints out the descriptions to the console.  I have temporarily
+disabled the rest of the game for this assignment, but it is controlled by an interal
+switch that can be set to '0' and upon recompilation, the game will run as it did in 
+1.06.  
+
+I also refactored the entire codebase to move to C++.  This included moving all my
+implementation over to Classes instead of Structs, and making use of the `new` and
+`delete` keywords for memory management when applicable.  This was relatively
+simple, however it was very time consuming.  The C code as of 1.06 has been saved
+to another folder and can still be built using the `make c` rule.  
+
 ### Assignment 1.06 - "Fog of War" and interfacing with C and C++
 
 For this assignment, we had to start switching our codebase over to C++ and write

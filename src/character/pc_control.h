@@ -2,16 +2,12 @@
 //  pc_control.h
 //  cs_327
 //
-//  Created by Srinivas Dhanwada on 10/19/16.
+//  Created by Srinivas Dhanwada on 11/1/16.
 //  Copyright © 2016 dhanwada. All rights reserved.
 //
 
 #ifndef pc_control_h
 #define pc_control_h
-
-#ifdef __cplusplus
-extern "C" {
-#endif // __cplusplus
 
 #define PC_QUIT          81
 #define PC_UP_LEFT_7     55
@@ -38,16 +34,26 @@ extern "C" {
 #define PC_ML_SCRL_UP   259
 #define PC_ML_SCRL_DOWN 258
 #define PC_ML_CLOSE      27
+#define PC_INV_LIST     105
+#define PC_EQP_LIST     101
+#define PC_INV_INSPECT   73
+#define PC_EQUIP        119
+#define PC_UNEQUIP      116
+#define PC_DROP         100
+#define PC_EXPUNGE      120
 
 typedef enum pc_move_t {
-    mv_NONE, mv_UL, mv_UP, mv_UR, mv_LT, mv_RT, mv_DL, mv_DN, mv_DR, mv_RS, mv_UPSTR, mv_DNSTR, mv_ML, mv_ML_UP, mv_ML_DN, mv_ML_CL
+    mv_NONE, mv_UL, mv_UP, mv_UR, mv_LT, mv_RT, mv_DL, mv_DN, mv_DR, mv_RS, mv_UPSTR, mv_DNSTR, mv_ML, mv_ML_UP, mv_ML_DN, mv_ML_CL, mv_IL, mv_EL, mv_ILI, mv_EQP, mv_UEQP, mv_DRP, mv_EX
 } pc_move_t;
-
-void setup_control_movement();
-void handle_control_move();
     
-#ifdef __cplusplus
+namespace pc_control {
+    void setup_control_movement();
+    void handle_control_move();
+    void show_inventory(int mode);
+    void print_inventory(int mode);
+    void print_detailed_item(int index);
+    void show_equipment(int mode);
+    void print_equipment(int mode);
 }
-#endif // __cplusplus
 
 #endif /* pc_control_h */
